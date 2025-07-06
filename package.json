@@ -1,0 +1,135 @@
+{
+  "name": "tg-backend",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "nest start -b swc",
+    "start:dev": "nest start -b swc --watch",
+    "start:debug": "nest start -b swc --debug --watch",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "prepare": "husky",
+    "commit": "cz",
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch",
+    "release:major": "standard-version --release-as major"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.842.x",
+    "@aws-sdk/s3-request-presigner": "^3.842.x",
+    "@nestjs-modules/mailer": "^1.6.x",
+    "@nestjs/bull": "^11.0.x",
+    "@nestjs/bullmq": "^11.0.x",
+    "@nestjs/common": "^11.0.x",
+    "@nestjs/config": "^4.0.1",
+    "@nestjs/core": "^11.0.x",
+    "@nestjs/jwt": "^11.0.x",
+    "@nestjs/mapped-types": "*",
+    "@nestjs/mongoose": "^11.0.x",
+    "@nestjs/platform-express": "^11.0.x",
+    "@nestjs/sequelize": "^11.0.x",
+    "@nestjs/terminus": "^11.0.x",
+    "@nestjs/throttler": "^6.2.1",
+    "@nestjs/websockets": "^11.0.x",
+    "bull": "^4.16.x",
+    "class-transformer": "^0.5.x",
+    "class-validator": "^0.14.x",
+    "helmet": "^8.0.x",
+    "ioredis": "^5.6.x",
+    "joi": "^17.13.3",
+    "luxon": "^3.5.x",
+    "mongoose": "^8.12.x",
+    "nestjs-i18n": "^10.5.x",
+    "nodemailer": "^6.10.x",
+    "pg": "^8.13.x",
+    "reflect-metadata": "^0.2.x",
+    "rxjs": "^7.8.x",
+    "sequelize": "^6.37.x",
+    "sequelize-typescript": "^2.1.x",
+    "twing": "6.0.x"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.x",
+    "@faker-js/faker": "^9.6.x",
+    "@nestjs/cli": "^11.0.x",
+    "@nestjs/schematics": "^11.0.x",
+    "@nestjs/testing": "^11.0.x",
+    "@swc/cli": "^0.6.x",
+    "@swc/core": "^1.11.x",
+    "@types/express": "^5.0.x",
+    "@types/jest": "^29.5.x",
+    "@types/luxon": "^3.4.x",
+    "@types/multer": "^1.4.x",
+    "@types/node": "^22.13.x",
+    "@types/nodemailer": "^6.4.x",
+    "@types/supertest": "^6.0.x",
+    "@typescript-eslint/eslint-plugin": "^8.26.x",
+    "@typescript-eslint/parser": "^8.26.x",
+    "commitizen": "^4.3.x",
+    "commitlint-config-gitmoji": "^2.3.x",
+    "cz-customizable": "^7.4.x",
+    "eslint": "^9.22.x",
+    "eslint-config-prettier": "^10.1.x",
+    "eslint-plugin-prettier": "^5.2.x",
+    "factory-girl-ts": "^2.3.x",
+    "husky": "^9.1.x",
+    "jest": "^29.5.x",
+    "lint-staged": "^15.4.x",
+    "pre-commit": "^1.0.x",
+    "prettier": "^3.5.x",
+    "source-map-support": "^0.5.x",
+    "standard-version": "^9.5.x",
+    "supertest": "^7.0.x",
+    "ts-jest": "^29.1.x",
+    "ts-loader": "^9.4.x",
+    "ts-node": "^10.9.x",
+    "tsconfig-paths": "^4.2.x",
+    "typescript": "^5.1.x"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    },
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-customizable"
+    }
+  },
+  "pre-commit": "lint",
+  "lint-staged": {
+    "*.ts": [
+      "eslint --ext=.ts",
+      "prettier --write"
+    ],
+    "*.js": [
+      "eslint --ext=.js"
+    ]
+  }
+}

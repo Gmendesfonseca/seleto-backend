@@ -1,0 +1,18 @@
+services:
+  main:
+    container_name: tg-backend
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    ports:
+      - 5000:80
+    volumes:
+      - ./:/usr/src/
+      - /usr/src/node_modules
+    env_file:
+      - .env
+    networks:
+      - laravel-network
+networks:
+  laravel-network:
+    external: true

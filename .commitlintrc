@@ -1,0 +1,20 @@
+{
+    "extends": [
+        "gitmoji"
+    ],
+    "rules": {
+        "header-max-length": [
+            0,
+            "always",
+            100
+        ],
+        "type-empty": [
+            0,
+            "always"
+        ],
+        "subject-empty": [
+            0,
+            "always"
+        ]
+    }
+}
