@@ -1,15 +1,24 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigProperties } from '../../infraestructure/config/config.module';
 import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from 'src/domain/auth/guard/auth.guard';
+import { AuthGuard } from './guard/auth.guard';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { AuthServiceInterface } from './interfaces';
+import { UsersModule } from '../users/users.module';
+import { SecretsModule } from '../secret/secret.module';
+import { MailerModule } from '../mailers/mailer.module';
 
 @Module({
   imports: [
+    ConfigModule,
+    UsersModule,
+    SecretsModule,
+    MailerModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService<ConfigProperties>) => {
+      useFactory: (configService: ConfigService) => {
         return {
           secret: configService.get('JWT_SECRET'),
           global: true,
@@ -18,10 +27,21 @@ import { AuthGuard } from 'src/domain/auth/guard/auth.guard';
       inject: [ConfigService],
     }),
   ],
+  controllers: [AuthController],
   providers: [
+    {
+      provide: AuthServiceInterface,
+      useClass: AuthService,
+    },
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+  ],
+  exports: [
+    {
+      provide: AuthServiceInterface,
+      useClass: AuthService,
     },
   ],
 })

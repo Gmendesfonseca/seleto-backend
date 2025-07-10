@@ -28,6 +28,19 @@ export class UsersService implements UsersServiceInterface {
     return this.usersRepository.findOne(id);
   }
 
+  async findOneByEmail(email: string): Promise<UserInterface | null> {
+    this.logger.debug('UserService.findOneByEmail: Called');
+    return this.usersRepository.findOneByEmail(email);
+  }
+
+  async findOneByCredentials(credentials: {
+    email: string;
+    password: string;
+  }): Promise<UserInterface | null> {
+    this.logger.debug('UserService.findOneByCredentials: Called');
+    return this.usersRepository.findOneByCredentials(credentials);
+  }
+
   async activate(input: ActivateInput): Promise<void> {
     this.logger.debug('UserService.activate: Called');
     return this.usersRepository.activate(input);
@@ -84,8 +97,32 @@ export class UsersService implements UsersServiceInterface {
     }
   }
 
+  async createUser(input: any): Promise<UserInterface> {
+    this.logger.debug('UserService.createUser: Called');
+    return this.usersRepository.createUser(input);
+  }
+
   async delete(id: string): Promise<void> {
     this.logger.debug('UserService.remove: Called');
     await this.usersRepository.delete(id);
+  }
+
+  async updatePasswordBySecret(secretKey: string, hashedPassword: string): Promise<void> {
+    this.logger.debug('UserService.updatePasswordBySecret: Called');
+
+    // Validate the secret key and get the associated userId
+    const userId = await this.secretService.getUserIdBySecret(secretKey, 'PASSWORD');
+
+    if (!userId) {
+      throw new UnauthorizedException('Invalid or expired secret key');
+    }
+
+    // Update the user's password
+    await this.usersRepository.updatePassword({
+      id: userId,
+      password: hashedPassword,
+    });
+
+    this.logger.debug(`Password updated successfully for user: ${userId}`);
   }
 }

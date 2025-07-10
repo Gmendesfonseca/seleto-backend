@@ -41,7 +41,7 @@ export interface UpdateEmailInputRepository {
   email: string;
 }
 
-export interface ActivateInput {
+export interface ActivateInputRepository {
   id: string;
 }
 
@@ -53,7 +53,7 @@ export abstract class UsersRepositoryInterface {
   abstract findOne(id: string): Promise<User | null>;
   abstract findOneByEmail(email: string): Promise<User | null>;
   abstract findOneByCredentials(input: GetByCredentialsInputRepository): Promise<User | null>;
-  abstract activate(input: ActivateInput): Promise<void>;
+  abstract activate(input: ActivateInputRepository): Promise<void>;
   abstract createUser(input: CreateUserInputRepository): Promise<User>;
   abstract createPerson(input: CreatePersonInputRepository): Promise<Person>;
   abstract createCompany(input: CreateCompanyInputRepository): Promise<Company>;

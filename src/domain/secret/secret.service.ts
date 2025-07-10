@@ -4,6 +4,7 @@ import {
   SecretServiceInterface,
   ValidateSecretInput,
 } from './interface/secret.service.interface';
+import { SecretType } from './interface/secret.interface';
 import { InjectModel } from '@nestjs/sequelize';
 import { Secret } from './secret.model';
 
@@ -39,5 +40,13 @@ export class SecretService implements SecretServiceInterface {
     await this.secretModel.destroy({
       where: { secret },
     });
+  }
+
+  public async getUserIdBySecret(secret: string, type: SecretType): Promise<string | null> {
+    this.logger.debug('SecretService.getUserIdBySecret: Called');
+    const secretRecord = await this.secretModel.findOne({
+      where: { secret, type },
+    });
+    return secretRecord ? secretRecord.userId : null;
   }
 }

@@ -16,4 +16,5 @@ export abstract class SecretServiceInterface {
   abstract validateSecret(input: ValidateSecretInput): Promise<boolean>;
   abstract createSecret(input: CreateSecretInput): Promise<void>;
   abstract deleteSecret(secret: string): Promise<void>;
+  abstract getUserIdBySecret(secret: string, type: SecretType): Promise<string | null>;
 }

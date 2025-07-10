@@ -7,7 +7,7 @@ import {
   UpdatePasswordInputRepository,
   UpdateEmailInputRepository,
   CreatePersonInputRepository,
-  ActivateInput,
+  ActivateInputRepository,
   ValidateEmailInput,
 } from '../interfaces/user.repository.interface';
 import { Injectable, Logger } from '@nestjs/common';
@@ -66,7 +66,7 @@ export class UserSequelizeRepository implements UsersRepositoryInterface {
     return !user;
   }
 
-  public async activate(input: ActivateInput): Promise<void> {
+  public async activate(input: ActivateInputRepository): Promise<void> {
     this.logger.debug('UserSequelizeRepository.activate: Called');
     await this.userModel.update(
       { status: 'ACTIVE' },
@@ -123,7 +123,6 @@ export class UserSequelizeRepository implements UsersRepositoryInterface {
       },
     );
   }
-
   public async delete(id: string): Promise<void> {
     this.logger.debug('UserSequelizeRepository.delete: Called');
     await this.userModel.destroy({ where: { id } });
