@@ -104,7 +104,6 @@
       "path": "./node_modules/cz-customizable"
     }
   },
-  "pre-commit": "lint",
   "lint-staged": {
     "*.ts": [
       "eslint --ext=.ts",
