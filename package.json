@@ -1,5 +1,5 @@
 {
-  "name": "tg-backend",
+  "name": "seleto-backend",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -28,7 +28,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.842.x",
     "@aws-sdk/s3-request-presigner": "^3.842.x",
-    "@nestjs-modules/mailer": "^1.6.x",
+    "@nestjs-modules/mailer": "^2.0.x",
     "@nestjs/bull": "^11.0.x",
     "@nestjs/bullmq": "^11.0.x",
     "@nestjs/common": "^11.0.x",
@@ -42,6 +42,7 @@
     "@nestjs/terminus": "^11.0.x",
     "@nestjs/throttler": "^6.2.1",
     "@nestjs/websockets": "^11.0.x",
+    "@webtre/nestjs-mailer-react-adapter": "^0.2.x",
     "bcrypt": "^6.0.x",
     "bull": "^4.16.x",
     "class-transformer": "^0.5.x",
@@ -57,8 +58,7 @@
     "reflect-metadata": "^0.2.x",
     "rxjs": "^7.8.x",
     "sequelize": "^6.37.x",
-    "sequelize-typescript": "^2.1.x",
-    "twing": "6.0.x"
+    "sequelize-typescript": "^2.1.x"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.x",
@@ -68,13 +68,14 @@
     "@nestjs/testing": "^11.0.x",
     "@swc/cli": "^0.6.x",
     "@swc/core": "^1.11.x",
+    "@types/bcrypt": "^6.0.x",
     "@types/express": "^5.0.x",
     "@types/jest": "^29.5.x",
     "@types/luxon": "^3.4.x",
     "@types/multer": "^1.4.x",
-    "@types/bcrypt": "^5.0.x",
     "@types/node": "^22.13.x",
     "@types/nodemailer": "^6.4.x",
+    "@types/react": "^19.2.0",
     "@types/supertest": "^6.0.x",
     "@typescript-eslint/eslint-plugin": "^8.26.x",
     "@typescript-eslint/parser": "^8.26.x",
@@ -90,6 +91,7 @@
     "lint-staged": "^15.4.x",
     "pre-commit": "^1.0.x",
     "prettier": "^3.5.x",
+    "sequelize-cli": "6.6.x",
     "source-map-support": "^0.5.x",
     "standard-version": "^9.5.x",
     "supertest": "^7.0.x",

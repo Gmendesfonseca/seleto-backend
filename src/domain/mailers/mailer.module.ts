@@ -1,6 +1,6 @@
 import { MailerModule as NestMailer } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
-import { TwingAdapter } from './adapters/twing.adapter';
+import { ReactAdapter } from '@webtre/nestjs-mailer-react-adapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
@@ -21,7 +21,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
         template: {
           dir: `${process.cwd()}/mailers/templates/`,
-          adapter: new TwingAdapter(),
+          adapter: new ReactAdapter(),
+          options: {
+            strict: true,
+          },
         },
       }),
       inject: [ConfigService],

@@ -5,14 +5,15 @@ services:
       context: .
       dockerfile: Dockerfile.local
     ports:
-      - 5000:80
+      - "5000:80"
+    command: npm run start:debug
     volumes:
-      - ./:/usr/src/
-      - /usr/src/node_modules
-    env_file:
-      - .env
+      - .:/home/node/app
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     networks:
       - laravel-network
+
 networks:
   laravel-network:
     external: true
