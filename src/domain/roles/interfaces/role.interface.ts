@@ -1,0 +1,34 @@
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+  permissions: string[];
+  isActive: boolean;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  resource: string;
+  action: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface RoleFilters {
+  name?: string;
+  isActive?: boolean;
+  isDefault?: boolean;
+}
+
+export interface PermissionFilters {
+  name?: string;
+  resource?: string;
+  action?: string;
+  isActive?: boolean;
+}

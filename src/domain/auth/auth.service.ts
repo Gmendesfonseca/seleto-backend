@@ -66,7 +66,7 @@ export class AuthService implements AuthServiceInterface {
     try {
       await this.mailerService.sendMail({
         to: username,
-        subject: 'Welcome to TG API',
+        subject: 'Bem vindo ao Seleto!',
         template: 'welcome',
         context: { username },
       });
@@ -93,7 +93,7 @@ export class AuthService implements AuthServiceInterface {
 
     await this.mailerService.sendMail({
       to: email,
-      subject: 'Password Reset Request',
+      subject: 'Solicitação de Redefinição de Senha',
       template: 'password-reset',
       context: { secretKey, username: user.username },
     });

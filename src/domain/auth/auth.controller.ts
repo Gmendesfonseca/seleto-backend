@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   ValidationPipe,
+  Logger,
 } from '@nestjs/common';
 import { AuthServiceInterface } from './interfaces';
 import {
@@ -19,41 +20,45 @@ import {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthServiceInterface) {}
+  private readonly logger = new Logger(AuthController.name);
+
+  constructor(private readonly service: AuthServiceInterface) {}
 
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  async signIn(@Body(ValidationPipe) signInDto: SignInDto) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+  async signIn(@Body(ValidationPipe) { username, password }: SignInDto) {
+    this.logger.debug('SignIn: called', { username });
+    return this.service.signIn(username, password);
   }
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  async signUp(@Body(ValidationPipe) signUpDto: SignUpDto) {
-    await this.authService.signUp(signUpDto.username, signUpDto.password);
+  async signUp(@Body(ValidationPipe) { password, username }: SignUpDto) {
+    this.logger.debug('SignUp: called', { username });
+    await this.service.signUp(username, password);
   }
 
   @Patch('forgot-password')
   @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body(ValidationPipe) forgotPasswordDto: ForgotPasswordDto) {
-    await this.authService.forgotPassword(forgotPasswordDto.email);
+  async forgotPassword(@Body(ValidationPipe) { email }: ForgotPasswordDto) {
+    await this.service.forgotPassword(email);
   }
 
   @Patch('password')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async checkSecretKey(@Body(ValidationPipe) checkSecretKeyDto: CheckSecretKeyDto) {
-    await this.authService.checkSecretKey(checkSecretKeyDto.secretKey);
+  async checkSecretKey(@Body(ValidationPipe) { secretKey }: CheckSecretKeyDto) {
+    await this.service.checkSecretKey(secretKey);
   }
 
   @Patch('reset-password')
   @HttpCode(HttpStatus.OK)
-  async resetPassword(@Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
-    await this.authService.resetPassword(resetPasswordDto.secretKey, resetPasswordDto.newPassword);
+  async resetPassword(@Body(ValidationPipe) { secretKey, newPassword }: ResetPasswordDto) {
+    await this.service.resetPassword(secretKey, newPassword);
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refreshToken(@Body(ValidationPipe) refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshToken(refreshTokenDto.refreshToken);
+  async refreshToken(@Body(ValidationPipe) { refreshToken }: RefreshTokenDto) {
+    return this.service.refreshToken(refreshToken);
   }
 }
