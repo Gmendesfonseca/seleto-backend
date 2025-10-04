@@ -6,7 +6,6 @@ import {
   SequelizeHealthIndicator,
 } from '@nestjs/terminus';
 import { Authorized } from 'src/shared/decorators/authorization.decorator';
-import { RedisHealthIndicator } from './redis-health.indicator';
 
 @Controller({
   version: VERSION_NEUTRAL,
@@ -14,10 +13,9 @@ import { RedisHealthIndicator } from './redis-health.indicator';
 })
 export class HealthController {
   constructor(
-    private health: HealthCheckService,
-    private memory: MemoryHealthIndicator,
-    private pg: SequelizeHealthIndicator,
-    private redis: RedisHealthIndicator,
+    private readonly health: HealthCheckService,
+    private readonly pg: SequelizeHealthIndicator,
+    private readonly memory: MemoryHealthIndicator,
   ) {}
 
   @Get()
@@ -27,7 +25,6 @@ export class HealthController {
     return this.health.check([
       () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
       () => this.pg.pingCheck('database', { timeout: 1500 }),
-      () => this.redis.isHealthy('redis'),
     ]);
   }
 }

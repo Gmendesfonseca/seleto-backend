@@ -9,7 +9,7 @@ import { JwtI18nResolver } from 'src/shared/middleware/http/jwtI18nResolver';
       disableMiddleware: true,
       fallbackLanguage: 'en',
       loaderOptions: {
-        path: path.join(process.cwd(), 'src/shared/i18n/'),
+        path: path.join(process.cwd(), 'src/i18n/'),
         watch: true,
       },
       resolvers: [JwtI18nResolver, AcceptLanguageResolver],
