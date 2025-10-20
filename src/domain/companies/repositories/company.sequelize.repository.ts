@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Company } from '../../users/user.model';
 import { CompanyRepository } from './company.repository.interface';
-import { PaginationParams, PaginatedList, SearchParams } from '../../../shared/interfaces/pagination.interface';
+import {
+  PaginationParams,
+  PaginatedList,
+  SearchParams,
+} from '../../../shared/interfaces/pagination.interface';
 import { Op } from 'sequelize';
 
 @Injectable()
@@ -89,7 +93,7 @@ export class CompanySequelizeRepository implements CompanyRepository {
   async findActive(pagination?: PaginationParams): Promise<PaginatedList<Company>> {
     this.logger.debug('CompanySequelizeRepository.findActive: Called');
     const defaultPagination: PaginationParams = pagination || { page: 1, pageSize: 10 };
-    
+
     const { rows: items, count: totalCount } = await this.companyModel.findAndCountAll({
       where: { is_active: true },
       limit: defaultPagination.pageSize,

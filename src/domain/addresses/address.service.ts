@@ -1,0 +1,78 @@
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { AddressService } from './interfaces/address.service.interface';
+import { AddressRepository } from './repositories/address.repository.interface';
+import { Address, AddressFilters } from './interfaces/address.interface';
+import { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
+
+@Injectable()
+export class AddressServiceImpl implements AddressService {
+  private readonly logger = new Logger(AddressServiceImpl.name);
+
+  constructor(private readonly addressRepository: AddressRepository) {}
+
+  async create(createAddressDto: CreateAddressDto): Promise<Address> {
+    this.logger.debug('AddressService.create: Called');
+    return this.addressRepository.create(createAddressDto);
+  }
+
+  async findAll(filters?: AddressFilters): Promise<Address[]> {
+    this.logger.debug('AddressService.findAll: Called');
+    return this.addressRepository.findAll(filters);
+  }
+
+  async findOne(id: string): Promise<Address | null> {
+    this.logger.debug('AddressService.findOne: Called');
+    return this.addressRepository.findOne(id);
+  }
+
+  async update(id: string, updateAddressDto: UpdateAddressDto): Promise<Address> {
+    this.logger.debug('AddressService.update: Called');
+    const address = await this.addressRepository.findOne(id);
+    if (!address) {
+      throw new NotFoundException(`Address with id ${id} not found`);
+    }
+    return this.addressRepository.update(id, updateAddressDto);
+  }
+
+  async remove(id: string): Promise<void> {
+    this.logger.debug('AddressService.remove: Called');
+    const address = await this.addressRepository.findOne(id);
+    if (!address) {
+      throw new NotFoundException(`Address with id ${id} not found`);
+    }
+    await this.addressRepository.delete(id);
+  }
+
+  async findByPerson(personId: string): Promise<Address[]> {
+    this.logger.debug('AddressService.findByPerson: Called');
+    return this.addressRepository.findByPerson(personId);
+  }
+
+  async findByCompany(companyId: string): Promise<Address[]> {
+    this.logger.debug('AddressService.findByCompany: Called');
+    return this.addressRepository.findByCompany(companyId);
+  }
+
+  async setPrimary(id: string, ownerId: string, ownerType: 'person' | 'company'): Promise<Address> {
+    this.logger.debug('AddressService.setPrimary: Called');
+    const address = await this.addressRepository.findOne(id);
+    if (!address) {
+      throw new NotFoundException(`Address with id ${id} not found`);
+    }
+
+    // First, unset all other addresses for this owner as primary
+    const allAddresses =
+      ownerType === 'person'
+        ? await this.addressRepository.findByPerson(ownerId)
+        : await this.addressRepository.findByCompany(ownerId);
+
+    for (const addr of allAddresses) {
+      if (addr.id !== id && addr.isPrimary) {
+        await this.addressRepository.update(addr.id, { isPrimary: false });
+      }
+    }
+
+    // Set this address as primary
+    return this.addressRepository.update(id, { isPrimary: true });
+  }
+}
