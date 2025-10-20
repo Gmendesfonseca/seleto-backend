@@ -4,7 +4,7 @@ import {
   CompanyResponse,
   CompanyListResponse,
 } from '../dto/company.dto';
-import { PaginationParams, SearchParams } from '../../../shared/interfaces/pagination.interface';
+import { PaginationParams, SearchParams } from '../../../shared/interfaces/entities';
 
 export abstract class CompanyService {
   /**

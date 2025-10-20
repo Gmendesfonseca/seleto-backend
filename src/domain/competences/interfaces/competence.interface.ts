@@ -8,20 +8,21 @@ export interface Competence {
   updatedAt: Date;
 }
 
-export enum CompetenceCategory {
-  TECHNICAL = 'technical',
-  BEHAVIORAL = 'behavioral',
-  LANGUAGE = 'language',
-  CERTIFICATION = 'certification',
-  OTHER = 'other',
-}
+export const CompetenceCategory = {
+  TECHNICAL: 'technical',
+  BEHAVIORAL: 'behavioral',
+  RESULT: 'result',
+  CULTURAL_FIT: 'cultural-fit',
+} as const;
+export type CompetenceCategory = (typeof CompetenceCategory)[keyof typeof CompetenceCategory];
 
-export enum CompetenceLevel {
-  BASIC = 'basic',
-  INTERMEDIATE = 'intermediate',
-  ADVANCED = 'advanced',
-  EXPERT = 'expert',
-}
+export const CompetenceLevel = {
+  BASIC: 'basic',
+  INTERMEDIATE: 'intermediate',
+  ADVANCED: 'advanced',
+  EXPERT: 'expert',
+} as const;
+export type CompetenceLevel = (typeof CompetenceLevel)[keyof typeof CompetenceLevel];
 
 export interface CompetenceFilters {
   name?: string;

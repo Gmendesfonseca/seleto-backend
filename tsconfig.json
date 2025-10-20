@@ -19,6 +19,13 @@
     "noFallthroughCasesInSwitch": true,
     "jsx": "react-jsx"
   },
-  "include": ["src/**/*", "test/**/*", "eslint.config.js", ".config/*", "commitlint.config.js"],
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "migrations/**/*",
+    "eslint.config.js",
+    ".config/*",
+    "commitlint.config.js"
+  ],
   "exclude": ["dist", "node_modules"]
 }
