@@ -53,10 +53,7 @@ export class CompanyServiceImpl implements CompanyService {
     await this.companyRepository.delete(companyId);
   }
 
-  async findAll(
-    pagination: PaginationParams,
-    search?: SearchParams,
-  ): Promise<CompanyListResponse> {
+  async findAll(pagination: PaginationParams, search?: SearchParams): Promise<CompanyListResponse> {
     this.logger.debug('CompanyService.findAll: Called');
     const result = await this.companyRepository.findAll(pagination, search);
     return {

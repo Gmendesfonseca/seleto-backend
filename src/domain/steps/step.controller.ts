@@ -58,10 +58,7 @@ export class StepController {
   }
 
   @Put('template/:templateId/reorder')
-  async reorderSteps(
-    @Param('templateId') templateId: string,
-    @Body('stepIds') stepIds: string[],
-  ) {
+  async reorderSteps(@Param('templateId') templateId: string, @Body('stepIds') stepIds: string[]) {
     this.logger.debug('StepController.reorderSteps: Called', { templateId, stepIds });
     return this.stepService.reorderSteps(templateId, stepIds);
   }

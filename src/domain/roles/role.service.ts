@@ -49,10 +49,10 @@ export class RoleServiceImpl implements RoleService {
     if (!role) {
       throw new NotFoundException(`Role with id ${roleId} not found`);
     }
-    
+
     const currentPermissions = role.permissions || [];
     const updatedPermissions = [...new Set([...currentPermissions, ...permissionIds])];
-    
+
     return this.roleRepository.update(roleId, { permissions: updatedPermissions });
   }
 
@@ -62,11 +62,11 @@ export class RoleServiceImpl implements RoleService {
     if (!role) {
       throw new NotFoundException(`Role with id ${roleId} not found`);
     }
-    
+
     const updatedPermissions = (role.permissions || []).filter(
       (permId) => !permissionIds.includes(permId),
     );
-    
+
     return this.roleRepository.update(roleId, { permissions: updatedPermissions });
   }
 }

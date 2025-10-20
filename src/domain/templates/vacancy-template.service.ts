@@ -64,9 +64,7 @@ export class VacancyTemplateServiceImpl implements VacancyTemplateService {
     }
 
     // Unset other default templates for the same company
-    const companyTemplates = await this.vacancyTemplateRepository.findByCompany(
-      template.companyId,
-    );
+    const companyTemplates = await this.vacancyTemplateRepository.findByCompany(template.companyId);
     for (const t of companyTemplates) {
       if (t.id !== id && t.isDefault) {
         await this.vacancyTemplateRepository.update(t.id, { isDefault: false });

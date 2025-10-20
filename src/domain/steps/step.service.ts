@@ -50,13 +50,13 @@ export class StepServiceImpl implements StepService {
 
   async reorderSteps(templateId: string, stepIds: string[]): Promise<Step[]> {
     this.logger.debug('StepService.reorderSteps: Called');
-    
+
     // Update the order of each step
     for (let i = 0; i < stepIds.length; i++) {
       const stepId = stepIds[i];
       await this.stepRepository.update(stepId, { order: i + 1 });
     }
-    
+
     // Return the reordered steps
     return this.stepRepository.findByTemplateOrdered(templateId);
   }

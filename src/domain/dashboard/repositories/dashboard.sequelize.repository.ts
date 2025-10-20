@@ -22,7 +22,7 @@ export class DashboardSequelizeRepository implements DashboardRepository {
   async getApplicationCount(filters?: DashboardFilters): Promise<number> {
     this.logger.debug('DashboardSequelizeRepository.getApplicationCount: Called');
     const where: any = {};
-    
+
     if (filters?.companyId) {
       // Would need to join with vacancy to filter by company
     }
@@ -42,7 +42,7 @@ export class DashboardSequelizeRepository implements DashboardRepository {
   async getVacancyCount(filters?: DashboardFilters): Promise<number> {
     this.logger.debug('DashboardSequelizeRepository.getVacancyCount: Called');
     const where: any = {};
-    
+
     if (filters?.companyId) {
       where.company_id = filters.companyId;
     }
@@ -63,7 +63,7 @@ export class DashboardSequelizeRepository implements DashboardRepository {
   async getRecentApplications(limit: number, companyId?: string): Promise<any[]> {
     this.logger.debug('DashboardSequelizeRepository.getRecentApplications: Called');
     const where: any = {};
-    
+
     if (companyId) {
       // Would need to join with vacancy to filter by company
     }
@@ -78,7 +78,7 @@ export class DashboardSequelizeRepository implements DashboardRepository {
   async getTopVacancies(limit: number, companyId?: string): Promise<any[]> {
     this.logger.debug('DashboardSequelizeRepository.getTopVacancies: Called');
     const where: any = {};
-    
+
     if (companyId) {
       where.company_id = companyId;
     }

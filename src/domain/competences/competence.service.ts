@@ -2,7 +2,11 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CompetenceServiceInterface } from './interfaces/competence.service.interface';
 import { CompetenceRepository } from './repositories/competence.repository.interface';
 import { CreateCompetenceDto, UpdateCompetenceDto } from './dto/competence.dto';
-import { Competence, CompetenceCategory, CompetenceFilters } from './interfaces/competence.interface';
+import {
+  Competence,
+  CompetenceCategory,
+  CompetenceFilters,
+} from './interfaces/competence.interface';
 
 @Injectable()
 export class CompetenceService implements CompetenceServiceInterface {
