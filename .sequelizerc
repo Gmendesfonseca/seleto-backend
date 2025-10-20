@@ -1,5 +1,7 @@
 const path = require('path');
 
+require('ts-node/register');
+
 module.exports = {
   'config': path.resolve('config', 'config.json'),
   'models-path': path.resolve('src', 'infrastructure', 'database', 'models'),

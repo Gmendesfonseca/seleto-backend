@@ -1,8 +1,8 @@
 import { QueryInterface } from 'sequelize';
 
 export = {
-  up: async (queryInterface: QueryInterface, Sequelize: any): Promise<void> => {
-    await queryInterface.createTable('addresses', {
+  up: async (query: QueryInterface, Sequelize: any): Promise<void> => {
+    await query.createTable('addresses', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -79,16 +79,16 @@ export = {
     });
 
     // Add indexes
-    await queryInterface.addIndex('addresses', ['person_id']);
-    await queryInterface.addIndex('addresses', ['company_id']);
-    await queryInterface.addIndex('addresses', ['city']);
-    await queryInterface.addIndex('addresses', ['state']);
-    await queryInterface.addIndex('addresses', ['postal_code']);
-    await queryInterface.addIndex('addresses', ['is_primary']);
-    await queryInterface.addIndex('addresses', ['deleted_at']);
+    await query.addIndex('addresses', ['person_id']);
+    await query.addIndex('addresses', ['company_id']);
+    await query.addIndex('addresses', ['city']);
+    await query.addIndex('addresses', ['state']);
+    await query.addIndex('addresses', ['postal_code']);
+    await query.addIndex('addresses', ['is_primary']);
+    await query.addIndex('addresses', ['deleted_at']);
   },
 
-  down: async (queryInterface: QueryInterface): Promise<void> => {
-    await queryInterface.dropTable('addresses');
+  down: async (query: QueryInterface): Promise<void> => {
+    await query.dropTable('addresses');
   },
 };

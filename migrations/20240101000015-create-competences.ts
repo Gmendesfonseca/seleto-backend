@@ -1,8 +1,8 @@
 import { QueryInterface } from 'sequelize';
 
 export = {
-  up: async (queryInterface: QueryInterface, Sequelize: any): Promise<void> => {
-    await queryInterface.createTable('competences', {
+  up: async (query: QueryInterface, Sequelize: any): Promise<void> => {
+    await query.createTable('competences', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -44,12 +44,12 @@ export = {
     });
 
     // Add indexes
-    await queryInterface.addIndex('competences', ['company_id']);
-    await queryInterface.addIndex('competences', ['name']);
-    await queryInterface.addIndex('competences', ['deleted_at']);
+    await query.addIndex('competences', ['company_id']);
+    await query.addIndex('competences', ['name']);
+    await query.addIndex('competences', ['deleted_at']);
   },
 
-  down: async (queryInterface: QueryInterface): Promise<void> => {
-    await queryInterface.dropTable('competences');
+  down: async (query: QueryInterface): Promise<void> => {
+    await query.dropTable('competences');
   },
 };

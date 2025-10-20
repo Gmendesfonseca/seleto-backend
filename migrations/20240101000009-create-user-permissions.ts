@@ -1,8 +1,8 @@
 import { QueryInterface } from 'sequelize';
 
 export = {
-  up: async (queryInterface: QueryInterface, Sequelize: any): Promise<void> => {
-    await queryInterface.createTable('user_permissions', {
+  up: async (query: QueryInterface, Sequelize: any): Promise<void> => {
+    await query.createTable('user_permissions', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -42,15 +42,15 @@ export = {
     });
 
     // Add indexes and unique constraint
-    await queryInterface.addIndex('user_permissions', ['user_id']);
-    await queryInterface.addIndex('user_permissions', ['permission_id']);
-    await queryInterface.addIndex('user_permissions', ['user_id', 'permission_id'], {
+    await query.addIndex('user_permissions', ['user_id']);
+    await query.addIndex('user_permissions', ['permission_id']);
+    await query.addIndex('user_permissions', ['user_id', 'permission_id'], {
       unique: true,
       name: 'unique_user_permission',
     });
   },
 
-  down: async (queryInterface: QueryInterface): Promise<void> => {
-    await queryInterface.dropTable('user_permissions');
+  down: async (query: QueryInterface): Promise<void> => {
+    await query.dropTable('user_permissions');
   },
 };

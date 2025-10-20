@@ -1,8 +1,8 @@
 import { QueryInterface } from 'sequelize';
 
 export = {
-  up: async (queryInterface: QueryInterface, Sequelize: any): Promise<void> => {
-    await queryInterface.createTable('refresh_tokens', {
+  up: async (query: QueryInterface, Sequelize: any): Promise<void> => {
+    await query.createTable('refresh_tokens', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -41,12 +41,12 @@ export = {
     });
 
     // Add indexes
-    await queryInterface.addIndex('refresh_tokens', ['token']);
-    await queryInterface.addIndex('refresh_tokens', ['user_id']);
-    await queryInterface.addIndex('refresh_tokens', ['expires_at']);
+    await query.addIndex('refresh_tokens', ['token']);
+    await query.addIndex('refresh_tokens', ['user_id']);
+    await query.addIndex('refresh_tokens', ['expires_at']);
   },
 
-  down: async (queryInterface: QueryInterface): Promise<void> => {
-    await queryInterface.dropTable('refresh_tokens');
+  down: async (query: QueryInterface): Promise<void> => {
+    await query.dropTable('refresh_tokens');
   },
 };

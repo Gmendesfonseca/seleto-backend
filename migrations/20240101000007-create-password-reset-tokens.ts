@@ -1,8 +1,8 @@
 import { QueryInterface } from 'sequelize';
 
 export = {
-  up: async (queryInterface: QueryInterface, Sequelize: any): Promise<void> => {
-    await queryInterface.createTable('password_reset_tokens', {
+  up: async (query: QueryInterface, Sequelize: any): Promise<void> => {
+    await query.createTable('password_reset_tokens', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -41,13 +41,13 @@ export = {
     });
 
     // Add indexes
-    await queryInterface.addIndex('password_reset_tokens', ['token']);
-    await queryInterface.addIndex('password_reset_tokens', ['user_id']);
-    await queryInterface.addIndex('password_reset_tokens', ['expires_at']);
-    await queryInterface.addIndex('password_reset_tokens', ['used']);
+    await query.addIndex('password_reset_tokens', ['token']);
+    await query.addIndex('password_reset_tokens', ['user_id']);
+    await query.addIndex('password_reset_tokens', ['expires_at']);
+    await query.addIndex('password_reset_tokens', ['used']);
   },
 
-  down: async (queryInterface: QueryInterface): Promise<void> => {
-    await queryInterface.dropTable('password_reset_tokens');
+  down: async (query: QueryInterface): Promise<void> => {
+    await query.dropTable('password_reset_tokens');
   },
 };
