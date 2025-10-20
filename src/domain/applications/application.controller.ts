@@ -1,8 +1,23 @@
-import { Controller, Delete, Get, Logger, Post, Put } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Logger,
+  Post,
+  Put,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ApplicationServiceInterface } from './interfaces/application.service.interface';
 import { ApplicationFilters } from './interfaces/application.interface';
 import { CreateApplicationDto } from './dto/create.dto';
 import { UpdateApplicationDto } from './dto/update.dto';
+import { ApplicationQueryDto } from './dto/query.dto';
+import { Authorized } from 'src/shared/decorators/authorization.decorator';
 
 @Controller('applications')
 export class ApplicationController {
@@ -11,31 +26,48 @@ export class ApplicationController {
   constructor(private readonly service: ApplicationServiceInterface) {}
 
   @Get()
-  public async list(filters?: ApplicationFilters) {
-    this.logger.debug('List: called', { filters });
+  @HttpCode(HttpStatus.OK)
+  @Authorized()
+  public async list(@Query(ValidationPipe) queryDto: ApplicationQueryDto) {
+    this.logger.debug('List: called', { queryDto });
+    const filters: ApplicationFilters = {
+      applicantId: queryDto.applicantId,
+      vacancyId: queryDto.vacancyId,
+      status: queryDto.status,
+      dateFrom: queryDto.dateFrom,
+      dateTo: queryDto.dateTo,
+    };
     return this.service.findAll(filters);
   }
 
   @Get(':id')
-  public async show(id: string) {
+  @HttpCode(HttpStatus.OK)
+  @Authorized()
+  public async show(@Param('id') id: string) {
     this.logger.debug('Show: called', { id });
     return this.service.findOne(id);
   }
 
   @Post()
-  public async store(dto: CreateApplicationDto) {
+  @HttpCode(HttpStatus.CREATED)
+  @Authorized()
+  public async store(@Body(ValidationPipe) dto: CreateApplicationDto) {
     this.logger.debug('Store: called', dto);
     return this.service.create(dto);
   }
 
   @Put(':id')
-  public async update(id: string, dto: UpdateApplicationDto) {
+  @HttpCode(HttpStatus.OK)
+  @Authorized()
+  public async update(@Param('id') id: string, @Body(ValidationPipe) dto: UpdateApplicationDto) {
     this.logger.debug('Update: called', { id, dto });
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
-  public async destroy(id: string) {
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Authorized()
+  public async destroy(@Param('id') id: string) {
     this.logger.debug('Destroy: called', { id });
     return this.service.remove(id);
   }

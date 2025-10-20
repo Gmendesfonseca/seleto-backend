@@ -7,6 +7,7 @@ import {
   HttpStatus,
   ValidationPipe,
   Logger,
+  Req,
 } from '@nestjs/common';
 import { AuthServiceInterface } from './interfaces';
 import {
@@ -17,6 +18,7 @@ import {
   ResetPasswordDto,
   RefreshTokenDto,
 } from './dto';
+import { Authorized } from 'src/shared/decorators/authorization.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -60,5 +62,16 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshToken(@Body(ValidationPipe) { refreshToken }: RefreshTokenDto) {
     return this.service.refreshToken(refreshToken);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Authorized()
+  async logout(@Req() request: any) {
+    this.logger.debug('Logout: called');
+    const userId = request.user?.sub;
+    if (userId) {
+      await this.service.logout(userId);
+    }
   }
 }

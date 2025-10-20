@@ -28,6 +28,11 @@ export class UsersService implements UsersServiceInterface {
     return this.usersRepository.findOne(id);
   }
 
+  async findAll(filters?: any): Promise<{ users: UserInterface[]; total: number }> {
+    this.logger.debug('UserService.findAll: Called');
+    return this.usersRepository.findAll(filters);
+  }
+
   async findOneByEmail(email: string): Promise<UserInterface | null> {
     this.logger.debug('UserService.findOneByEmail: Called');
     return this.usersRepository.findOneByEmail(email);
@@ -124,5 +129,24 @@ export class UsersService implements UsersServiceInterface {
     });
 
     this.logger.debug(`Password updated successfully for user: ${userId}`);
+  }
+
+  async updateUser(id: string, input: any): Promise<UserInterface> {
+    this.logger.debug('UserService.updateUser: Called');
+    const user = await this.usersRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Filter out undefined values
+    const updateData = Object.entries(input)
+      .filter(([_, value]) => value !== undefined)
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+    if (Object.keys(updateData).length === 0) {
+      return user;
+    }
+
+    return this.usersRepository.update(id, updateData);
   }
 }
