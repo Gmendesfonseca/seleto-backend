@@ -42,6 +42,52 @@ export class UserSequelizeRepository implements UsersRepositoryInterface {
     });
   }
 
+  public async findAll(filters?: any): Promise<{ users: User[]; total: number }> {
+    this.logger.debug('UserSequelizeRepository.findAll: Called');
+    const where: any = {};
+
+    if (filters?.email) {
+      where.email = filters.email;
+    }
+    if (filters?.username) {
+      where.username = filters.username;
+    }
+    if (filters?.status) {
+      where.status = filters.status;
+    }
+    if (filters?.type) {
+      where.type = filters.type;
+    }
+    if (filters?.isVerified !== undefined) {
+      where.isVerified = filters.isVerified;
+    }
+
+    const page = filters?.page || 1;
+    const limit = filters?.limit || 10;
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await this.userModel.findAndCountAll({
+      where,
+      limit,
+      offset,
+      include: [
+        {
+          model: Person,
+          attributes: ['id', 'name', 'avatar'],
+        },
+        {
+          model: Company,
+          attributes: ['id', 'name', 'avatar'],
+        },
+      ],
+    });
+
+    return {
+      users: rows,
+      total: count,
+    };
+  }
+
   public async findOneByCredentials({
     email,
     password,
@@ -123,6 +169,16 @@ export class UserSequelizeRepository implements UsersRepositoryInterface {
       },
     );
   }
+
+  public async update(id: string, data: Partial<User>): Promise<User> {
+    this.logger.debug('UserSequelizeRepository.update: Called');
+    const [, [updatedUser]] = await this.userModel.update(data, {
+      where: { id },
+      returning: true,
+    });
+    return updatedUser;
+  }
+
   public async delete(id: string): Promise<void> {
     this.logger.debug('UserSequelizeRepository.delete: Called');
     await this.userModel.destroy({ where: { id } });

@@ -5,4 +5,5 @@ export abstract class AuthServiceInterface {
   abstract checkSecretKey(secretKey: string): Promise<boolean>;
   abstract resetPassword(secretKey: string, newPassword: string): Promise<void>;
   abstract refreshToken(refreshToken: string): Promise<any>;
+  abstract logout(userId: string): Promise<void>;
 }

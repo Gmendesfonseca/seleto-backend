@@ -176,4 +176,11 @@ export class AuthService implements AuthServiceInterface {
   private async verifyPassword(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash);
   }
+
+  async logout(userId: string): Promise<void> {
+    this.logger.debug('AuthService.logout: Called', { userId });
+    // In a stateless JWT implementation, logout is typically handled on the client side
+    // by removing the token. However, we can add token blacklisting or other mechanisms
+    // if needed in the future. For now, this is a no-op that allows the endpoint to exist.
+  }
 }

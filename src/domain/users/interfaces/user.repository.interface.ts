@@ -51,6 +51,7 @@ export interface ValidateEmailInput {
 
 export abstract class UsersRepositoryInterface {
   abstract findOne(id: string): Promise<User | null>;
+  abstract findAll(filters?: any): Promise<{ users: User[]; total: number }>;
   abstract findOneByEmail(email: string): Promise<User | null>;
   abstract findOneByCredentials(input: GetByCredentialsInputRepository): Promise<User | null>;
   abstract activate(input: ActivateInputRepository): Promise<void>;
@@ -60,6 +61,7 @@ export abstract class UsersRepositoryInterface {
   abstract updateUsername(input: UpdateUsernameInputRepository): Promise<User>;
   abstract updatePassword(input: UpdatePasswordInputRepository): Promise<void>;
   abstract updateEmail(input: UpdateEmailInputRepository): Promise<void>;
+  abstract update(id: string, data: Partial<User>): Promise<User>;
   abstract validateEmail(input: ValidateEmailInput): Promise<boolean>;
   abstract delete(id: string): Promise<void>;
 }
