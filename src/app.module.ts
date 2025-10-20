@@ -5,6 +5,13 @@ import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/c
 import { AuthModule } from './domain/auth/auth.module';
 import { UsersModule } from './domain/users/users.module';
 import { SecretsModule } from './domain/secret/secret.module';
+import { RoleModule } from './domain/roles/role.module';
+import { ApplicationModule } from './domain/applications/application.module';
+import { CompetenceModule } from './domain/competences/competence.module';
+import { StepModule } from './domain/steps/step.module';
+import { VacancyModule } from './domain/vacancies/vacancy.module';
+import { PermissionModule } from './domain/permissions/permission.module';
+import { TemplateModule } from './domain/templates/template.module';
 
 import { I18nModule } from './infrastructure/config/i18n.module';
 import { LimitModule } from './infrastructure/config/limit.module';
@@ -27,6 +34,13 @@ import { MailerModule } from './domain/mailers/mailer.module';
     UsersModule,
     MailerModule,
     SecretsModule,
+    RoleModule,
+    ApplicationModule,
+    CompetenceModule,
+    StepModule,
+    VacancyModule,
+    PermissionModule,
+    TemplateModule,
   ],
   providers: [JwtService],
 })
