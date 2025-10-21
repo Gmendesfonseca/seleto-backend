@@ -57,13 +57,13 @@ export class VacancyController {
     await this.vacancyService.remove(id);
   }
 
-  @Put(':id/publish')
+  @Post(':id/publish')
   async publish(@Param('id') id: string) {
     this.logger.debug('VacancyController.publish: Called', { id });
     return this.vacancyService.publishVacancy(id);
   }
 
-  @Put(':id/close')
+  @Post(':id/close')
   async close(@Param('id') id: string) {
     this.logger.debug('VacancyController.close: Called', { id });
     return this.vacancyService.closeVacancy(id);
@@ -79,6 +79,12 @@ export class VacancyController {
   async applyToVacancy(@Param('vacancyId') vacancyId: string, @Body() applicationData: any) {
     this.logger.debug('VacancyController.applyToVacancy: Called', { vacancyId });
     return this.vacancyService.createApplication(vacancyId, applicationData);
+  }
+
+  @Get(':id/stats')
+  async getVacancyStats(@Param('id') id: string) {
+    this.logger.debug('VacancyController.getVacancyStats: Called', { id });
+    return this.vacancyService.getStats(id);
   }
 
   @Get('company/:companyId')

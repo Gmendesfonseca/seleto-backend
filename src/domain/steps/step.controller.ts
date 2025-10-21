@@ -57,9 +57,18 @@ export class StepController {
     return this.stepService.findByTemplate(templateId);
   }
 
+  @Post('reorder')
+  async reorderSteps(@Body() payload: { templateId: string; stepIds: string[] }) {
+    this.logger.debug('StepController.reorderSteps: Called', { payload });
+    return this.stepService.reorderSteps(payload.templateId, payload.stepIds);
+  }
+
   @Put('template/:templateId/reorder')
-  async reorderSteps(@Param('templateId') templateId: string, @Body('stepIds') stepIds: string[]) {
-    this.logger.debug('StepController.reorderSteps: Called', { templateId, stepIds });
+  async reorderStepsByTemplate(
+    @Param('templateId') templateId: string,
+    @Body('stepIds') stepIds: string[],
+  ) {
+    this.logger.debug('StepController.reorderStepsByTemplate: Called', { templateId, stepIds });
     return this.stepService.reorderSteps(templateId, stepIds);
   }
 }
