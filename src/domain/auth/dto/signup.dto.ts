@@ -13,7 +13,6 @@ export class SignUpDto {
   @IsNotEmpty()
   email: string;
 
-  @IsString()
   @IsEnum(['PERSON', 'COMPANY'])
   type: 'PERSON' | 'COMPANY';
 
