@@ -10,6 +10,8 @@ import { AuthServiceInterface } from './interfaces';
 import { UsersModule } from '../users/users.module';
 import { SecretsModule } from '../secret/secret.module';
 import { MailerModule } from '../mailers/mailer.module';
+import { CompanyModule } from '../companies/company.module';
+import { PersonModule } from '../persons/person.module';
 import { RefreshToken } from './models/refresh-token.model';
 import { PasswordResetToken } from './models/password-reset-token.model';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.interface';
@@ -23,6 +25,8 @@ import { PasswordResetTokenSequelizeRepository } from './repositories/password-r
     UsersModule,
     SecretsModule,
     MailerModule,
+    CompanyModule,
+    PersonModule,
     SequelizeModule.forFeature([RefreshToken, PasswordResetToken]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

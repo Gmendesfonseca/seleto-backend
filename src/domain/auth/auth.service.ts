@@ -11,7 +11,8 @@ import { UsersServiceInterface } from '../users/interfaces';
 import { SecretServiceInterface } from '../secret/interface/secret.service.interface';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';
-import { CompanyService } from '../companies';
+import { CompanyService } from '../companies/interfaces/company.service.interface';
+import { PersonService } from '../persons/interfaces/person.service.interface';
 
 @Injectable()
 export class AuthService implements AuthServiceInterface {
@@ -23,7 +24,7 @@ export class AuthService implements AuthServiceInterface {
     private readonly secretService: SecretServiceInterface,
     private readonly mailerService: MailerService,
     private readonly companyService: CompanyService,
-    private readonly personService: CompanyService,
+    private readonly personService: PersonService,
   ) {}
 
   async signIn(email: string, password: string): Promise<SignInResponse> {
@@ -59,8 +60,8 @@ export class AuthService implements AuthServiceInterface {
 
     const hashedPassword = await this.hashPassword(password);
 
-    await this.usersService.createUser({
-      email: username,
+    const user = await this.usersService.createUser({
+      email,
       username,
       password: hashedPassword,
       type,
@@ -69,7 +70,16 @@ export class AuthService implements AuthServiceInterface {
     if (type === 'COMPANY') {
       await this.companyService.create({ name });
     } else if (type === 'PERSON') {
-      await this.personService.create({ name });
+      const nameParts = name.split(' ');
+      const firstName = nameParts[0] || name;
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      await this.personService.create({
+        userId: user.id,
+        firstName,
+        lastName,
+        email,
+      });
     }
 
     try {
