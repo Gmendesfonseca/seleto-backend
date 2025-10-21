@@ -37,7 +37,7 @@ services:
       context: .
       dockerfile: Dockerfile.local
     ports:
-      - "5000:80"
+      - "5000:5000"
     command: npm run start:debug
     volumes:
       - .:/home/node/app
