@@ -1,9 +1,21 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
 
 export class SignUpDto {
   @IsString()
   @IsNotEmpty()
   username: string;
+
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsEnum(['PERSON', 'COMPANY'])
+  type: 'PERSON' | 'COMPANY';
 
   @IsString()
   @IsNotEmpty()

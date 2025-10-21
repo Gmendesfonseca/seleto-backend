@@ -37,9 +37,9 @@ export class AuthController {
   @Post('signup')
   @Authorized()
   @HttpCode(HttpStatus.CREATED)
-  async signUp(@Body(ValidationPipe) { password, username }: SignUpDto) {
+  async signUp(@Body(ValidationPipe) { password, email, type, username, name }: SignUpDto) {
     this.logger.debug('SignUp: called', { username });
-    await this.service.signUp(username, password);
+    await this.service.signUp({ username, password, email, type, name });
   }
 
   @Patch('forgot-password')

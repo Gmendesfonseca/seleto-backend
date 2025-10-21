@@ -6,11 +6,12 @@ import {
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AuthServiceInterface, SignInResponse } from './interfaces';
+import { AuthServiceInterface, SignInResponse, SignUpDto } from './interfaces';
 import { UsersServiceInterface } from '../users/interfaces';
 import { SecretServiceInterface } from '../secret/interface/secret.service.interface';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';
+import { CompanyService } from '../companies';
 
 @Injectable()
 export class AuthService implements AuthServiceInterface {
@@ -21,6 +22,8 @@ export class AuthService implements AuthServiceInterface {
     private readonly usersService: UsersServiceInterface,
     private readonly secretService: SecretServiceInterface,
     private readonly mailerService: MailerService,
+    private readonly companyService: CompanyService,
+    private readonly personService: CompanyService,
   ) {}
 
   async signIn(email: string, password: string): Promise<SignInResponse> {
@@ -46,10 +49,10 @@ export class AuthService implements AuthServiceInterface {
     };
   }
 
-  async signUp(username: string, password: string): Promise<void> {
+  async signUp({ username, password, email, type, name }: SignUpDto): Promise<void> {
     this.logger.debug('AuthService.signUp: Called');
 
-    const existingUser = await this.usersService.findOneByEmail(username);
+    const existingUser = await this.usersService.findOneByEmail(email);
     if (existingUser) {
       throw new ConflictException('User already exists');
     }
@@ -60,8 +63,14 @@ export class AuthService implements AuthServiceInterface {
       email: username,
       username,
       password: hashedPassword,
-      type: 'PERSON',
+      type,
     });
+
+    if (type === 'COMPANY') {
+      await this.companyService.create({ name });
+    } else if (type === 'PERSON') {
+      await this.personService.create({ name });
+    }
 
     try {
       await this.mailerService.sendMail({
