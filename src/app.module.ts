@@ -14,6 +14,7 @@ import { PermissionModule } from './domain/permissions/permission.module';
 import { TemplateModule } from './domain/templates/template.module';
 import { CompanyModule } from './domain/companies/company.module';
 import { DashboardModule } from './domain/dashboard/dashboard.module';
+import { RecruitmentModule } from './domain/recruitment/recruitment.module';
 
 import { I18nModule } from './infrastructure/config/i18n.module';
 import { LimitModule } from './infrastructure/config/limit.module';
@@ -45,6 +46,7 @@ import { MailerModule } from './domain/mailers/mailer.module';
     TemplateModule,
     CompanyModule,
     DashboardModule,
+    RecruitmentModule,
   ],
   providers: [JwtService],
 })

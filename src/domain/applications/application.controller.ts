@@ -72,3 +72,19 @@ export class ApplicationController {
     return this.service.remove(id);
   }
 }
+
+@Controller('applicants')
+export class ApplicantController {
+  private readonly logger = new Logger(ApplicantController.name);
+
+  constructor(private readonly service: ApplicationServiceInterface) {}
+
+  @Get(':applicantId/applications')
+  @HttpCode(HttpStatus.OK)
+  @Authorized()
+  public async getApplicationsByApplicant(@Param('applicantId') applicantId: string) {
+    this.logger.debug('GetApplicationsByApplicant: called', { applicantId });
+    const filters: ApplicationFilters = { applicantId };
+    return this.service.findAll(filters);
+  }
+}

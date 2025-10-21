@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { ApplicationController } from './application.controller';
+import { ApplicationController, ApplicantController } from './application.controller';
 import { Application } from './application.model';
 import { ApplicationService } from './application.service';
 import { ApplicationSequelizeRepository } from './repositories/application.sequelize.repository';
@@ -9,7 +9,7 @@ import { ApplicationServiceInterface } from './interfaces/application.service.in
 
 @Module({
   imports: [SequelizeModule.forFeature([Application])],
-  controllers: [ApplicationController],
+  controllers: [ApplicationController, ApplicantController],
   providers: [
     {
       provide: ApplicationRepository,

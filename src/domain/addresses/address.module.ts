@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Address } from './address.model';
 import { AddressController } from './address.controller';
-import { AddressServiceImpl } from './address.service';
+import { AddressService } from './address.service';
 import { AddressSequelizeRepository } from './repositories/address.sequelize.repository';
 import { AddressRepository } from './repositories/address.repository.interface';
-import { AddressService } from './interfaces/address.service.interface';
+import { AddressServiceInterface } from './interfaces/address.service.interface';
 
 @Module({
   imports: [SequelizeModule.forFeature([Address])],
@@ -16,10 +16,10 @@ import { AddressService } from './interfaces/address.service.interface';
       useClass: AddressSequelizeRepository,
     },
     {
-      provide: AddressService,
-      useClass: AddressServiceImpl,
+      provide: AddressServiceInterface,
+      useClass: AddressService,
     },
   ],
-  exports: [AddressService],
+  exports: [AddressServiceInterface],
 })
 export class AddressModule {}

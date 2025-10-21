@@ -29,6 +29,7 @@ export interface UserFilters {
   username?: string;
   status?: string;
   type?: string;
+  companyId?: string;
   isVerified?: boolean;
   page?: number;
   limit?: number;

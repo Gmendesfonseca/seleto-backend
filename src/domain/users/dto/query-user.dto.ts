@@ -18,6 +18,10 @@ export class QueryUserDto {
   readonly type?: string;
 
   @IsOptional()
+  @IsString()
+  readonly companyId?: string;
+
+  @IsOptional()
   @IsBoolean()
   readonly isVerified?: boolean;
 

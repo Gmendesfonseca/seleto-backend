@@ -14,6 +14,7 @@ import {
   Patch,
   ValidationPipe,
   Query,
+  Request,
 } from '@nestjs/common';
 import {
   UpdateEmailDto,
@@ -42,14 +43,29 @@ export class UsersController {
         username: queryDto.username,
         status: queryDto.status,
         type: queryDto.type,
+        companyId: queryDto.companyId,
         isVerified: queryDto.isVerified,
-        page: queryDto.page ? parseInt(queryDto.page, 10) : 1,
-        limit: queryDto.limit ? parseInt(queryDto.limit, 10) : 10,
+        page: queryDto.page ? Number.parseInt(queryDto.page, 10) : 1,
+        limit: queryDto.limit ? Number.parseInt(queryDto.limit, 10) : 10,
       };
       return await this.usersService.findAll(filters);
     } catch (error) {
       this.logger.error(error.message);
       throw new BadRequestException('Failed to list users');
+    }
+  }
+
+  @Get('/me')
+  @HttpCode(200)
+  @Authorized()
+  async getCurrentUser(@Request() req: any) {
+    this.logger.debug('UsersController.getCurrentUser: Called');
+    try {
+      const userId = req.auth?.id || req.user?.id;
+      return await this.usersService.findOne(userId);
+    } catch (error) {
+      this.logger.error(error.message);
+      throw error instanceof NotFoundException ? error : new NotFoundException('User not found');
     }
   }
 
@@ -109,6 +125,24 @@ export class UsersController {
     }
   }
 
+  @Put('/:id')
+  @HttpCode(200)
+  @Authorized()
+  async updateUserGeneral(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body(ValidationPipe) updateUserDto: UpdateUserDto,
+  ) {
+    this.logger.debug('UsersController.updateUserGeneral: Called');
+    try {
+      return await this.usersService.updateUser(id, updateUserDto);
+    } catch (error) {
+      this.logger.error(error.message);
+      throw error instanceof NotFoundException
+        ? error
+        : new BadRequestException('Failed to update user');
+    }
+  }
+
   @Patch('/:id')
   @HttpCode(200)
   @Authorized()
@@ -132,7 +166,7 @@ export class UsersController {
   async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     this.logger.debug('UsersController.deleteUser: Called');
     try {
-      return this.usersService.delete(id);
+      await this.usersService.delete(id);
     } catch (error) {
       this.logger.error(error.message);
       return new NotFoundException();

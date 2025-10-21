@@ -1,12 +1,12 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { AddressService } from './interfaces/address.service.interface';
+import { AddressServiceInterface } from './interfaces/address.service.interface';
 import { AddressRepository } from './repositories/address.repository.interface';
 import { Address, AddressFilters } from './interfaces/address.interface';
 import { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
 
 @Injectable()
-export class AddressServiceImpl implements AddressService {
-  private readonly logger = new Logger(AddressServiceImpl.name);
+export class AddressService implements AddressServiceInterface {
+  private readonly logger = new Logger(AddressService.name);
 
   constructor(private readonly addressRepository: AddressRepository) {}
 

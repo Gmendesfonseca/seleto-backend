@@ -11,4 +11,6 @@ export abstract class VacancyService {
   abstract findPublished(): Promise<Vacancy[]>;
   abstract publishVacancy(id: string): Promise<Vacancy>;
   abstract closeVacancy(id: string): Promise<Vacancy>;
+  abstract getApplications(vacancyId: string): Promise<any[]>;
+  abstract createApplication(vacancyId: string, applicationData: any): Promise<any>;
 }

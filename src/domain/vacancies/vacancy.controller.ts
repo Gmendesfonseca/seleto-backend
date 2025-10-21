@@ -69,6 +69,18 @@ export class VacancyController {
     return this.vacancyService.closeVacancy(id);
   }
 
+  @Get(':vacancyId/applications')
+  async getVacancyApplications(@Param('vacancyId') vacancyId: string) {
+    this.logger.debug('VacancyController.getVacancyApplications: Called', { vacancyId });
+    return this.vacancyService.getApplications(vacancyId);
+  }
+
+  @Post(':vacancyId/apply')
+  async applyToVacancy(@Param('vacancyId') vacancyId: string, @Body() applicationData: any) {
+    this.logger.debug('VacancyController.applyToVacancy: Called', { vacancyId });
+    return this.vacancyService.createApplication(vacancyId, applicationData);
+  }
+
   @Get('company/:companyId')
   async findByCompany(@Param('companyId') companyId: string) {
     this.logger.debug('VacancyController.findByCompany: Called', { companyId });

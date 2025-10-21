@@ -38,11 +38,35 @@ export class CompanyController {
 
   @Get(':id/vacancies')
   @Authorized()
-  async getCompanyVacancies(@Param('id') id: string) {
-    this.logger.debug('CompanyController.getCompanyVacancies: Called', { id });
-    // This will be handled by the vacancy service's findByCompany method
-    // For now, return empty array or implement in the service
-    return [];
+  async getCompanyVacancies(
+    @Param('id') id: string,
+    @Query('status') status?: string,
+    @Query('area') area?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    this.logger.debug('CompanyController.getCompanyVacancies: Called', { id, status, area });
+    return this.companyService.getVacancies(id, { status, area, page, limit });
+  }
+
+  @Get(':id/users')
+  @Authorized()
+  async getCompanyUsers(
+    @Param('id') id: string,
+    @Query('type') type?: string,
+    @Query('status') status?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    this.logger.debug('CompanyController.getCompanyUsers: Called', { id, type, status });
+    return this.companyService.getUsers(id, { type, status, page, limit });
+  }
+
+  @Get(':id/statistics')
+  @Authorized()
+  async getCompanyStatistics(@Param('id') id: string) {
+    this.logger.debug('CompanyController.getCompanyStatistics: Called', { id });
+    return this.companyService.getStatistics(id);
   }
 
   @Get(':id/addresses')

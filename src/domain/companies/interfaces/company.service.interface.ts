@@ -49,4 +49,25 @@ export abstract class CompanyService {
    * Activate/Deactivate company
    */
   abstract setActiveStatus(companyId: string, isActive: boolean): Promise<void>;
+
+  /**
+   * Get company vacancies with filters
+   */
+  abstract getVacancies(
+    companyId: string,
+    filters?: { status?: string; area?: string; page?: number; limit?: number },
+  ): Promise<any[]>;
+
+  /**
+   * Get company users with filters
+   */
+  abstract getUsers(
+    companyId: string,
+    filters?: { type?: string; status?: string; page?: number; limit?: number },
+  ): Promise<any[]>;
+
+  /**
+   * Get company statistics
+   */
+  abstract getStatistics(companyId: string): Promise<any>;
 }

@@ -12,20 +12,20 @@ import {
   HttpStatus,
   Patch,
 } from '@nestjs/common';
-import { AddressService } from './interfaces/address.service.interface';
+import { AddressServiceInterface } from './interfaces/address.service.interface';
 import { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
 
 @Controller('addresses')
 export class AddressController {
   private readonly logger = new Logger(AddressController.name);
 
-  constructor(private readonly addressService: AddressService) {}
+  constructor(private readonly service: AddressServiceInterface) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createAddressDto: CreateAddressDto) {
     this.logger.debug('AddressController.create: Called');
-    return this.addressService.create(createAddressDto);
+    return this.service.create(createAddressDto);
   }
 
   @Get()
@@ -38,31 +38,31 @@ export class AddressController {
     @Query('isPrimary') isPrimary?: boolean,
   ) {
     this.logger.debug('AddressController.findAll: Called');
-    return this.addressService.findAll({ personId, companyId, city, state, country, isPrimary });
+    return this.service.findAll({ personId, companyId, city, state, country, isPrimary });
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
     this.logger.debug('AddressController.findOne: Called');
-    return this.addressService.findOne(id);
+    return this.service.findOne(id);
   }
 
   @Get('person/:personId')
   async findByPerson(@Param('personId') personId: string) {
     this.logger.debug('AddressController.findByPerson: Called');
-    return this.addressService.findByPerson(personId);
+    return this.service.findByPerson(personId);
   }
 
   @Get('company/:companyId')
   async findByCompany(@Param('companyId') companyId: string) {
     this.logger.debug('AddressController.findByCompany: Called');
-    return this.addressService.findByCompany(companyId);
+    return this.service.findByCompany(companyId);
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateAddressDto: UpdateAddressDto) {
     this.logger.debug('AddressController.update: Called');
-    return this.addressService.update(id, updateAddressDto);
+    return this.service.update(id, updateAddressDto);
   }
 
   @Patch(':id/set-primary')
@@ -72,13 +72,13 @@ export class AddressController {
     @Body('ownerType') ownerType: 'person' | 'company',
   ) {
     this.logger.debug('AddressController.setPrimary: Called');
-    return this.addressService.setPrimary(id, ownerId, ownerType);
+    return this.service.setPrimary(id, ownerId, ownerType);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
     this.logger.debug('AddressController.remove: Called');
-    await this.addressService.remove(id);
+    await this.service.remove(id);
   }
 }
