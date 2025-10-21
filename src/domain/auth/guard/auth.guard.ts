@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 import { Jwt } from 'src/shared/interfaces/jwt.interface';
 import { SECURED_KEY } from 'src/shared/utils/constants';
 
@@ -15,8 +16,8 @@ export class AuthGuard implements CanActivate {
   private readonly logger = new Logger(AuthGuard.name);
 
   constructor(
-    private jwtService: JwtService,
-    private reflector: Reflector,
+    private readonly jwtService: JwtService,
+    private readonly reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -32,7 +33,7 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
       this.logger.debug('AuthGuard.canActivate: no token found');
@@ -58,8 +59,11 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.get('authorization')?.split(' ') ?? [];
-    this.logger.debug(`AuthGuard.extractTokenFromHeader: type=${type}, token=${token}`);
+    const authHeader = request.headers['authorization'] || request.headers.authorization;
+    const [type, token] = authHeader?.split(' ') ?? [];
+    this.logger.debug(
+      `AuthGuard.extractTokenFromHeader: type=${type}, token=${token ? '[REDACTED]' : 'undefined'}`,
+    );
     return type === 'Bearer' ? token : undefined;
   }
 }

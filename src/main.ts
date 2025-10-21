@@ -40,22 +40,17 @@ async function bootstrap() {
     origin: function (origin, callback) {
       console.log('CORS request from origin:', origin);
 
-      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) {
-        console.log('Allowing request with no origin');
         return callback(null, true);
       }
 
       if (corsOrigins.includes('*')) {
-        console.log('Allowing all origins (wildcard)');
         return callback(null, true);
       }
 
       if (corsOrigins.includes(origin)) {
-        console.log('Origin allowed:', origin);
         callback(null, true);
       } else {
-        console.log('Origin blocked:', origin, 'Allowed origins:', corsOrigins);
         callback(new Error('Not allowed by CORS'));
       }
     },
