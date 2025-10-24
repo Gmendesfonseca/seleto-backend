@@ -13,6 +13,7 @@ import { VacancyModule } from './domain/vacancies/vacancy.module';
 import { PermissionModule } from './domain/permissions/permission.module';
 import { TemplateModule } from './domain/templates/template.module';
 import { CompanyModule } from './domain/companies/company.module';
+import { PersonModule } from './domain/persons/person.module';
 import { DashboardModule } from './domain/dashboard/dashboard.module';
 import { RecruitmentModule } from './domain/recruitment/recruitment.module';
 
@@ -45,6 +46,7 @@ import { MailerModule } from './domain/mailers/mailer.module';
     PermissionModule,
     TemplateModule,
     CompanyModule,
+    PersonModule,
     DashboardModule,
     RecruitmentModule,
   ],

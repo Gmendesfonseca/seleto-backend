@@ -5,18 +5,13 @@ import { UsersController } from './users.controller';
 import { UsersRepositoryInterface } from './interfaces/user.repository.interface';
 import { UserSequelizeRepository } from './repositories/user.sequelize.repository';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { User, Person, Company } from './user.model';
+import { User } from './user.model';
 import { UsersServiceInterface } from './interfaces/user.service.interface';
 import { MailerModule } from '../mailers/mailer.module';
 import { SecretsModule } from '../secret/secret.module';
 
 @Module({
-  imports: [
-    SequelizeModule.forFeature([User, Person, Company]),
-    ConfigModule,
-    MailerModule,
-    SecretsModule,
-  ],
+  imports: [SequelizeModule.forFeature([User]), ConfigModule, MailerModule, SecretsModule],
   providers: [
     {
       provide: UsersRepositoryInterface,
