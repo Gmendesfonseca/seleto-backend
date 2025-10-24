@@ -83,12 +83,12 @@ export class AuthService implements AuthServiceInterface {
     }
 
     try {
-      await this.mailerService.sendMail({
-        to: username,
-        subject: 'Bem vindo ao Seleto!',
-        template: 'welcome',
-        context: { username },
-      });
+      // await this.mailerService.sendMail({
+      //   to: username,
+      //   subject: 'Bem vindo ao Seleto!',
+      //   template: 'welcome',
+      //   context: { username },
+      // });
     } catch (error) {
       this.logger.warn('Failed to send welcome email', error);
     }
