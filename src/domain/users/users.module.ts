@@ -9,9 +9,18 @@ import { User } from './user.model';
 import { UsersServiceInterface } from './interfaces/user.service.interface';
 import { MailerModule } from '../mailers/mailer.module';
 import { SecretsModule } from '../secret/secret.module';
+import { PersonModule } from '../persons/person.module';
+import { CompanyModule } from '../companies/company.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([User]), ConfigModule, MailerModule, SecretsModule],
+  imports: [
+    SequelizeModule.forFeature([User]),
+    ConfigModule,
+    MailerModule,
+    SecretsModule,
+    PersonModule,
+    CompanyModule,
+  ],
   providers: [
     {
       provide: UsersRepositoryInterface,

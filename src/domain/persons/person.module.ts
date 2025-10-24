@@ -20,6 +20,6 @@ import { PersonService } from './interfaces/person.service.interface';
       useClass: PersonServiceImpl,
     },
   ],
-  exports: [PersonService],
+  exports: [PersonService, PersonRepository, SequelizeModule],
 })
 export class PersonModule {}

@@ -9,9 +9,10 @@ import { ConfigProperties } from './config.module';
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService<ConfigProperties>) => {
+        const isLoggingEnabled = configService.get('DB_LOGGING');
         return {
           models: [],
-          logging: configService.get('DB_LOGGING'),
+          logging: isLoggingEnabled ? console.log : false,
           autoLoadModels: configService.get('DB_AUTO_LOAD_MODELS'),
           dialect: 'postgres',
           host: configService.get('DB_HOST'),

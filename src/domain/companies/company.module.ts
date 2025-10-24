@@ -20,6 +20,6 @@ import { CompanyService } from './interfaces/company.service.interface';
       useClass: CompanyServiceImpl,
     },
   ],
-  exports: [CompanyService],
+  exports: [CompanyService, CompanyRepository, SequelizeModule],
 })
 export class CompanyModule {}

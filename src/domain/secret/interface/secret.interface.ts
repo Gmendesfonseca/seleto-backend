@@ -5,6 +5,6 @@ export interface SecretInterface {
   secret: string;
   type: SecretType;
   userId: string;
-  createdAt: number;
-  deletedAt: number;
+  createdAt: Date;
+  deletedAt: Date;
 }
