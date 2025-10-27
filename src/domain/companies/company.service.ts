@@ -19,8 +19,8 @@ export class CompanyServiceImpl implements CompanyService {
     this.logger.debug('CompanyService.create: Called');
     const company = await this.companyRepository.create({
       name: request.name,
-      avatar: request.address || null,
-      userId: null,
+      address: request.address || null,
+      isActive: true,
     });
 
     return this.toResponse(company);
@@ -39,7 +39,7 @@ export class CompanyServiceImpl implements CompanyService {
     this.logger.debug('CompanyService.update: Called');
     const company = await this.companyRepository.update(companyId, {
       name: request.name,
-      avatar: request.address,
+      address: request.address || null,
     });
     return this.toResponse(company);
   }

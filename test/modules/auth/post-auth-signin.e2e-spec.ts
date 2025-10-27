@@ -2,11 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
-import {
-  AuthHelper,
-  expectUnauthorizedResponse,
-  createMockServices,
-} from '../../helpers/auth-helper';
+import { AuthHelper, createMockServices } from '../../helpers/auth-helper';
 import { AuthController } from '../../../src/domain/auth/auth.controller';
 import { AuthServiceInterface } from '../../../src/domain/auth/interfaces/auth-service.interface';
 
@@ -68,8 +64,26 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
     jest.clearAllMocks();
   });
 
-  describe('Authentication Tests', () => {
-    it('should sign in user when authenticated with valid credentials', async () => {
+  describe('Public Access Tests', () => {
+    it('should sign in user with valid credentials (no auth required)', async () => {
+      // Arrange
+      mockAuthService.signIn.mockResolvedValue(mockSignInResponse);
+
+      // Act
+      const response = await authHelper
+        .unauthenticatedRequest('post', '/auth/signin')
+        .send(validSignInData);
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockSignInResponse);
+      expect(mockAuthService.signIn).toHaveBeenCalledWith(
+        validSignInData.username,
+        validSignInData.password,
+      );
+    });
+
+    it('should work when authenticated as well', async () => {
       // Arrange
       mockAuthService.signIn.mockResolvedValue(mockSignInResponse);
       const testUser = authHelper.createTestUser();
@@ -88,30 +102,6 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
         validSignInData.username,
         validSignInData.password,
       );
-    });
-
-    it('should return 401 when not authenticated', async () => {
-      const response = await authHelper
-        .unauthenticatedRequest('post', '/auth/signin')
-        .send(validSignInData);
-      expectUnauthorizedResponse(response);
-      expect(mockAuthService.signIn).not.toHaveBeenCalled();
-    });
-
-    it('should return 401 with invalid token', async () => {
-      const response = await authHelper
-        .invalidTokenRequest('post', '/auth/signin')
-        .send(validSignInData);
-      expectUnauthorizedResponse(response);
-      expect(mockAuthService.signIn).not.toHaveBeenCalled();
-    });
-
-    it('should return 401 with expired token', async () => {
-      const response = await authHelper
-        .expiredTokenRequest('post', '/auth/signin')
-        .send(validSignInData);
-      expectUnauthorizedResponse(response);
-      expect(mockAuthService.signIn).not.toHaveBeenCalled();
     });
   });
 

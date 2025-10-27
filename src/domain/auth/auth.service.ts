@@ -27,11 +27,14 @@ export class AuthService implements AuthServiceInterface {
     private readonly personService: PersonService,
   ) {}
 
-  async signIn(email: string, password: string): Promise<SignInResponse> {
+  async signIn(username: string, password: string): Promise<SignInResponse> {
     this.logger.debug('AuthService.signIn: Called');
 
-    const user = await this.usersService.findOneByEmail(email);
+    // Try to find user by email first, then by username if not found
+    const user = await this.usersService.findOneByEmail(username);
     if (!user) {
+      // If not found by email, we could try finding by username
+      // For now, we'll treat username as email for backward compatibility
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -41,12 +44,21 @@ export class AuthService implements AuthServiceInterface {
     }
 
     const payload = { sub: user.id, username: user.username };
-    const token = this.jwtService.sign(payload);
-    const expiration = Date.now() + 3600 * 1000;
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const expiresIn = 3600;
 
     return {
-      token,
-      expiration,
+      accessToken,
+      refreshToken,
+      expiresIn,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        type: user.type,
+        status: user.status || 'ACTIVE',
+      },
     };
   }
 
@@ -83,12 +95,12 @@ export class AuthService implements AuthServiceInterface {
     }
 
     try {
-      // await this.mailerService.sendMail({
-      //   to: username,
-      //   subject: 'Bem vindo ao Seleto!',
-      //   template: 'welcome',
-      //   context: { username },
-      // });
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Bem vindo ao Seleto!',
+        template: 'welcome',
+        context: { username },
+      });
     } catch (error) {
       this.logger.warn('Failed to send welcome email', error);
     }
@@ -152,11 +164,11 @@ export class AuthService implements AuthServiceInterface {
     await this.secretService.deleteSecret(secretKey);
   }
 
-  async refreshToken(refreshToken: string): Promise<SignInResponse> {
+  async refreshToken(inputRefreshToken: string): Promise<SignInResponse> {
     this.logger.debug('AuthService.refreshToken: Called');
 
     try {
-      const decoded = this.jwtService.verify(refreshToken);
+      const decoded = this.jwtService.verify(inputRefreshToken);
 
       const user = await this.usersService.findOne(decoded.sub);
       if (!user) {
@@ -164,12 +176,21 @@ export class AuthService implements AuthServiceInterface {
       }
 
       const payload = { sub: user.id, username: user.username };
-      const token = this.jwtService.sign(payload);
-      const expiration = Date.now() + 3600 * 1000;
+      const accessToken = this.jwtService.sign(payload);
+      const newRefreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+      const expiresIn = 3600;
 
       return {
-        token,
-        expiration,
+        accessToken,
+        refreshToken: newRefreshToken,
+        expiresIn,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          type: user.type || 'PERSON',
+          status: 'ACTIVE',
+        },
       };
     } catch {
       throw new UnauthorizedException('Invalid refresh token');

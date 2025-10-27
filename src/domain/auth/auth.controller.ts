@@ -18,7 +18,6 @@ import {
   ResetPasswordDto,
   RefreshTokenDto,
 } from './dto';
-import { Authorized } from 'src/shared/decorators/authorization.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -27,15 +26,14 @@ export class AuthController {
   constructor(private readonly service: AuthServiceInterface) {}
 
   @Post('signin')
-  @Authorized()
   @HttpCode(HttpStatus.OK)
   async signIn(@Body(ValidationPipe) { username, password }: SignInDto) {
     this.logger.debug('SignIn: called', { username });
+    // The service expects email but we receive username, so we pass username as email
     return this.service.signIn(username, password);
   }
 
   @Post('signup')
-  @Authorized()
   @HttpCode(HttpStatus.CREATED)
   async signUp(@Body(ValidationPipe) { password, email, type, username, name }: SignUpDto) {
     this.logger.debug('SignUp: called', { username });
@@ -68,7 +66,6 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Authorized()
   async logout(@Req() request: any) {
     this.logger.debug('Logout: called');
     const userId = request.user?.sub;
