@@ -78,6 +78,30 @@ export class CompanyServiceImpl implements CompanyService {
     await this.companyRepository.update(companyId, { isActive });
   }
 
+  async getStatistics(companyId: string): Promise<any> {
+    this.logger.debug('CompanyService.getStatistics: Called');
+    // Placeholder for statistics logic
+    return Promise.resolve({ totalUsers: 0, totalVacancies: 0 });
+  }
+
+  async getUsers(
+    companyId: string,
+    filters?: { type?: string; status?: string; page?: number; limit?: number },
+  ): Promise<any[]> {
+    this.logger.debug('CompanyService.getUsers: Called');
+    // This would need to be implemented with user repository
+    return [];
+  }
+
+  async getVacancies(
+    companyId: string,
+    filters?: { status?: string; page?: number; limit?: number },
+  ): Promise<any[]> {
+    this.logger.debug('CompanyService.getVacancies: Called');
+    // This would need to be implemented with vacancy repository
+    return [];
+  }
+
   private toResponse(company: any): CompanyResponse {
     return {
       id: company.id,

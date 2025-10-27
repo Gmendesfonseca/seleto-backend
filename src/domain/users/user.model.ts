@@ -8,7 +8,7 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import { GroupUser, UserStatus } from 'src/shared/utils/constants';
+import { UserType, UserStatus } from 'src/shared/utils/constants';
 import { UserInterface } from './interfaces';
 
 @Table({ tableName: 'users', underscored: true, paranoid: true })
@@ -32,7 +32,7 @@ class User extends Model<User> implements UserInterface {
   })
   status: string;
 
-  @Column({ type: DataType.ENUM, values: Object.values(GroupUser) })
+  @Column({ type: DataType.ENUM, values: Object.values(UserType) })
   type: string;
 
   @Column({ type: DataType.BOOLEAN, defaultValue: true })

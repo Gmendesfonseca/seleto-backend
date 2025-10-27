@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { UsersServiceInterface } from '../users/interfaces';
 import { SecretServiceInterface } from '../secret/interface/secret.service.interface';
+import { UserType } from 'src/shared/utils/constants';
 
 // Mock bcrypt module
 jest.mock('bcrypt');
@@ -166,10 +167,15 @@ describe('AuthService', () => {
   });
 
   describe('signUp', () => {
-    it('should successfully create a new user', async () => {
+    it('should successfully create a new user PERSON', async () => {
       // Setup
-      const username = 'newuser@example.com';
-      const password = 'password123';
+      const payload = {
+        email: 'newuser@example.com',
+        password: 'password123',
+        username: 'newuser',
+        type: UserType.PERSON,
+        name: 'New User',
+      };
       const hashedPassword = 'hashed_password123';
 
       usersService.findOneByEmail.mockResolvedValue(null);
@@ -178,51 +184,97 @@ describe('AuthService', () => {
       mailerService.sendMail.mockResolvedValue(undefined);
 
       // Act
-      await service.signUp(username, password);
+      await service.signUp(payload);
 
       // Assert
-      expect(usersService.findOneByEmail).toHaveBeenCalledWith(username);
-      expect(mockedBcrypt.hash).toHaveBeenCalledWith(password, 12);
+      expect(usersService.findOneByEmail).toHaveBeenCalledWith(payload.email);
+      expect(mockedBcrypt.hash).toHaveBeenCalledWith(payload.password, 12);
       expect(usersService.createUser).toHaveBeenCalledWith({
-        email: username,
-        username,
+        email: payload.email,
+        username: payload.username,
         password: hashedPassword,
         type: 'PERSON',
       });
       expect(mailerService.sendMail).toHaveBeenCalledWith({
-        to: username,
+        to: payload.email,
         subject: 'Welcome to TG API',
         template: 'welcome',
-        context: { username },
+        context: { username: payload.username },
+      });
+    });
+
+    it('should successfully create a new user COMPANY', async () => {
+      // Setup
+      const payload = {
+        email: 'newcompany@example.com',
+        password: 'password123',
+        username: 'newcompany',
+        type: UserType.COMPANY,
+        name: 'New Company',
+      };
+      const hashedPassword = 'hashed_password123';
+
+      usersService.findOneByEmail.mockResolvedValue(null);
+      (mockedBcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
+      usersService.createUser.mockResolvedValue(mockUser);
+      mailerService.sendMail.mockResolvedValue(undefined);
+
+      // Act
+      await service.signUp(payload);
+
+      // Assert
+      expect(usersService.findOneByEmail).toHaveBeenCalledWith(payload.email);
+      expect(mockedBcrypt.hash).toHaveBeenCalledWith(payload.password, 12);
+      expect(usersService.createUser).toHaveBeenCalledWith({
+        email: payload.email,
+        username: payload.username,
+        password: hashedPassword,
+        type: 'COMPANY',
+      });
+      expect(mailerService.sendMail).toHaveBeenCalledWith({
+        to: payload.email,
+        subject: 'Welcome to TG API',
+        template: 'welcome',
+        context: { username: payload.username },
       });
     });
 
     it('should throw ConflictException when user already exists', async () => {
       // Setup
-      const username = 'existing@example.com';
-      const password = 'password123';
+      const payload = {
+        email: 'existing@example.com',
+        password: 'password123',
+        type: UserType.PERSON,
+        username: 'existinguser',
+        name: 'Existing User',
+      };
 
       usersService.findOneByEmail.mockResolvedValue(mockUser);
 
       // Act & Assert
-      await expect(service.signUp(username, password)).rejects.toThrow(
+      await expect(service.signUp(payload)).rejects.toThrow(
         new ConflictException('User already exists'),
       );
-      expect(usersService.findOneByEmail).toHaveBeenCalledWith(username);
+      expect(usersService.findOneByEmail).toHaveBeenCalledWith(payload.email);
       expect(usersService.createUser).not.toHaveBeenCalled();
     });
 
     it('should continue when email sending fails', async () => {
       // Setup
-      const username = 'newuser@example.com';
-      const password = 'password123';
+      const payload = {
+        email: 'newuser@example.com',
+        password: 'password123',
+        username: 'newuser',
+        type: UserType.PERSON,
+        name: 'New User',
+      };
 
       usersService.findOneByEmail.mockResolvedValue(null);
       usersService.createUser.mockResolvedValue(mockUser);
       mailerService.sendMail.mockRejectedValue(new Error('Email service down'));
 
       // Act & Assert
-      await expect(service.signUp(username, password)).resolves.not.toThrow();
+      await expect(service.signUp(payload)).resolves.not.toThrow();
       expect(usersService.createUser).toHaveBeenCalled();
     });
   });

@@ -1,9 +1,11 @@
+import { UserType } from 'src/shared/utils/constants';
+
 export type SignUpDto = {
   name: string;
   username: string;
   password: string;
   email: string;
-  type: 'PERSON' | 'COMPANY';
+  type: UserType;
 };
 
 export abstract class AuthServiceInterface {
