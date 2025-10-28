@@ -27,6 +27,21 @@ export = {
         type: Sequelize.STRING(255),
         allowNull: false,
       },
+      status: {
+        type: Sequelize.ENUM('ACTIVE', 'BLOCKED'),
+        allowNull: false,
+        defaultValue: 'BLOCKED',
+      },
+      type: {
+        type: Sequelize.ENUM('PERSON', 'COMPANY'),
+        allowNull: false,
+        defaultValue: 'PERSON',
+      },
+      is_verified: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
       person_id: {
         type: Sequelize.UUID,
         allowNull: true,
@@ -66,6 +81,9 @@ export = {
     // Add indexes
     await query.addIndex('users', ['email']);
     await query.addIndex('users', ['username']);
+    await query.addIndex('users', ['status']);
+    await query.addIndex('users', ['type']);
+    await query.addIndex('users', ['is_verified']);
     await query.addIndex('users', ['person_id']);
     await query.addIndex('users', ['company_id']);
     await query.addIndex('users', ['deleted_at']);

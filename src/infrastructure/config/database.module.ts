@@ -46,7 +46,7 @@ const models = [
         return {
           models,
           logging: isLoggingEnabled ? console.log : false,
-          autoLoadModels: false,
+          autoLoadModels: true,
           dialect: 'postgres',
           host: configService.get('DB_HOST'),
           port: configService.get('DB_PORT'),

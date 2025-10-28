@@ -17,7 +17,7 @@ export class PasswordResetToken extends Model<PasswordResetToken> {
 
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID, allowNull: false })
-  userId: string;
+  user_id: string;
 
   @BelongsTo(() => User)
   user: User;
@@ -26,7 +26,7 @@ export class PasswordResetToken extends Model<PasswordResetToken> {
   token: string;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  expiresAt: Date;
+  expires_at: Date;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
   used: boolean;

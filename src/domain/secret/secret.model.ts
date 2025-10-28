@@ -1,11 +1,19 @@
-import { Column, DataType, Table, Model } from 'sequelize-typescript';
-import { SecretInterface, SecretType } from './interface/secret.interface';
-
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Model,
+  PrimaryKey,
+  Table,
+} from 'sequelize-typescript';
+import { User } from '../users/user.model';
+import { SecretType } from './interface/secret.interface';
 @Table({ tableName: 'secrets', underscored: true, paranoid: true })
-export class Secret extends Model<Secret> implements SecretInterface {
+export class Secret extends Model<Secret> {
+  @PrimaryKey
   @Column({
     type: DataType.UUID,
-    primaryKey: true,
     defaultValue: DataType.UUIDV4,
     allowNull: false,
   })
@@ -15,25 +23,15 @@ export class Secret extends Model<Secret> implements SecretInterface {
   secret: string;
 
   @Column({
-    type: DataType.ENUM,
-    values: ['EMAIL', 'PASSWORD'],
+    type: DataType.ENUM('EMAIL', 'PASSWORD'),
     allowNull: true,
   })
   type: SecretType;
 
+  @ForeignKey(() => User)
   @Column({ type: DataType.UUID, allowNull: false })
   userId: string;
 
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-    defaultValue: DataType.NOW,
-  })
-  createdAt: Date;
-
-  @Column({
-    type: DataType.DATE,
-    allowNull: true,
-  })
-  deletedAt: Date;
+  @BelongsTo(() => User)
+  user: User;
 }

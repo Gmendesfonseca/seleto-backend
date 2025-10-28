@@ -3,12 +3,10 @@ import {
   Column,
   DataType,
   ForeignKey,
-  HasOne,
   Model,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import { UserType, UserStatus } from 'src/shared/utils/constants';
 import { UserInterface } from './interfaces';
 
 @Table({ tableName: 'users', underscored: true, paranoid: true })
@@ -17,33 +15,48 @@ export class User extends Model<User> implements UserInterface {
   @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
   id: string;
 
-  @Column({ unique: true })
+  @Column({ type: DataType.STRING(255), allowNull: false })
+  name: string;
+
+  @Column({ type: DataType.STRING(255), allowNull: false, unique: true })
   email: string;
 
-  @Column
-  password: string;
-
-  @Column({ allowNull: false, unique: true })
+  @Column({ type: DataType.STRING(100), allowNull: false, unique: true })
   username: string;
 
+  @Column({ type: DataType.STRING(255), allowNull: false })
+  password: string;
+
   @Column({
-    type: DataType.ENUM,
-    values: Object.values(UserStatus),
+    type: DataType.ENUM('ACTIVE', 'BLOCKED'),
+    allowNull: false,
     defaultValue: 'BLOCKED',
   })
   status: string;
 
-  @Column({ type: DataType.ENUM, values: Object.values(UserType) })
+  @Column({
+    type: DataType.ENUM('PERSON', 'COMPANY'),
+    allowNull: false,
+    defaultValue: 'PERSON',
+  })
   type: string;
 
-  @Column({ type: DataType.BOOLEAN, defaultValue: true })
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   isVerified: boolean;
 
-  @HasOne(() => Company)
-  company: Company | null;
+  @ForeignKey(() => Person)
+  @Column({ type: DataType.UUID, allowNull: true })
+  person_id: string;
 
-  @HasOne(() => Person)
+  @ForeignKey(() => Company)
+  @Column({ type: DataType.UUID, allowNull: true })
+  company_id: string;
+
+  @BelongsTo(() => Person)
   person: Person | null;
+
+  @BelongsTo(() => Company)
+  company: Company | null;
 }
 
 @Table({ tableName: 'companies', underscored: true, paranoid: true })
@@ -52,41 +65,22 @@ export class Company extends Model<Company> {
   @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
   id: string;
 
-  @Column
+  @Column({ type: DataType.STRING(255), allowNull: false })
   name: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
-  avatar: string | null;
-
-  @ForeignKey(() => User)
-  @Column({ type: DataType.UUID })
-  userId: string;
-
-  @BelongsTo(() => User)
-  user: User;
+  @Column({ type: DataType.TEXT, allowNull: true })
+  address: string | null;
 }
 
-@Table({
-  tableName: 'persons',
-  underscored: true,
-  paranoid: false,
-  timestamps: false,
-})
+@Table({ tableName: 'persons', underscored: true, paranoid: true })
 export class Person extends Model<Person> {
   @PrimaryKey
   @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
   id: string;
 
-  @Column
+  @Column({ type: DataType.STRING(255), allowNull: false })
   name: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
-  avatar: string | null;
-
-  @ForeignKey(() => User)
-  @Column({ type: DataType.UUID })
-  userId: string;
-
-  @BelongsTo(() => User)
-  user: User;
+  @Column({ type: DataType.TEXT, allowNull: true })
+  address: string | null;
 }
