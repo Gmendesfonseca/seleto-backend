@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigProperties } from './config.module';
 
-import { User, Company, Person } from '../../domain/users/user.model';
+import { User } from '../../domain/users/user.model';
 import { Role } from '../../domain/roles/role.model';
 import { Permission } from '../../domain/permissions/permission.model';
 import { Secret } from '../../domain/secret/secret.model';
@@ -16,6 +16,8 @@ import { Address } from '../../domain/addresses/address.model';
 import { Phone } from '../../domain/phones/phone.model';
 import { RefreshToken } from '../../domain/auth/models/refresh-token.model';
 import { PasswordResetToken } from '../../domain/auth/models/password-reset-token.model';
+import { Company } from 'src/domain/companies/models/company.model';
+import { Person } from 'src/domain/persons/models/person.model';
 
 const models = [
   User,

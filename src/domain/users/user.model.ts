@@ -1,19 +1,13 @@
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  HasOne,
-  Model,
-  PrimaryKey,
-  Table,
-} from 'sequelize-typescript';
+import { Column, DataType, HasOne, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { UserType, UserStatus } from 'src/shared/utils/constants';
 import { UserInterface } from './interfaces';
+import { Person } from '../persons/models/person.model';
+import { Company } from '../companies/models/company.model';
 
 @Table({ tableName: 'users', underscored: true, paranoid: true })
 class User extends Model<User> implements UserInterface {
-  @Column({ type: DataType.UUID, primaryKey: true, autoIncrement: true })
+  @PrimaryKey
+  @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
   id: string;
 
   @Column({ unique: true })
@@ -45,49 +39,4 @@ class User extends Model<User> implements UserInterface {
   person: Person | null;
 }
 
-@Table({ tableName: 'companies', underscored: true, paranoid: true })
-class Company extends Model<Company> {
-  @PrimaryKey
-  @Column({ type: DataType.UUID })
-  id: string;
-
-  @Column
-  name: string;
-
-  @Column({ type: DataType.STRING, allowNull: true })
-  avatar: string | null;
-
-  @ForeignKey(() => User)
-  @Column({ type: DataType.UUID })
-  userId: string;
-
-  @BelongsTo(() => User)
-  user: User;
-}
-
-@Table({
-  tableName: 'persons',
-  underscored: true,
-  paranoid: false,
-  timestamps: false,
-})
-class Person extends Model<Person> {
-  @PrimaryKey
-  @Column({ type: DataType.UUID })
-  id: string;
-
-  @Column
-  name: string;
-
-  @Column({ type: DataType.STRING, allowNull: true })
-  avatar: string | null;
-
-  @ForeignKey(() => User)
-  @Column({ type: DataType.UUID })
-  userId: string;
-
-  @BelongsTo(() => User)
-  user: User;
-}
-
-export { User, Company, Person };
+export { User };
