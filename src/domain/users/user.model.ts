@@ -5,7 +5,7 @@ import { Person } from '../persons/models/person.model';
 import { Company } from '../companies/models/company.model';
 
 @Table({ tableName: 'users', underscored: true, paranoid: true })
-class User extends Model<User> implements UserInterface {
+export class User extends Model<User> implements UserInterface {
   @PrimaryKey
   @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
   id: string;
@@ -38,5 +38,3 @@ class User extends Model<User> implements UserInterface {
   @HasOne(() => Person)
   person: Person | null;
 }
-
-export { User };
