@@ -57,8 +57,8 @@ export class CompanyServiceImpl implements CompanyService {
     this.logger.debug('CompanyService.findAll: Called');
     const result = await this.companyRepository.findAll(pagination, search);
     return {
-      ...result,
-      items: result.items.map((company) => this.toResponse(company)),
+      data: result.data.map((company: any) => this.toResponse(company)),
+      meta: result.meta,
     };
   }
 
@@ -67,7 +67,7 @@ export class CompanyServiceImpl implements CompanyService {
     return this.companyRepository.existsByName(name);
   }
 
-  async getUsersCount(companyId: string): Promise<number> {
+  async getUsersCount(_companyId: string): Promise<number> {
     this.logger.debug('CompanyService.getUsersCount: Called');
     // This would need to be implemented with user repository
     return 0;
@@ -78,15 +78,15 @@ export class CompanyServiceImpl implements CompanyService {
     await this.companyRepository.update(companyId, { isActive });
   }
 
-  async getStatistics(companyId: string): Promise<any> {
+  async getStatistics(_companyId: string): Promise<any> {
     this.logger.debug('CompanyService.getStatistics: Called');
     // Placeholder for statistics logic
     return Promise.resolve({ totalUsers: 0, totalVacancies: 0 });
   }
 
   async getUsers(
-    companyId: string,
-    filters?: { type?: string; status?: string; page?: number; limit?: number },
+    _companyId: string,
+    _filters?: { type?: string; status?: string; page?: number; limit?: number },
   ): Promise<any[]> {
     this.logger.debug('CompanyService.getUsers: Called');
     // This would need to be implemented with user repository
@@ -94,8 +94,8 @@ export class CompanyServiceImpl implements CompanyService {
   }
 
   async getVacancies(
-    companyId: string,
-    filters?: { status?: string; page?: number; limit?: number },
+    _companyId: string,
+    _filters?: { status?: string; page?: number; limit?: number },
   ): Promise<any[]> {
     this.logger.debug('CompanyService.getVacancies: Called');
     // This would need to be implemented with vacancy repository
@@ -106,8 +106,8 @@ export class CompanyServiceImpl implements CompanyService {
     return {
       id: company.id,
       name: company.name,
-      address: company.avatar,
-      isActive: true,
+      address: company.address,
+      isActive: company.isActive ?? true,
       createdAt: company.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: company.updatedAt?.toISOString() || new Date().toISOString(),
     };
