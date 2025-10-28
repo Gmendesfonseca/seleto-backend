@@ -18,6 +18,7 @@ import {
   ResetPasswordDto,
   RefreshTokenDto,
 } from './dto';
+import { Authorized } from 'src/shared/decorators/authorization.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -26,6 +27,7 @@ export class AuthController {
   constructor(private readonly service: AuthServiceInterface) {}
 
   @Post('signin')
+  @Authorized()
   @HttpCode(HttpStatus.OK)
   async signIn(@Body(ValidationPipe) { username, password }: SignInDto) {
     this.logger.debug('SignIn: called', { username });
@@ -34,6 +36,7 @@ export class AuthController {
   }
 
   @Post('signup')
+  @Authorized()
   @HttpCode(HttpStatus.CREATED)
   async signUp(@Body(ValidationPipe) { password, email, type, username, name }: SignUpDto) {
     this.logger.debug('SignUp: called', { username });
