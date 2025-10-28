@@ -23,13 +23,13 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     this.logger.debug('AuthGuard.canActivate: called');
 
-    const isSecured = this.reflector.getAllAndOverride<boolean>(SECURED_KEY, [
+    const isPublic = this.reflector.getAllAndOverride<boolean>(SECURED_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (isSecured) {
-      this.logger.debug('AuthGuard.canActivate: secured endpoint');
+    if (isPublic) {
+      this.logger.debug('AuthGuard.canActivate: public endpoint, skipping authentication');
       return true;
     }
 
