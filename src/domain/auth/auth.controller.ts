@@ -75,7 +75,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Req() request: any) {
     this.logger.debug('Logout: called');
-    const userId = request.user?.sub;
+    const userId = request.auth?.sub;
     if (userId) {
       await this.service.logout(userId);
     }
