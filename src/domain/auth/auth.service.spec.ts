@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { UsersServiceInterface } from '../users/interfaces';
 import { SecretServiceInterface } from '../secret/interface/secret.service.interface';
+import { CompanyService } from '../companies/interfaces/company.service.interface';
+import { PersonService } from '../persons/interfaces/person.service.interface';
 import { UserType } from 'src/shared/utils/constants';
 
 // Mock bcrypt module
@@ -19,6 +21,8 @@ describe('AuthService', () => {
   let secretService: jest.Mocked<SecretServiceInterface>;
   let jwtService: jest.Mocked<JwtService>;
   let mailerService: jest.Mocked<MailerService>;
+  let companyService: jest.Mocked<CompanyService>;
+  let personService: jest.Mocked<PersonService>;
 
   // Test data
   const mockUser = {
@@ -55,6 +59,14 @@ describe('AuthService', () => {
       sendMail: jest.fn(),
     };
 
+    const mockCompanyService = {
+      create: jest.fn(),
+    };
+
+    const mockPersonService = {
+      create: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -74,6 +86,14 @@ describe('AuthService', () => {
           provide: MailerService,
           useValue: mockMailerService,
         },
+        {
+          provide: CompanyService,
+          useValue: mockCompanyService,
+        },
+        {
+          provide: PersonService,
+          useValue: mockPersonService,
+        },
       ],
     }).compile();
 
@@ -82,6 +102,8 @@ describe('AuthService', () => {
     secretService = module.get(SecretServiceInterface);
     jwtService = module.get(JwtService);
     mailerService = module.get(MailerService);
+    companyService = module.get(CompanyService);
+    personService = module.get(PersonService);
 
     // Setup bcrypt mocks
     (mockedBcrypt.hash as jest.Mock).mockImplementation(
@@ -129,8 +151,16 @@ describe('AuthService', () => {
         username: mockUser.username,
       });
       expect(result).toEqual({
-        token: expectedToken,
-        expiration: mockNow + 3600 * 1000,
+        accessToken: expectedToken,
+        refreshToken: expectedToken, // JwtService.sign is mocked to return the same token
+        expiresIn: 3600,
+        user: {
+          id: mockUser.id,
+          username: mockUser.username,
+          email: mockUser.email,
+          type: mockUser.type,
+          status: mockUser.status,
+        },
       });
     });
 
@@ -181,6 +211,7 @@ describe('AuthService', () => {
       usersService.findOneByEmail.mockResolvedValue(null);
       (mockedBcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
       usersService.createUser.mockResolvedValue(mockUser);
+      personService.create.mockResolvedValue({} as any);
       mailerService.sendMail.mockResolvedValue(undefined);
 
       // Act
@@ -195,9 +226,15 @@ describe('AuthService', () => {
         password: hashedPassword,
         type: 'PERSON',
       });
+      expect(personService.create).toHaveBeenCalledWith({
+        userId: mockUser.id,
+        firstName: 'New',
+        lastName: 'User',
+        email: payload.email,
+      });
       expect(mailerService.sendMail).toHaveBeenCalledWith({
         to: payload.email,
-        subject: 'Welcome to TG API',
+        subject: 'Bem vindo ao Seleto!',
         template: 'welcome',
         context: { username: payload.username },
       });
@@ -217,6 +254,7 @@ describe('AuthService', () => {
       usersService.findOneByEmail.mockResolvedValue(null);
       (mockedBcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
       usersService.createUser.mockResolvedValue(mockUser);
+      companyService.create.mockResolvedValue({} as any);
       mailerService.sendMail.mockResolvedValue(undefined);
 
       // Act
@@ -231,9 +269,12 @@ describe('AuthService', () => {
         password: hashedPassword,
         type: 'COMPANY',
       });
+      expect(companyService.create).toHaveBeenCalledWith({
+        name: payload.name,
+      });
       expect(mailerService.sendMail).toHaveBeenCalledWith({
         to: payload.email,
-        subject: 'Welcome to TG API',
+        subject: 'Bem vindo ao Seleto!',
         template: 'welcome',
         context: { username: payload.username },
       });
@@ -303,7 +344,7 @@ describe('AuthService', () => {
       });
       expect(mailerService.sendMail).toHaveBeenCalledWith({
         to: email,
-        subject: 'Password Reset Request',
+        subject: 'Solicitação de Redefinição de Senha',
         template: 'password-reset',
         context: { secretKey, username: mockUser.username },
       });
@@ -432,8 +473,16 @@ describe('AuthService', () => {
         username: mockUser.username,
       });
       expect(result).toEqual({
-        token: newToken,
-        expiration: mockNow + 3600 * 1000,
+        accessToken: newToken,
+        refreshToken: newToken, // JwtService.sign is mocked to return the same token
+        expiresIn: 3600,
+        user: {
+          id: mockUser.id,
+          username: mockUser.username,
+          email: mockUser.email,
+          type: mockUser.type || 'PERSON',
+          status: 'ACTIVE',
+        },
       });
     });
 

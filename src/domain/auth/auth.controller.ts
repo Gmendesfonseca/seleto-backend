@@ -51,18 +51,21 @@ export class AuthController {
   }
 
   @Patch('password')
+  @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   async checkSecretKey(@Body(ValidationPipe) { secretKey }: CheckSecretKeyDto) {
     await this.service.checkSecretKey(secretKey);
   }
 
   @Patch('reset-password')
+  @Public()
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body(ValidationPipe) { secretKey, newPassword }: ResetPasswordDto) {
     await this.service.resetPassword(secretKey, newPassword);
   }
 
   @Post('refresh')
+  @Public()
   @HttpCode(HttpStatus.OK)
   async refreshToken(@Body(ValidationPipe) { refreshToken }: RefreshTokenDto) {
     return this.service.refreshToken(refreshToken);

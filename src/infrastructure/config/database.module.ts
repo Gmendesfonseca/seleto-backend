@@ -3,6 +3,38 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigProperties } from './config.module';
 
+import { User, Company, Person } from '../../domain/users/user.model';
+import { Role } from '../../domain/roles/role.model';
+import { Permission } from '../../domain/permissions/permission.model';
+import { Secret } from '../../domain/secret/secret.model';
+import { Application } from '../../domain/applications/application.model';
+import { Step } from '../../domain/steps/step.model';
+import { Competence } from '../../domain/competences/competence.model';
+import { Vacancy } from '../../domain/vacancies/vacancy.model';
+import { VacancyTemplate } from '../../domain/templates/vacancy-template.model';
+import { Address } from '../../domain/addresses/address.model';
+import { Phone } from '../../domain/phones/phone.model';
+import { RefreshToken } from '../../domain/auth/models/refresh-token.model';
+import { PasswordResetToken } from '../../domain/auth/models/password-reset-token.model';
+
+const models = [
+  User,
+  Company,
+  Person,
+  Role,
+  Permission,
+  Secret,
+  Application,
+  Step,
+  Competence,
+  Vacancy,
+  VacancyTemplate,
+  Address,
+  Phone,
+  RefreshToken,
+  PasswordResetToken,
+];
+
 @Module({
   imports: [
     ConfigModule,
@@ -11,9 +43,9 @@ import { ConfigProperties } from './config.module';
       useFactory: (configService: ConfigService<ConfigProperties>) => {
         const isLoggingEnabled = configService.get('DB_LOGGING');
         return {
-          models: [],
+          models,
           logging: isLoggingEnabled ? console.log : false,
-          autoLoadModels: configService.get('DB_AUTO_LOAD_MODELS'),
+          autoLoadModels: false,
           dialect: 'postgres',
           host: configService.get('DB_HOST'),
           port: configService.get('DB_PORT'),

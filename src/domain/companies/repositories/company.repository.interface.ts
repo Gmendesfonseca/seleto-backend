@@ -1,9 +1,5 @@
+import { PaginatedList, PaginationParams, SearchParams } from 'src/shared/interfaces';
 import { Company } from '../interfaces/company.interface';
-import {
-  PaginationParams,
-  PaginatedList,
-  SearchParams,
-} from '../../../shared/interfaces/pagination.interface';
 
 export abstract class CompanyRepository {
   /**
