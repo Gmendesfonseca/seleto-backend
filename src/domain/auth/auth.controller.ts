@@ -29,10 +29,10 @@ export class AuthController {
   @Post('signin')
   @Public()
   @HttpCode(HttpStatus.OK)
-  async signIn(@Body(ValidationPipe) { username, password }: SignInDto) {
-    this.logger.debug('SignIn: called', { username });
-    // The service expects email but we receive username, so we pass username as email
-    return this.service.signIn(username, password);
+  async signIn(@Body(ValidationPipe) { email, password }: SignInDto) {
+    this.logger.debug('SignIn: called', { email });
+    // The service expects email but we receive email, so we pass email as email
+    return this.service.signIn(email, password);
   }
 
   @Post('signup')
