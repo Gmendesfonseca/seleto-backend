@@ -9,6 +9,7 @@ import {
   CreatePersonInputRepository,
   ActivateInputRepository,
   ValidateEmailInput,
+  CreateCompanyInputRepository,
 } from '../interfaces/user.repository.interface';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
@@ -125,17 +126,17 @@ export class UserSequelizeRepository implements UsersRepositoryInterface {
 
   public async createUser(newUser: CreateUserInputRepository): Promise<User> {
     this.logger.debug('UserSequelizeRepository.create: Called');
-    return await this.userModel.create(newUser as User);
+    return this.userModel.create(newUser as User);
   }
 
   public async createPerson(input: CreatePersonInputRepository): Promise<Person> {
     this.logger.debug('UserSequelizeRepository.createPerson: Called');
-    return await this.personModel.create(input as Person);
+    return await this.personModel.create(input);
   }
 
-  public async createCompany(input: CreatePersonInputRepository): Promise<Company> {
+  public async createCompany(input: CreateCompanyInputRepository): Promise<Company> {
     this.logger.debug('UserSequelizeRepository.createCompany: Called');
-    return await this.companyModel.create(input as Company);
+    return await this.companyModel.create(input);
   }
 
   public async updateUsername({ id, ...input }: UpdateUsernameInputRepository): Promise<User> {

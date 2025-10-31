@@ -76,6 +76,7 @@ export class AuthService implements AuthServiceInterface {
       email,
       username,
       password: hashedPassword,
+      name,
       type,
     });
 

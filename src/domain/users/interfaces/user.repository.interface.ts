@@ -10,6 +10,7 @@ export interface CreateUserInputRepository {
   password: string;
   username: string;
   type: string;
+  name: string;
   company: Company | null;
   person: Person | null;
 }
