@@ -9,25 +9,15 @@ export = {
         primaryKey: true,
         allowNull: false,
       },
-      person_id: {
+      user_id: {
         type: Sequelize.UUID,
         allowNull: true,
         references: {
-          model: 'persons',
+          model: 'users',
           key: 'id',
         },
         onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
-      },
-      company_id: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: 'companies',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        onDelete: 'SET NULL',
       },
       street: {
         type: Sequelize.STRING(255),

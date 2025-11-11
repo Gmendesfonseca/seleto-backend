@@ -9,7 +9,7 @@ export = {
         primaryKey: true,
         allowNull: false,
       },
-      person_id: {
+      user_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {

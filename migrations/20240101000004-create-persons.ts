@@ -9,13 +9,10 @@ export = {
         primaryKey: true,
         allowNull: false,
       },
-      name: {
-        type: Sequelize.STRING(255),
+      cpf: {
+        type: Sequelize.STRING(20),
         allowNull: false,
-      },
-      address: {
-        type: Sequelize.TEXT,
-        allowNull: true,
+        unique: true,
       },
       created_at: {
         type: Sequelize.DATE,

@@ -23,6 +23,10 @@ export = {
         allowNull: false,
         unique: true,
       },
+      address: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
       password: {
         type: Sequelize.STRING(255),
         allowNull: false,
@@ -41,6 +45,26 @@ export = {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true,
+      },
+      address_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'adresses',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+      },
+      phone_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'phones',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
       },
       person_id: {
         type: Sequelize.UUID,
