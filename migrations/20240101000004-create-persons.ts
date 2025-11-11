@@ -31,7 +31,7 @@ export = {
     });
 
     // Add indexes
-    await query.addIndex('persons', ['name']);
+    await query.addIndex('persons', ['cpf']);
     await query.addIndex('persons', ['deleted_at']);
   },
 

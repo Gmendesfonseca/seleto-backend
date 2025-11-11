@@ -50,7 +50,7 @@ export = {
     });
 
     // Add indexes
-    await query.addIndex('phones', ['person_id']);
+    await query.addIndex('phones', ['user_id']);
     await query.addIndex('phones', ['number']);
     await query.addIndex('phones', ['is_primary']);
     await query.addIndex('phones', ['deleted_at']);

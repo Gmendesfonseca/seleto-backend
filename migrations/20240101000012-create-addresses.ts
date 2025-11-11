@@ -69,8 +69,7 @@ export = {
     });
 
     // Add indexes
-    await query.addIndex('addresses', ['person_id']);
-    await query.addIndex('addresses', ['company_id']);
+    await query.addIndex('addresses', ['user_id']);
     await query.addIndex('addresses', ['city']);
     await query.addIndex('addresses', ['state']);
     await query.addIndex('addresses', ['postal_code']);
