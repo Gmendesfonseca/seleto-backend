@@ -4,7 +4,7 @@ import { Step } from '../step.model';
 import { StepRepository } from './step.repository.interface';
 import { CreateStepDto, UpdateStepDto } from '../dto/step.dto';
 import { StepFilters } from '../interfaces/step.interface';
-import { Company } from '../../users/user.model';
+import { Company } from '../../companies/company.model';
 import { Op } from 'sequelize';
 
 @Injectable()

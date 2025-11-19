@@ -19,7 +19,7 @@ export interface ProcessTemplateFilters {
   offset?: number;
 }
 
-export abstract class ProcessTemplateService {
+export abstract class ProcessTemplateServiceInterface {
   abstract findAll(filters?: ProcessTemplateFilters): Promise<{
     templates: ProcessTemplate[];
     total: number;

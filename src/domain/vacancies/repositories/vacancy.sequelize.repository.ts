@@ -4,7 +4,7 @@ import { Vacancy } from '../vacancy.model';
 import { VacancyRepository } from './vacancy.repository.interface';
 import { CreateVacancyDto, UpdateVacancyDto } from '../dto/vacancy.dto';
 import { VacancyFilters, VacancyStatus } from '../interfaces/vacancy.interface';
-import { Company } from '../../users/user.model';
+import { Company } from '../../companies/company.model';
 import { Application } from '../../applications/application.model';
 import { Op } from 'sequelize';
 
@@ -50,7 +50,7 @@ export class VacancySequelizeRepository implements VacancyRepository {
       include: [
         {
           model: Company,
-          attributes: ['id', 'name', 'avatar'],
+          attributes: ['id', 'cnpj'],
         },
       ],
     });
@@ -63,7 +63,7 @@ export class VacancySequelizeRepository implements VacancyRepository {
       include: [
         {
           model: Company,
-          attributes: ['id', 'name', 'avatar'],
+          attributes: ['id', 'cnpj'],
         },
         {
           model: Application,
@@ -116,7 +116,7 @@ export class VacancySequelizeRepository implements VacancyRepository {
       include: [
         {
           model: Company,
-          attributes: ['id', 'name', 'avatar'],
+          attributes: ['id', 'cnpj'],
         },
       ],
     });

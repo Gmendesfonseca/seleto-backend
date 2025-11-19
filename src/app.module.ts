@@ -16,6 +16,8 @@ import { CompanyModule } from './domain/companies/company.module';
 import { PersonModule } from './domain/persons/person.module';
 import { DashboardModule } from './domain/dashboard/dashboard.module';
 import { RecruitmentModule } from './domain/recruitment/recruitment.module';
+import { AddressModule } from './domain/addresses/address.module';
+import { PhoneModule } from './domain/phones/phone.module';
 
 import { I18nModule } from './infrastructure/config/i18n.module';
 import { LimitModule } from './infrastructure/config/limit.module';
@@ -49,11 +51,13 @@ import { MailerModule } from './domain/mailers/mailer.module';
     PersonModule,
     DashboardModule,
     RecruitmentModule,
+    AddressModule,
+    PhoneModule,
   ],
   providers: [JwtService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(PaginationMiddleware).forRoutes({ path: '*', method: RequestMethod.GET });
+    consumer.apply(PaginationMiddleware).forRoutes({ path: '*path', method: RequestMethod.GET });
   }
 }

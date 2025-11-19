@@ -19,4 +19,14 @@ export class SignUpDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsString()
+  cnpj?: string;
+
+  @IsString()
+  cpf?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  phone: string;
 }

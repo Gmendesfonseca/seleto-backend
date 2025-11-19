@@ -1,3 +1,4 @@
+import { Phone } from 'src/domain/phones';
 import {
   Address,
   PersonCompetence,
@@ -6,29 +7,19 @@ import {
 } from '../interfaces/person.interface';
 
 export class CreatePersonDto {
+  cpf: string;
   userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  dateOfBirth?: Date;
-  address?: Address;
-  profilePicture?: string;
   bio?: string;
+  dateOfBirth?: Date;
   linkedinProfile?: string;
   githubProfile?: string;
   portfolioUrl?: string;
 }
 
 export class UpdatePersonDto {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-  dateOfBirth?: Date;
-  address?: Address;
-  profilePicture?: string;
+  cnpj?: string;
   bio?: string;
+  dateOfBirth?: Date;
   linkedinProfile?: string;
   githubProfile?: string;
   portfolioUrl?: string;
@@ -45,17 +36,15 @@ export class PersonQueryDto {
 export class PersonResponseDto {
   id: string;
   userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
+  cpf: string;
+  cnpj?: string;
   dateOfBirth?: Date;
-  address?: Address;
-  profilePicture?: string;
   bio?: string;
   linkedinProfile?: string;
   githubProfile?: string;
   portfolioUrl?: string;
+  phone?: Phone;
+  address?: Address;
   competences?: PersonCompetence[];
   experiences?: WorkExperience[];
   education?: Education[];

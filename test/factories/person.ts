@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { FactoryGirl } from 'factory-girl-ts';
-import { Person } from 'src/domain/users/user.model';
+import { Person } from 'src/domain/persons/person.model';
 
 export function definePersonFactory(factory: typeof FactoryGirl) {
   return factory.define(Person, () => ({

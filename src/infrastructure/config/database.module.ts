@@ -4,7 +4,9 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigProperties } from './config.module';
 
 // Import all models
-import { User, Company, Person } from '../../domain/users/user.model';
+import { User } from '../../domain/users/user.model';
+import { Company } from '../../domain/companies/company.model';
+import { Person } from '../../domain/persons/person.model';
 import { Role } from '../../domain/roles/role.model';
 import { Permission } from '../../domain/permissions/permission.model';
 import { Secret } from '../../domain/secret/secret.model';
@@ -17,6 +19,14 @@ import { Address } from '../../domain/addresses/address.model';
 import { Phone } from '../../domain/phones/phone.model';
 import { RefreshToken } from '../../domain/auth/models/refresh-token.model';
 import { PasswordResetToken } from '../../domain/auth/models/password-reset-token.model';
+import { UserRole } from '../../domain/users/user-role.model';
+import { UserPermission } from '../../domain/users/user-permission.model';
+import { RolePermission } from '../../domain/roles/role-permission.model';
+import { PersonExperience } from '../../domain/persons/person-experience.model';
+import { PersonFormation } from '../../domain/persons/person-formation.model';
+import { VacancyStep } from '../../domain/vacancies/vacancy-step.model';
+import { VacancyResponsible } from '../../domain/vacancies/vacancy-responsible.model';
+import { StepCompetence } from '../../domain/steps/step-competence.model';
 
 const models = [
   User,
@@ -34,6 +44,14 @@ const models = [
   Phone,
   RefreshToken,
   PasswordResetToken,
+  UserRole,
+  UserPermission,
+  RolePermission,
+  PersonExperience,
+  PersonFormation,
+  VacancyStep,
+  VacancyResponsible,
+  StepCompetence,
 ];
 
 @Module({
@@ -46,7 +64,7 @@ const models = [
         return {
           models,
           logging: isLoggingEnabled ? console.log : false,
-          autoLoadModels: true,
+          autoLoadModels: false,
           dialect: 'postgres',
           host: configService.get('DB_HOST'),
           port: configService.get('DB_PORT'),

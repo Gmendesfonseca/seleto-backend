@@ -2,7 +2,7 @@ import { PhoneType } from '../phone.model';
 
 export interface Phone {
   id: string;
-  personId: string;
+  userId: string;
   number: string;
   type: PhoneType;
   isPrimary: boolean;
@@ -11,7 +11,7 @@ export interface Phone {
 }
 
 export interface PhoneFilters {
-  personId?: string;
+  userId?: string;
   type?: PhoneType;
   isPrimary?: boolean;
 }

@@ -1,56 +1,59 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { VacancyService } from './interfaces/vacancy.service.interface';
+import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
+import { VacancyServiceInterface } from './interfaces/vacancy.service.interface';
 import { VacancyRepository } from './repositories/vacancy.repository.interface';
 import { CreateVacancyDto, UpdateVacancyDto } from './dto/vacancy.dto';
 import { Vacancy, VacancyFilters, VacancyStatus } from './interfaces/vacancy.interface';
 
 @Injectable()
-export class VacancyServiceImpl implements VacancyService {
-  private readonly logger = new Logger(VacancyServiceImpl.name);
+export class VacancyService implements VacancyServiceInterface {
+  private readonly logger = new Logger(VacancyService.name);
 
-  constructor(private readonly vacancyRepository: VacancyRepository) {}
+  constructor(
+    @Inject(VacancyRepository)
+    private readonly repository: VacancyRepository,
+  ) {}
 
   async create(createVacancyDto: CreateVacancyDto): Promise<Vacancy> {
     this.logger.debug('VacancyService.create: Called');
-    return this.vacancyRepository.create(createVacancyDto);
+    return this.repository.create(createVacancyDto);
   }
 
   async findAll(filters?: VacancyFilters): Promise<Vacancy[]> {
     this.logger.debug('VacancyService.findAll: Called');
-    return this.vacancyRepository.findAll(filters);
+    return this.repository.findAll(filters);
   }
 
   async findOne(id: string): Promise<Vacancy | null> {
     this.logger.debug('VacancyService.findOne: Called');
-    return this.vacancyRepository.findOne(id);
+    return this.repository.findOne(id);
   }
 
   async update(id: string, updateVacancyDto: UpdateVacancyDto): Promise<Vacancy> {
     this.logger.debug('VacancyService.update: Called');
-    const vacancy = await this.vacancyRepository.findOne(id);
+    const vacancy = await this.repository.findOne(id);
     if (!vacancy) {
       throw new NotFoundException(`Vacancy with id ${id} not found`);
     }
-    return this.vacancyRepository.update(id, updateVacancyDto);
+    return this.repository.update(id, updateVacancyDto);
   }
 
   async remove(id: string): Promise<void> {
     this.logger.debug('VacancyService.remove: Called');
-    const vacancy = await this.vacancyRepository.findOne(id);
+    const vacancy = await this.repository.findOne(id);
     if (!vacancy) {
       throw new NotFoundException(`Vacancy with id ${id} not found`);
     }
-    await this.vacancyRepository.delete(id);
+    await this.repository.delete(id);
   }
 
   async findByCompany(companyId: string): Promise<Vacancy[]> {
     this.logger.debug('VacancyService.findByCompany: Called');
-    return this.vacancyRepository.findByCompany(companyId);
+    return this.repository.findByCompany(companyId);
   }
 
   async findPublished(): Promise<Vacancy[]> {
     this.logger.debug('VacancyService.findPublished: Called');
-    return this.vacancyRepository.findPublished();
+    return this.repository.findPublished();
   }
 
   async publishVacancy(id: string): Promise<Vacancy> {

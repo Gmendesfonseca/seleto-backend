@@ -47,7 +47,8 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync<Jwt>(token);
       request.auth = payload;
       this.logger.debug('AuthGuard.canActivate: authenticated');
-    } catch {
+    } catch (e) {
+      console.error(e);
       this.logger.debug('AuthGuard.canActivate: token invalid');
       throw new UnauthorizedException({
         code: 401,

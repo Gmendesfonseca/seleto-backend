@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { RoleService } from './interfaces/role.service.interface';
 import { RoleRepository } from './repositories/role.repository.interface';
 import { CreateRoleDto, UpdateRoleDto } from './dto/role.dto';
@@ -8,7 +8,10 @@ import { Role, RoleFilters } from './interfaces/role.interface';
 export class RoleServiceImpl implements RoleService {
   private readonly logger = new Logger(RoleServiceImpl.name);
 
-  constructor(private readonly roleRepository: RoleRepository) {}
+  constructor(
+    @Inject(RoleRepository)
+    private readonly roleRepository: RoleRepository,
+  ) {}
 
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
     this.logger.debug('RoleService.create: Called');

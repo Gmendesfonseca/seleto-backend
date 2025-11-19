@@ -1,5 +1,5 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { PersonService } from './interfaces/person.service.interface';
+import { Injectable, Logger, NotFoundException, Inject } from '@nestjs/common';
+import { PersonServiceInterface } from './interfaces/person.service.interface';
 import { PersonRepository } from './repositories/person.repository.interface';
 import { Person, PersonFilters } from './interfaces/person.interface';
 import {
@@ -11,10 +11,13 @@ import {
 } from './dto/person.dto';
 
 @Injectable()
-export class PersonServiceImpl implements PersonService {
-  private readonly logger = new Logger(PersonServiceImpl.name);
+export class PersonService implements PersonServiceInterface {
+  private readonly logger = new Logger(PersonService.name);
 
-  constructor(private readonly personRepository: PersonRepository) {}
+  constructor(
+    @Inject(PersonRepository)
+    private readonly personRepository: PersonRepository,
+  ) {}
 
   async create(createPersonDto: CreatePersonDto): Promise<Person> {
     this.logger.debug('PersonService.create: Called');
@@ -47,11 +50,6 @@ export class PersonServiceImpl implements PersonService {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
     await this.personRepository.delete(id);
-  }
-
-  async findByUser(userId: string): Promise<Person | null> {
-    this.logger.debug('PersonService.findByUser: Called');
-    return this.personRepository.findByUser(userId);
   }
 
   async addCompetence(personId: string, _addCompetenceDto: AddCompetenceDto): Promise<Person> {

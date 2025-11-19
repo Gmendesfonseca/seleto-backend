@@ -7,8 +7,8 @@ import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { UsersServiceInterface } from '../users/interfaces';
 import { SecretServiceInterface } from '../secret/interface/secret.service.interface';
-import { CompanyService } from '../companies/interfaces/company.service.interface';
-import { PersonService } from '../persons/interfaces/person.service.interface';
+import { CompanyServiceInterface } from '../companies/interfaces/company.service.interface';
+import { PersonServiceInterface } from '../persons/interfaces/person.service.interface';
 import { UserType } from 'src/shared/utils/constants';
 
 // Mock bcrypt module
@@ -21,8 +21,8 @@ describe('AuthService', () => {
   let secretService: jest.Mocked<SecretServiceInterface>;
   let jwtService: jest.Mocked<JwtService>;
   let mailerService: jest.Mocked<MailerService>;
-  let companyService: jest.Mocked<CompanyService>;
-  let personService: jest.Mocked<PersonService>;
+  let companyService: jest.Mocked<CompanyServiceInterface>;
+  let personService: jest.Mocked<PersonServiceInterface>;
 
   // Test data
   const mockUser = {
@@ -87,11 +87,11 @@ describe('AuthService', () => {
           useValue: mockMailerService,
         },
         {
-          provide: CompanyService,
+          provide: CompanyServiceInterface,
           useValue: mockCompanyService,
         },
         {
-          provide: PersonService,
+          provide: PersonServiceInterface,
           useValue: mockPersonService,
         },
       ],
@@ -102,8 +102,8 @@ describe('AuthService', () => {
     secretService = module.get(SecretServiceInterface);
     jwtService = module.get(JwtService);
     mailerService = module.get(MailerService);
-    companyService = module.get(CompanyService);
-    personService = module.get(PersonService);
+    companyService = module.get(CompanyServiceInterface);
+    personService = module.get(PersonServiceInterface);
 
     // Setup bcrypt mocks
     (mockedBcrypt.hash as jest.Mock).mockImplementation(
@@ -132,7 +132,7 @@ describe('AuthService', () => {
       const password = 'password123';
       const expectedToken = 'jwt-token-123';
 
-      usersService.findOneByEmail.mockResolvedValue(mockUser);
+      usersService.findByEmail.mockResolvedValue(mockUser);
       (mockedBcrypt.compare as jest.Mock).mockResolvedValue(true);
       jwtService.sign.mockReturnValue(expectedToken);
 
@@ -144,7 +144,7 @@ describe('AuthService', () => {
       const result = await service.signIn(email, password);
 
       // Assert
-      expect(usersService.findOneByEmail).toHaveBeenCalledWith(email);
+      expect(usersService.findByEmail).toHaveBeenCalledWith(email);
       expect(mockedBcrypt.compare).toHaveBeenCalledWith(password, mockUser.password);
       expect(jwtService.sign).toHaveBeenCalledWith({
         sub: mockUser.id,
@@ -169,13 +169,13 @@ describe('AuthService', () => {
       const email = 'nonexistent@example.com';
       const password = 'password123';
 
-      usersService.findOneByEmail.mockResolvedValue(null);
+      usersService.findByEmail.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.signIn(email, password)).rejects.toThrow(
         new UnauthorizedException('Invalid credentials'),
       );
-      expect(usersService.findOneByEmail).toHaveBeenCalledWith(email);
+      expect(usersService.findByEmail).toHaveBeenCalledWith(email);
       expect(mockedBcrypt.compare).not.toHaveBeenCalled();
     });
 
@@ -184,14 +184,14 @@ describe('AuthService', () => {
       const email = 'test@example.com';
       const password = 'wrongpassword';
 
-      usersService.findOneByEmail.mockResolvedValue(mockUser);
+      usersService.findByEmail.mockResolvedValue(mockUser);
       (mockedBcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       // Act & Assert
       await expect(service.signIn(email, password)).rejects.toThrow(
         new UnauthorizedException('Invalid credentials'),
       );
-      expect(usersService.findOneByEmail).toHaveBeenCalledWith(email);
+      expect(usersService.findByEmail).toHaveBeenCalledWith(email);
       expect(mockedBcrypt.compare).toHaveBeenCalledWith(password, mockUser.password);
     });
   });
@@ -208,9 +208,9 @@ describe('AuthService', () => {
       };
       const hashedPassword = 'hashed_password123';
 
-      usersService.findOneByEmail.mockResolvedValue(null);
+      usersService.findByEmail.mockResolvedValue(null);
       (mockedBcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
-      usersService.createUser.mockResolvedValue(mockUser);
+      usersService.create.mockResolvedValue(mockUser);
       personService.create.mockResolvedValue({} as any);
       mailerService.sendMail.mockResolvedValue(undefined);
 
@@ -218,9 +218,9 @@ describe('AuthService', () => {
       await service.signUp(payload);
 
       // Assert
-      expect(usersService.findOneByEmail).toHaveBeenCalledWith(payload.email);
+      expect(usersService.findByEmail).toHaveBeenCalledWith(payload.email);
       expect(mockedBcrypt.hash).toHaveBeenCalledWith(payload.password, 12);
-      expect(usersService.createUser).toHaveBeenCalledWith({
+      expect(usersService.create).toHaveBeenCalledWith({
         email: payload.email,
         username: payload.username,
         password: hashedPassword,
@@ -251,9 +251,9 @@ describe('AuthService', () => {
       };
       const hashedPassword = 'hashed_password123';
 
-      usersService.findOneByEmail.mockResolvedValue(null);
+      usersService.findByEmail.mockResolvedValue(null);
       (mockedBcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
-      usersService.createUser.mockResolvedValue(mockUser);
+      usersService.create.mockResolvedValue(mockUser);
       companyService.create.mockResolvedValue({} as any);
       mailerService.sendMail.mockResolvedValue(undefined);
 
@@ -261,9 +261,9 @@ describe('AuthService', () => {
       await service.signUp(payload);
 
       // Assert
-      expect(usersService.findOneByEmail).toHaveBeenCalledWith(payload.email);
+      expect(usersService.findByEmail).toHaveBeenCalledWith(payload.email);
       expect(mockedBcrypt.hash).toHaveBeenCalledWith(payload.password, 12);
-      expect(usersService.createUser).toHaveBeenCalledWith({
+      expect(usersService.create).toHaveBeenCalledWith({
         email: payload.email,
         username: payload.username,
         password: hashedPassword,
@@ -290,14 +290,14 @@ describe('AuthService', () => {
         name: 'Existing User',
       };
 
-      usersService.findOneByEmail.mockResolvedValue(mockUser);
+      usersService.findByEmail.mockResolvedValue(mockUser);
 
       // Act & Assert
       await expect(service.signUp(payload)).rejects.toThrow(
         new ConflictException('User already exists'),
       );
-      expect(usersService.findOneByEmail).toHaveBeenCalledWith(payload.email);
-      expect(usersService.createUser).not.toHaveBeenCalled();
+      expect(usersService.findByEmail).toHaveBeenCalledWith(payload.email);
+      expect(usersService.create).not.toHaveBeenCalled();
     });
 
     it('should continue when email sending fails', async () => {
@@ -310,13 +310,13 @@ describe('AuthService', () => {
         name: 'New User',
       };
 
-      usersService.findOneByEmail.mockResolvedValue(null);
-      usersService.createUser.mockResolvedValue(mockUser);
+      usersService.findByEmail.mockResolvedValue(null);
+      usersService.create.mockResolvedValue(mockUser);
       mailerService.sendMail.mockRejectedValue(new Error('Email service down'));
 
       // Act & Assert
       await expect(service.signUp(payload)).resolves.not.toThrow();
-      expect(usersService.createUser).toHaveBeenCalled();
+      expect(usersService.create).toHaveBeenCalled();
     });
   });
 
@@ -326,7 +326,7 @@ describe('AuthService', () => {
       const email = 'test@example.com';
       const secretKey = 'secret-123';
 
-      usersService.findOneByEmail.mockResolvedValue(mockUser);
+      usersService.findByEmail.mockResolvedValue(mockUser);
       secretService.generateSecret.mockReturnValue(secretKey);
       secretService.createSecret.mockResolvedValue(undefined);
       mailerService.sendMail.mockResolvedValue(undefined);
@@ -335,7 +335,7 @@ describe('AuthService', () => {
       await service.forgotPassword(email);
 
       // Assert
-      expect(usersService.findOneByEmail).toHaveBeenCalledWith(email);
+      expect(usersService.findByEmail).toHaveBeenCalledWith(email);
       expect(secretService.generateSecret).toHaveBeenCalled();
       expect(secretService.createSecret).toHaveBeenCalledWith({
         secret: secretKey,
@@ -354,13 +354,13 @@ describe('AuthService', () => {
       // Setup
       const email = 'nonexistent@example.com';
 
-      usersService.findOneByEmail.mockResolvedValue(null);
+      usersService.findByEmail.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.forgotPassword(email)).rejects.toThrow(
         new NotFoundException('User not found'),
       );
-      expect(usersService.findOneByEmail).toHaveBeenCalledWith(email);
+      expect(usersService.findByEmail).toHaveBeenCalledWith(email);
       expect(secretService.generateSecret).not.toHaveBeenCalled();
     });
   });
@@ -455,7 +455,7 @@ describe('AuthService', () => {
       const newToken = 'new-jwt-token';
 
       jwtService.verify.mockReturnValue(decodedToken);
-      usersService.findOne.mockResolvedValue(mockUser);
+      usersService.findById.mockResolvedValue(mockUser);
       jwtService.sign.mockReturnValue(newToken);
 
       // Mock Date.now()
@@ -467,7 +467,7 @@ describe('AuthService', () => {
 
       // Assert
       expect(jwtService.verify).toHaveBeenCalledWith(refreshToken);
-      expect(usersService.findOne).toHaveBeenCalledWith(decodedToken.sub);
+      expect(usersService.findById).toHaveBeenCalledWith(decodedToken.sub);
       expect(jwtService.sign).toHaveBeenCalledWith({
         sub: mockUser.id,
         username: mockUser.username,
@@ -499,7 +499,7 @@ describe('AuthService', () => {
         new UnauthorizedException('Invalid refresh token'),
       );
       expect(jwtService.verify).toHaveBeenCalledWith(refreshToken);
-      expect(usersService.findOne).not.toHaveBeenCalled();
+      expect(usersService.findById).not.toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException when user is not found', async () => {
@@ -508,14 +508,14 @@ describe('AuthService', () => {
       const decodedToken = { sub: 'nonexistent-user-id' };
 
       jwtService.verify.mockReturnValue(decodedToken);
-      usersService.findOne.mockResolvedValue(null);
+      usersService.findById.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.refreshToken(refreshToken)).rejects.toThrow(
         new UnauthorizedException('Invalid refresh token'),
       );
       expect(jwtService.verify).toHaveBeenCalledWith(refreshToken);
-      expect(usersService.findOne).toHaveBeenCalledWith(decodedToken.sub);
+      expect(usersService.findById).toHaveBeenCalledWith(decodedToken.sub);
     });
   });
 

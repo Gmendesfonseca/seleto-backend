@@ -13,14 +13,14 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
-import { ProcessTemplateService } from './interfaces/process-template.service.interface';
+import { ProcessTemplateServiceInterface } from './interfaces/process-template.service.interface';
 import { Authorized } from 'src/shared/decorators/authorization.decorator';
 
 @Controller('process-templates')
 export class ProcessTemplateController {
   private readonly logger = new Logger(ProcessTemplateController.name);
 
-  constructor(private readonly processTemplateService: ProcessTemplateService) {}
+  constructor(private readonly service: ProcessTemplateServiceInterface) {}
 
   @Get()
   @Authorized()
@@ -40,7 +40,7 @@ export class ProcessTemplateController {
       limit,
       offset,
     });
-    return this.processTemplateService.findAll({
+    return this.service.findAll({
       companyId,
       category,
       isDefault,
@@ -54,28 +54,28 @@ export class ProcessTemplateController {
   @Authorized()
   async getDefaults() {
     this.logger.debug('ProcessTemplateController.getDefaults: Called');
-    return this.processTemplateService.getDefaults();
+    return this.service.getDefaults();
   }
 
   @Get(':id')
   @Authorized()
   async findOne(@Param('id') id: string) {
     this.logger.debug('ProcessTemplateController.findOne: Called', { id });
-    return this.processTemplateService.findOne(id);
+    return this.service.findOne(id);
   }
 
   @Post()
   @Authorized()
   async create(@Body() createTemplateDto: any) {
     this.logger.debug('ProcessTemplateController.create: Called', { createTemplateDto });
-    return this.processTemplateService.create(createTemplateDto);
+    return this.service.create(createTemplateDto);
   }
 
   @Put(':id')
   @Authorized()
   async update(@Param('id') id: string, @Body() updateTemplateDto: any) {
     this.logger.debug('ProcessTemplateController.update: Called', { id, updateTemplateDto });
-    return this.processTemplateService.update(id, updateTemplateDto);
+    return this.service.update(id, updateTemplateDto);
   }
 
   @Delete(':id')
@@ -83,13 +83,13 @@ export class ProcessTemplateController {
   @Authorized()
   async remove(@Param('id') id: string) {
     this.logger.debug('ProcessTemplateController.remove: Called', { id });
-    await this.processTemplateService.remove(id);
+    await this.service.remove(id);
   }
 
   @Post(':id/duplicate')
   @Authorized()
   async duplicate(@Param('id') id: string, @Body('name') name?: string) {
     this.logger.debug('ProcessTemplateController.duplicate: Called', { id, name });
-    return this.processTemplateService.duplicate(id, name);
+    return this.service.duplicate(id, name);
   }
 }

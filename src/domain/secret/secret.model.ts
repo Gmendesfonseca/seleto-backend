@@ -34,4 +34,13 @@ export class Secret extends Model<Secret> {
 
   @BelongsTo(() => User)
   user: User;
+
+  @Column({ type: DataType.DATE, allowNull: false })
+  createdAt: Date;
+
+  @Column({ type: DataType.DATE, allowNull: false })
+  updatedAt: Date;
+
+  @Column({ type: DataType.DATE, allowNull: true })
+  deletedAt: Date | null;
 }

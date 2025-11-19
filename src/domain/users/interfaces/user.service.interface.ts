@@ -48,17 +48,17 @@ export interface ChangeEmailInput {
 }
 
 export abstract class UsersServiceInterface {
-  abstract findOne(id: string): Promise<UserInterface | null>;
+  abstract findById(id: string): Promise<UserInterface | null>;
   abstract findAll(filters?: UserFilters): Promise<{ users: UserInterface[]; total: number }>;
-  abstract findOneByEmail(email: string): Promise<UserInterface | null>;
-  abstract findOneByCredentials(credentials: {
+  abstract findByEmail(email: string): Promise<UserInterface | null>;
+  abstract findByCredentials(credentials: {
     email: string;
     password: string;
   }): Promise<UserInterface | null>;
-  abstract createUser(input: CreateUserInput): Promise<UserInterface>;
+  abstract create(input: CreateUserInput): Promise<UserInterface>;
   abstract activate(input: ActivateInput): Promise<void>;
   abstract updateUsername(input: UpdateUsernameInput): Promise<void>;
-  abstract updateUser(id: string, input: UpdateUserInput): Promise<UserInterface>;
+  abstract update(id: string, input: UpdateUserInput): Promise<UserInterface>;
   abstract changeEmail(input: ChangeEmailInput): Promise<void>;
   abstract requestChangeEmail(input: RequestChangeEmailInput): Promise<void>;
   abstract delete(id: string): Promise<void>;

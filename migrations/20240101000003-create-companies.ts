@@ -14,6 +14,16 @@ export = {
         allowNull: false,
         unique: true,
       },
+      user_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -31,6 +41,7 @@ export = {
     });
 
     // Add indexes
+    await query.addIndex('companies', ['user_id']);
     await query.addIndex('companies', ['deleted_at']);
   },
 

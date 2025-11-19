@@ -11,17 +11,17 @@ export class PhoneSequelizeRepository implements PhoneRepository {
 
   constructor(
     @InjectModel(PhoneModel)
-    private readonly phoneModel: typeof PhoneModel,
+    private readonly model: typeof PhoneModel,
   ) {}
 
   async create(createPhoneDto: CreatePhoneDto): Promise<Phone> {
     this.logger.debug('PhoneSequelizeRepository.create: Called');
-    const phone = await this.phoneModel.create({
-      personId: createPhoneDto.personId,
+    const phone = await this.model.create({
+      userId: createPhoneDto.userId,
       number: createPhoneDto.number,
       type: createPhoneDto.type,
       isPrimary: createPhoneDto.isPrimary || false,
-    } as any);
+    } as PhoneModel);
 
     return this.toInterface(phone);
   }
@@ -30,8 +30,8 @@ export class PhoneSequelizeRepository implements PhoneRepository {
     this.logger.debug('PhoneSequelizeRepository.findAll: Called');
     const where: any = {};
 
-    if (filters?.personId) {
-      where.personId = filters.personId;
+    if (filters?.userId) {
+      where.userId = filters.userId;
     }
 
     if (filters?.type) {
@@ -42,19 +42,19 @@ export class PhoneSequelizeRepository implements PhoneRepository {
       where.isPrimary = filters.isPrimary;
     }
 
-    const phones = await this.phoneModel.findAll({ where });
+    const phones = await this.model.findAll({ where });
     return phones.map((phone) => this.toInterface(phone));
   }
 
   async findOne(id: string): Promise<Phone | null> {
     this.logger.debug('PhoneSequelizeRepository.findOne: Called');
-    const phone = await this.phoneModel.findByPk(id);
+    const phone = await this.model.findByPk(id);
     return phone ? this.toInterface(phone) : null;
   }
 
   async update(id: string, updatePhoneDto: UpdatePhoneDto): Promise<Phone> {
     this.logger.debug('PhoneSequelizeRepository.update: Called');
-    const phone = await this.phoneModel.findByPk(id);
+    const phone = await this.model.findByPk(id);
     if (!phone) {
       throw new Error('Phone not found');
     }
@@ -65,19 +65,19 @@ export class PhoneSequelizeRepository implements PhoneRepository {
 
   async delete(id: string): Promise<void> {
     this.logger.debug('PhoneSequelizeRepository.delete: Called');
-    await this.phoneModel.destroy({ where: { id } });
+    await this.model.destroy({ where: { id } });
   }
 
-  async findByPerson(personId: string): Promise<Phone[]> {
+  async findByPerson(userId: string): Promise<Phone[]> {
     this.logger.debug('PhoneSequelizeRepository.findByPerson: Called');
-    const phones = await this.phoneModel.findAll({ where: { personId } });
+    const phones = await this.model.findAll({ where: { userId } });
     return phones.map((phone) => this.toInterface(phone));
   }
 
-  async findPrimaryByPerson(personId: string): Promise<Phone | null> {
+  async findPrimaryByPerson(userId: string): Promise<Phone | null> {
     this.logger.debug('PhoneSequelizeRepository.findPrimaryByPerson: Called');
-    const phone = await this.phoneModel.findOne({
-      where: { personId, isPrimary: true },
+    const phone = await this.model.findOne({
+      where: { userId, isPrimary: true },
     });
     return phone ? this.toInterface(phone) : null;
   }
@@ -85,7 +85,7 @@ export class PhoneSequelizeRepository implements PhoneRepository {
   private toInterface(phone: PhoneModel): Phone {
     return {
       id: phone.id,
-      personId: phone.personId,
+      userId: phone.userId,
       number: phone.number,
       type: phone.type,
       isPrimary: phone.isPrimary,

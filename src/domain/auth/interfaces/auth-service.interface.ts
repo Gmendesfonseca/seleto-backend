@@ -6,6 +6,9 @@ export type SignUpDto = {
   password: string;
   email: string;
   type: UserType;
+  cpf?: string;
+  phone: string;
+  cnpj?: string;
 };
 
 export abstract class AuthServiceInterface {

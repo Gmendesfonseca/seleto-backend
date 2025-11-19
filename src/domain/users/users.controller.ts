@@ -1,20 +1,19 @@
 import {
-  BadRequestException,
-  Body,
-  Controller,
-  Delete,
   Get,
-  HttpCode,
-  Logger,
-  NotFoundException,
-  Param,
-  ParseUUIDPipe,
   Post,
   Put,
-  Patch,
-  ValidationPipe,
+  Delete,
+  Body,
+  Param,
   Query,
+  Logger,
+  HttpCode,
+  Controller,
+  ParseUUIDPipe,
+  ValidationPipe,
   Request,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   UpdateEmailDto,
@@ -30,13 +29,13 @@ import { Authorized } from 'src/shared/decorators/authorization.decorator';
 export class UsersController {
   private readonly logger = new Logger(UsersController.name);
 
-  constructor(private readonly usersService: UsersServiceInterface) {}
+  constructor(private readonly service: UsersServiceInterface) {}
 
   @Get()
   @HttpCode(200)
   @Authorized()
-  async listUsers(@Query(ValidationPipe) queryDto: QueryUserDto) {
-    this.logger.debug('UsersController.listUsers: Called');
+  async index(@Query(ValidationPipe) queryDto: QueryUserDto) {
+    this.logger.debug('Index: Called');
     try {
       const filters: UserFilters = {
         email: queryDto.email,
@@ -48,7 +47,7 @@ export class UsersController {
         page: queryDto.page ? Number.parseInt(queryDto.page, 10) : 1,
         limit: queryDto.limit ? Number.parseInt(queryDto.limit, 10) : 10,
       };
-      return await this.usersService.findAll(filters);
+      return await this.service.findAll(filters);
     } catch (error) {
       this.logger.error(error.message);
       throw new BadRequestException('Failed to list users');
@@ -58,11 +57,11 @@ export class UsersController {
   @Get('/me')
   @HttpCode(200)
   @Authorized()
-  async getCurrentUser(@Request() req: any) {
-    this.logger.debug('UsersController.getCurrentUser: Called');
+  async me(@Request() req: any) {
+    this.logger.debug('Me: Called');
     try {
       const userId = req.auth?.id || req.user?.id;
-      return await this.usersService.findOne(userId);
+      return await this.service.findById(userId);
     } catch (error) {
       this.logger.error(error.message);
       throw error instanceof NotFoundException ? error : new NotFoundException('User not found');
@@ -71,10 +70,10 @@ export class UsersController {
 
   @Get('/:id')
   @HttpCode(200)
-  async getUser(@Param('id', new ParseUUIDPipe()) id: string) {
-    this.logger.debug('UsersController.getUser: Called');
+  async show(@Param('id', new ParseUUIDPipe()) id: string) {
+    this.logger.debug('Show: Called');
     try {
-      return await this.usersService.findOne(id);
+      return await this.service.findById(id);
     } catch (error) {
       this.logger.error(error.message);
       throw error instanceof NotFoundException ? error : new NotFoundException('User not found');
@@ -84,10 +83,10 @@ export class UsersController {
   @Post('/')
   @HttpCode(201)
   @Authorized()
-  async activateUser(@Body() activateUserDto: ActivateUserDto) {
-    this.logger.debug('UsersController.activateUser: Called');
+  async activate(@Body() activateUserDto: ActivateUserDto) {
+    this.logger.debug('Activate: Called');
     try {
-      await this.usersService.activate(activateUserDto);
+      await this.service.activate(activateUserDto);
       return { message: 'User activated successfully' };
     } catch (error) {
       this.logger.error(error.message);
@@ -101,9 +100,9 @@ export class UsersController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() { email, secret }: UpdateEmailDto,
   ) {
-    this.logger.debug('UsersController.updateEmail: Called');
+    this.logger.debug('UpdateEmail: Called');
     try {
-      await this.usersService.changeEmail({ id, email, secret });
+      await this.service.changeEmail({ id, email, secret });
     } catch (error) {
       this.logger.error(error.message);
       throw new NotFoundException();
@@ -116,9 +115,9 @@ export class UsersController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() { username }: UpdateUsernameDto,
   ) {
-    this.logger.debug('UsersController.updateUser: Called');
+    this.logger.debug('UpdateUsername: Called');
     try {
-      return await this.usersService.updateUsername({ id, username });
+      return await this.service.updateUsername({ id, username });
     } catch (error) {
       this.logger.error(error.message);
       throw new NotFoundException();
@@ -128,31 +127,13 @@ export class UsersController {
   @Put('/:id')
   @HttpCode(200)
   @Authorized()
-  async updateUserGeneral(
+  async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
   ) {
-    this.logger.debug('UsersController.updateUserGeneral: Called');
+    this.logger.debug('Update: Called');
     try {
-      return await this.usersService.updateUser(id, updateUserDto);
-    } catch (error) {
-      this.logger.error(error.message);
-      throw error instanceof NotFoundException
-        ? error
-        : new BadRequestException('Failed to update user');
-    }
-  }
-
-  @Patch('/:id')
-  @HttpCode(200)
-  @Authorized()
-  async updateUser(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body(ValidationPipe) updateUserDto: UpdateUserDto,
-  ) {
-    this.logger.debug('UsersController.updateUser: Called');
-    try {
-      return await this.usersService.updateUser(id, updateUserDto);
+      return await this.service.update(id, updateUserDto);
     } catch (error) {
       this.logger.error(error.message);
       throw error instanceof NotFoundException
@@ -163,10 +144,10 @@ export class UsersController {
 
   @Delete('/:id')
   @HttpCode(204)
-  async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
-    this.logger.debug('UsersController.deleteUser: Called');
+  async delete(@Param('id', new ParseUUIDPipe()) id: string) {
+    this.logger.debug('Delete: Called');
     try {
-      await this.usersService.delete(id);
+      await this.service.delete(id);
     } catch (error) {
       this.logger.error(error.message);
       return new NotFoundException();

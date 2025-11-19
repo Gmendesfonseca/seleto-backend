@@ -7,7 +7,8 @@ import { DashboardRepository } from './repositories/dashboard.repository.interfa
 import { DashboardServiceInterface } from './interfaces/dashboard.service.interface';
 import { Application } from '../applications/application.model';
 import { Vacancy } from '../vacancies/vacancy.model';
-import { Company, User } from '../users/user.model';
+import { Company } from '../companies/company.model';
+import { User } from '../users/user.model';
 
 @Module({
   imports: [SequelizeModule.forFeature([Application, Vacancy, Company, User])],

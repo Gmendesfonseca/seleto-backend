@@ -15,4 +15,4 @@ export { PersonModule } from './person.module';
 export { PersonController } from './person.controller';
 
 // Person service
-export { PersonServiceImpl } from './person.service';
+export { PersonService } from './person.service';

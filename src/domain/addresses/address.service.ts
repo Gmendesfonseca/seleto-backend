@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { AddressServiceInterface } from './interfaces/address.service.interface';
 import { AddressRepository } from './repositories/address.repository.interface';
 import { Address, AddressFilters } from './interfaces/address.interface';
@@ -8,7 +8,10 @@ import { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
 export class AddressService implements AddressServiceInterface {
   private readonly logger = new Logger(AddressService.name);
 
-  constructor(private readonly addressRepository: AddressRepository) {}
+  constructor(
+    @Inject(AddressRepository)
+    private readonly addressRepository: AddressRepository,
+  ) {}
 
   async create(createAddressDto: CreateAddressDto): Promise<Address> {
     this.logger.debug('AddressService.create: Called');

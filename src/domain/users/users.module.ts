@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { UsersRepositoryInterface } from './interfaces/user.repository.interface';
+import { UserRepositoryInterface } from './interfaces/user.repository.interface';
 import { UserSequelizeRepository } from './repositories/user.sequelize.repository';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { User } from './user.model';
@@ -23,7 +23,7 @@ import { CompanyModule } from '../companies/company.module';
   ],
   providers: [
     {
-      provide: UsersRepositoryInterface,
+      provide: UserRepositoryInterface,
       useClass: UserSequelizeRepository,
     },
     {

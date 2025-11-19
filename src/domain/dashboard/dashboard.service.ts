@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { DashboardServiceInterface } from './interfaces/dashboard.service.interface';
 import { DashboardRepository } from './repositories/dashboard.repository.interface';
 import { DashboardStats, DashboardFilters } from './interfaces/dashboard.interface';
@@ -7,7 +7,10 @@ import { DashboardStats, DashboardFilters } from './interfaces/dashboard.interfa
 export class DashboardService implements DashboardServiceInterface {
   private readonly logger = new Logger(DashboardService.name);
 
-  constructor(private readonly dashboardRepository: DashboardRepository) {}
+  constructor(
+    @Inject(DashboardRepository)
+    private readonly dashboardRepository: DashboardRepository,
+  ) {}
 
   async getStats(filters?: DashboardFilters): Promise<DashboardStats> {
     this.logger.debug('DashboardService.getStats: Called');

@@ -4,7 +4,7 @@ import { Role } from '../role.model';
 import { RoleRepository } from './role.repository.interface';
 import { CreateRoleDto, UpdateRoleDto } from '../dto/role.dto';
 import { RoleFilters } from '../interfaces/role.interface';
-import { Company } from '../../users/user.model';
+import { Company } from '../../companies/company.model';
 import { Op } from 'sequelize';
 
 @Injectable()

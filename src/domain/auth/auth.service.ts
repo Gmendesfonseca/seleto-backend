@@ -11,8 +11,10 @@ import { UsersServiceInterface } from '../users/interfaces';
 import { SecretServiceInterface } from '../secret/interface/secret.service.interface';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';
-import { CompanyService } from '../companies/interfaces/company.service.interface';
-import { PersonService } from '../persons/interfaces/person.service.interface';
+import { CompanyServiceInterface } from '../companies/interfaces/company.service.interface';
+import { PersonServiceInterface } from '../persons/interfaces/person.service.interface';
+import { UserType } from 'src/shared/utils/constants';
+import { PhoneServiceInterface, PhoneType } from '../phones';
 
 @Injectable()
 export class AuthService implements AuthServiceInterface {
@@ -23,18 +25,16 @@ export class AuthService implements AuthServiceInterface {
     private readonly usersService: UsersServiceInterface,
     private readonly secretService: SecretServiceInterface,
     private readonly mailerService: MailerService,
-    private readonly companyService: CompanyService,
-    private readonly personService: PersonService,
+    private readonly companyService: CompanyServiceInterface,
+    private readonly personService: PersonServiceInterface,
+    private readonly phoneService: PhoneServiceInterface,
   ) {}
 
-  async signIn(username: string, password: string): Promise<SignInResponse> {
+  async signIn(email: string, password: string): Promise<SignInResponse> {
     this.logger.debug('AuthService.signIn: Called');
 
-    // Try to find user by email first, then by username if not found
-    const user = await this.usersService.findOneByEmail(username);
+    const user = await this.usersService.findByEmail(email);
     if (!user) {
-      // If not found by email, we could try finding by username
-      // For now, we'll treat username as email for backward compatibility
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -62,38 +62,49 @@ export class AuthService implements AuthServiceInterface {
     };
   }
 
-  async signUp({ username, password, email, type, name }: SignUpDto): Promise<void> {
+  async signUp({
+    username,
+    password,
+    email,
+    type,
+    name,
+    cnpj,
+    cpf,
+    phone,
+  }: SignUpDto): Promise<void> {
     this.logger.debug('AuthService.signUp: Called');
 
-    const existingUser = await this.usersService.findOneByEmail(email);
+    const existingUser = await this.usersService.findByEmail(email);
     if (existingUser) {
       throw new ConflictException('User already exists');
     }
 
     const hashedPassword = await this.hashPassword(password);
 
-    const user = await this.usersService.createUser({
+    const user = await this.usersService.create({
+      type,
+      name,
       email,
       username,
       password: hashedPassword,
-      name,
-      type,
     });
 
-    if (type === 'COMPANY') {
-      await this.companyService.create({ name });
-    } else if (type === 'PERSON') {
-      const nameParts = name.split(' ');
-      const firstName = nameParts[0] || name;
-      const lastName = nameParts.slice(1).join(' ') || '';
-
+    if (type === UserType.COMPANY) {
+      await this.companyService.create({ cnpj: cnpj!, userId: user.id });
+    } else if (type === UserType.PERSON) {
       await this.personService.create({
+        cpf: cpf!,
         userId: user.id,
-        firstName,
-        lastName,
-        email,
       });
     }
+
+    if (phone)
+      await this.phoneService.create({
+        number: phone,
+        userId: user.id,
+        type: PhoneType.WORK,
+        isPrimary: true,
+      });
 
     try {
       await this.mailerService.sendMail({
@@ -110,7 +121,7 @@ export class AuthService implements AuthServiceInterface {
   async forgotPassword(email: string): Promise<void> {
     this.logger.debug('AuthService.forgotPassword: Called');
 
-    const user = await this.usersService.findOneByEmail(email);
+    const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -171,7 +182,7 @@ export class AuthService implements AuthServiceInterface {
     try {
       const decoded = this.jwtService.verify(inputRefreshToken);
 
-      const user = await this.usersService.findOne(decoded.sub);
+      const user = await this.usersService.findById(decoded.sub);
       if (!user) {
         throw new UnauthorizedException('Invalid refresh token');
       }

@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { VacancyTemplate } from './vacancy-template.model';
 import { VacancyTemplateController } from './vacancy-template.controller';
-import { VacancyTemplateServiceImpl } from './vacancy-template.service';
+import { VacancyTemplateService } from './vacancy-template.service';
 import { ProcessTemplateController } from './process-template.controller';
-import { ProcessTemplateServiceImpl } from './process-template.service';
+import { ProcessTemplateService } from './process-template.service';
 import { VacancyTemplateSequelizeRepository } from './repositories/vacancy-template.sequelize.repository';
 import { VacancyTemplateRepository } from './repositories/vacancy-template.repository.interface';
-import { VacancyTemplateService } from './interfaces/vacancy-template.service.interface';
-import { ProcessTemplateService } from './interfaces/process-template.service.interface';
+import { VacancyTemplateServiceInterface } from './interfaces/vacancy-template.service.interface';
+import { ProcessTemplateServiceInterface } from './interfaces/process-template.service.interface';
 
 @Module({
   imports: [SequelizeModule.forFeature([VacancyTemplate])],
@@ -19,14 +19,14 @@ import { ProcessTemplateService } from './interfaces/process-template.service.in
       useClass: VacancyTemplateSequelizeRepository,
     },
     {
-      provide: VacancyTemplateService,
-      useClass: VacancyTemplateServiceImpl,
+      provide: VacancyTemplateServiceInterface,
+      useClass: VacancyTemplateService,
     },
     {
-      provide: ProcessTemplateService,
-      useClass: ProcessTemplateServiceImpl,
+      provide: ProcessTemplateServiceInterface,
+      useClass: ProcessTemplateService,
     },
   ],
-  exports: [VacancyTemplateService],
+  exports: [VacancyTemplateServiceInterface, ProcessTemplateServiceInterface],
 })
 export class TemplateModule {}

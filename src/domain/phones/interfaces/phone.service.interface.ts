@@ -1,7 +1,7 @@
 import { Phone, PhoneFilters } from './phone.interface';
 import { CreatePhoneDto, UpdatePhoneDto } from '../dto/phone.dto';
 
-export abstract class PhoneService {
+export abstract class PhoneServiceInterface {
   abstract create(createPhoneDto: CreatePhoneDto): Promise<Phone>;
   abstract findAll(filters?: PhoneFilters): Promise<Phone[]>;
   abstract findOne(id: string): Promise<Phone | null>;

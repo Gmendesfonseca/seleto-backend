@@ -7,7 +7,7 @@ import {
   Table,
   PrimaryKey,
 } from 'sequelize-typescript';
-import { Person } from '../users/user.model';
+import { Person } from '../persons/person.model';
 import { Vacancy } from '../vacancies/vacancy.model';
 
 export enum ApplicationStatus {

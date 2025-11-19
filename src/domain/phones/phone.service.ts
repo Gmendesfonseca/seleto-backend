@@ -1,14 +1,17 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { PhoneService } from './interfaces/phone.service.interface';
+import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
+import { PhoneServiceInterface } from './interfaces/phone.service.interface';
 import { PhoneRepository } from './repositories/phone.repository.interface';
 import { Phone, PhoneFilters } from './interfaces/phone.interface';
 import { CreatePhoneDto, UpdatePhoneDto } from './dto/phone.dto';
 
 @Injectable()
-export class PhoneServiceImpl implements PhoneService {
-  private readonly logger = new Logger(PhoneServiceImpl.name);
+export class PhoneService implements PhoneServiceInterface {
+  private readonly logger = new Logger(PhoneService.name);
 
-  constructor(private readonly phoneRepository: PhoneRepository) {}
+  constructor(
+    @Inject(PhoneRepository)
+    private readonly phoneRepository: PhoneRepository,
+  ) {}
 
   async create(createPhoneDto: CreatePhoneDto): Promise<Phone> {
     this.logger.debug('PhoneService.create: Called');

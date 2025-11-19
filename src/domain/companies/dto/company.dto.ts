@@ -1,22 +1,19 @@
 import { PaginatedList } from '../../../shared/interfaces/entities/pagination.interface';
 
-export interface CreateCompanyRequest {
-  name: string;
-  address?: string;
+export interface CreateCompanyDto {
+  cnpj: string;
+  userId: string;
 }
 
-export interface UpdateCompanyRequest {
-  name?: string;
-  address?: string;
+export interface UpdateCompanyDto {
+  cnpj?: string;
 }
 
-export interface CompanyResponse {
+export interface CompanyOutputDto {
   id: string;
-  name: string;
-  address?: string;
-  isActive: boolean;
+  cnpj: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface CompanyListResponse extends PaginatedList<CompanyResponse> {} // eslint-disable-line
+export type CompaniesOutputDto = PaginatedList<CompanyOutputDto>;

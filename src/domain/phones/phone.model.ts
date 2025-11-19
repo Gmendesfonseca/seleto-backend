@@ -7,7 +7,7 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import { Person } from '../users/user.model';
+import { User } from '../users/user.model';
 
 export enum PhoneType {
   MOBILE = 'mobile',
@@ -21,12 +21,12 @@ export class Phone extends Model<Phone> {
   @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
   id: string;
 
-  @ForeignKey(() => Person)
-  @Column({ type: DataType.UUID, allowNull: false })
-  personId: string;
+  @ForeignKey(() => User)
+  @Column({ type: DataType.UUID, allowNull: false, field: 'user_id' })
+  userId: string;
 
-  @BelongsTo(() => Person)
-  person: Person;
+  @BelongsTo(() => User)
+  user: User;
 
   @Column({ type: DataType.STRING(20), allowNull: false })
   number: string;

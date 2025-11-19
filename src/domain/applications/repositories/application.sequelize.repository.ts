@@ -46,7 +46,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
       include: [
         {
           model: Person,
-          attributes: ['id', 'name', 'avatar'],
+          attributes: ['id', 'cpf'],
         },
         {
           model: Vacancy,
@@ -63,7 +63,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
       include: [
         {
           model: Person,
-          attributes: ['id', 'name', 'avatar'],
+          attributes: ['id', 'cpf'],
         },
         {
           model: Vacancy,
@@ -93,7 +93,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
       include: [
         {
           model: Person,
-          attributes: ['id', 'name', 'avatar'],
+          attributes: ['id', 'cpf'],
         },
       ],
     });

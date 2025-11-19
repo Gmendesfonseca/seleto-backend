@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Person } from '../users/user.model';
+import { Person } from './person.model';
 import { PersonController } from './person.controller';
-import { PersonServiceImpl } from './person.service';
+import { PersonService } from './person.service';
 import { PersonSequelizeRepository } from './repositories/person.sequelize.repository';
 import { PersonRepository } from './repositories/person.repository.interface';
-import { PersonService } from './interfaces/person.service.interface';
+import { PersonServiceInterface } from './interfaces/person.service.interface';
 
 @Module({
   imports: [SequelizeModule.forFeature([Person])],
@@ -16,10 +16,10 @@ import { PersonService } from './interfaces/person.service.interface';
       useClass: PersonSequelizeRepository,
     },
     {
-      provide: PersonService,
-      useClass: PersonServiceImpl,
+      provide: PersonServiceInterface,
+      useClass: PersonService,
     },
   ],
-  exports: [PersonService, PersonRepository, SequelizeModule],
+  exports: [PersonServiceInterface, PersonRepository, SequelizeModule],
 })
 export class PersonModule {}

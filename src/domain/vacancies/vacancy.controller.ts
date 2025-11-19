@@ -11,14 +11,14 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { VacancyService } from './interfaces/vacancy.service.interface';
+import { VacancyServiceInterface } from './interfaces/vacancy.service.interface';
 import { CreateVacancyDto, UpdateVacancyDto, VacancyQueryDto } from './dto/vacancy.dto';
 
 @Controller('vacancies')
 export class VacancyController {
   private readonly logger = new Logger(VacancyController.name);
 
-  constructor(private readonly vacancyService: VacancyService) {}
+  constructor(private readonly vacancyService: VacancyServiceInterface) {}
 
   @Get()
   async findAll(@Query() filters: VacancyQueryDto) {

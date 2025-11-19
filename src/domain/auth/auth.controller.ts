@@ -29,18 +29,18 @@ export class AuthController {
   @Post('signin')
   @Public()
   @HttpCode(HttpStatus.OK)
-  async signIn(@Body(ValidationPipe) { email, password }: SignInDto) {
-    this.logger.debug('SignIn: called', { email });
-    // The service expects email but we receive email, so we pass email as email
-    return this.service.signIn(email, password);
+  async signIn(@Body(ValidationPipe) signInDto: SignInDto) {
+    this.logger.debug('SignIn: called', { signInDto });
+    const result = await this.service.signIn(signInDto.email, signInDto.password);
+    return result;
   }
 
   @Post('signup')
   @Public()
   @HttpCode(HttpStatus.CREATED)
-  async signUp(@Body(ValidationPipe) { password, email, type, username, name }: SignUpDto) {
-    this.logger.debug('SignUp: called', { username });
-    await this.service.signUp({ username, password, email, type, name });
+  async signUp(@Body(ValidationPipe) input: SignUpDto) {
+    this.logger.debug('SignUp: called', { input });
+    await this.service.signUp(input);
   }
 
   @Patch('forgot-password')

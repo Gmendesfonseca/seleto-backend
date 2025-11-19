@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { PersonServiceImpl } from './person.service';
+import { PersonService } from './person.service';
 import { PersonRepository } from './repositories/person.repository.interface';
 import { Person, PersonFilters, Address } from './interfaces/person.interface';
 import {
@@ -12,7 +12,7 @@ import {
 } from './dto/person.dto';
 
 describe('PersonService', () => {
-  let service: PersonServiceImpl;
+  let service: PersonService;
   let repository: jest.Mocked<PersonRepository>;
 
   const mockAddress: Address = {
@@ -50,7 +50,7 @@ describe('PersonService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        PersonServiceImpl,
+        PersonService,
         {
           provide: PersonRepository,
           useValue: mockRepository,
@@ -58,7 +58,7 @@ describe('PersonService', () => {
       ],
     }).compile();
 
-    service = module.get<PersonServiceImpl>(PersonServiceImpl);
+    service = module.get<PersonService>(PersonService);
     repository = module.get(PersonRepository);
   });
 
@@ -68,7 +68,7 @@ describe('PersonService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-    expect(service).toBeInstanceOf(PersonServiceImpl);
+    expect(service).toBeInstanceOf(PersonService);
   });
 
   describe('create', () => {

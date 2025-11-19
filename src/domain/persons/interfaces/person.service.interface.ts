@@ -7,13 +7,12 @@ import {
   AddEducationDto,
 } from '../dto/person.dto';
 
-export abstract class PersonService {
+export abstract class PersonServiceInterface {
   abstract create(createPersonDto: CreatePersonDto): Promise<Person>;
   abstract findAll(filters?: PersonFilters): Promise<Person[]>;
   abstract findOne(id: string): Promise<Person | null>;
   abstract update(id: string, updatePersonDto: UpdatePersonDto): Promise<Person>;
   abstract remove(id: string): Promise<void>;
-  abstract findByUser(userId: string): Promise<Person | null>;
   abstract addCompetence(personId: string, addCompetenceDto: AddCompetenceDto): Promise<Person>;
   abstract removeCompetence(personId: string, competenceId: string): Promise<Person>;
   abstract addWorkExperience(

@@ -1,7 +1,7 @@
 import { PhoneType } from '../phone.model';
 
 export class CreatePhoneDto {
-  personId: string;
+  userId: string;
   number: string;
   type: PhoneType;
   isPrimary?: boolean;
@@ -15,7 +15,7 @@ export class UpdatePhoneDto {
 
 export class PhoneResponseDto {
   id: string;
-  personId: string;
+  userId: string;
   number: string;
   type: PhoneType;
   isPrimary: boolean;

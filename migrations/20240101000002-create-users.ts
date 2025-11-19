@@ -9,6 +9,10 @@ export = {
         primaryKey: true,
         allowNull: false,
       },
+      avatar: {
+        type: Sequelize.STRING(255),
+        allowNull: true,
+      },
       name: {
         type: Sequelize.STRING(255),
         allowNull: false,
@@ -42,26 +46,6 @@ export = {
         allowNull: false,
         defaultValue: true,
       },
-      person_id: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: 'persons',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
-      },
-      company_id: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: 'companies',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
-      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -84,8 +68,6 @@ export = {
     await query.addIndex('users', ['status']);
     await query.addIndex('users', ['type']);
     await query.addIndex('users', ['is_verified']);
-    await query.addIndex('users', ['person_id']);
-    await query.addIndex('users', ['company_id']);
     await query.addIndex('users', ['deleted_at']);
   },
 

@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Company } from '../users/user.model';
+import { Company } from './company.model';
 import { CompanyController } from './company.controller';
-import { CompanyServiceImpl } from './company.service';
+import { CompanyService } from './company.service';
 import { CompanySequelizeRepository } from './repositories/company.sequelize.repository';
 import { CompanyRepository } from './repositories/company.repository.interface';
-import { CompanyService } from './interfaces/company.service.interface';
+import { CompanyServiceInterface } from './interfaces/company.service.interface';
 
 @Module({
   imports: [SequelizeModule.forFeature([Company])],
@@ -16,10 +16,10 @@ import { CompanyService } from './interfaces/company.service.interface';
       useClass: CompanySequelizeRepository,
     },
     {
-      provide: CompanyService,
-      useClass: CompanyServiceImpl,
+      provide: CompanyServiceInterface,
+      useClass: CompanyService,
     },
   ],
-  exports: [CompanyService, CompanyRepository, SequelizeModule],
+  exports: [CompanyServiceInterface, CompanyRepository, SequelizeModule],
 })
 export class CompanyModule {}

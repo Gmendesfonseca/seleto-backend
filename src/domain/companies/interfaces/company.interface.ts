@@ -1,8 +1,7 @@
 export interface Company {
   id: string;
-  name: string;
-  address: string | null;
+  cnpj: string;
+  user_id: string;
   createdAt: Date;
   updatedAt: Date;
-  isActive: boolean;
 }

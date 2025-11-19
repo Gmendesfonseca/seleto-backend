@@ -12,7 +12,7 @@ import {
   HttpStatus,
   Patch,
 } from '@nestjs/common';
-import { PhoneService } from './interfaces/phone.service.interface';
+import { PhoneServiceInterface } from './interfaces/phone.service.interface';
 import { CreatePhoneDto, UpdatePhoneDto } from './dto/phone.dto';
 import { PhoneType } from './phone.model';
 
@@ -20,7 +20,7 @@ import { PhoneType } from './phone.model';
 export class PhoneController {
   private readonly logger = new Logger(PhoneController.name);
 
-  constructor(private readonly phoneService: PhoneService) {}
+  constructor(private readonly phoneService: PhoneServiceInterface) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

@@ -8,7 +8,7 @@ import {
   Table,
   HasMany,
 } from 'sequelize-typescript';
-import { Company } from '../users/user.model';
+import { Company } from '../companies/company.model';
 import { Application } from '../applications/application.model';
 
 export enum VacancyStatus {

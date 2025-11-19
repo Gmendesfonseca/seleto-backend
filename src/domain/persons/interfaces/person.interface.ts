@@ -1,9 +1,7 @@
 export interface Person {
   id: string;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+  cpf: string;
+  user_id: string;
   phone?: string;
   dateOfBirth?: Date;
   address?: Address;
@@ -55,9 +53,7 @@ export interface Education {
 }
 
 export interface PersonFilters {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
+  cpf?: string;
   competences?: string[];
   location?: string;
 }

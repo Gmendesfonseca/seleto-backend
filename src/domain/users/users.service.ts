@@ -3,7 +3,7 @@ import {
   UsersServiceInterface,
   UpdateUsernameInput,
   UserInterface,
-  UsersRepositoryInterface,
+  UserRepositoryInterface,
   ActivateInput,
   ChangeEmailInput,
   RequestChangeEmailInput,
@@ -20,53 +20,93 @@ export class UsersService implements UsersServiceInterface {
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
     private readonly secretService: SecretServiceInterface,
-    private readonly usersRepository: UsersRepositoryInterface,
+    private readonly repository: UserRepositoryInterface,
   ) {}
 
-  async findOne(id: string): Promise<UserInterface | null> {
+  async findById(id: string): Promise<UserInterface | null> {
     this.logger.debug('UserService.findOne: Called');
-    return this.usersRepository.findOne(id);
+    return this.repository.findOne({ id });
   }
 
   async findAll(filters?: any): Promise<{ users: UserInterface[]; total: number }> {
     this.logger.debug('UserService.findAll: Called');
-    return this.usersRepository.findAll(filters);
+    return this.repository.findAll(filters);
   }
 
-  async findOneByEmail(email: string): Promise<UserInterface | null> {
-    this.logger.debug('UserService.findOneByEmail: Called');
-    return this.usersRepository.findOneByEmail(email);
+  async findByEmail(email: string): Promise<UserInterface | null> {
+    this.logger.debug('UserService.findByEmail: Called');
+    return this.repository.findOne({ email });
   }
 
-  async findOneByCredentials(credentials: {
+  async findByCredentials({
+    email,
+    password,
+  }: {
     email: string;
     password: string;
   }): Promise<UserInterface | null> {
     this.logger.debug('UserService.findOneByCredentials: Called');
-    return this.usersRepository.findOneByCredentials(credentials);
+    return this.repository.findOne({
+      email,
+      password,
+    });
   }
 
   async activate(input: ActivateInput): Promise<void> {
     this.logger.debug('UserService.activate: Called');
-    return this.usersRepository.activate(input);
+    await this.repository.update(input.id, { status: 'ACTIVE' });
   }
 
   async updateUsername({ id, username }: UpdateUsernameInput): Promise<void> {
     this.logger.debug('UserService.updateUsername: Called');
-    const user = await this.usersRepository.findOne(id);
+    const user = await this.repository.findOne({ id });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    await this.usersRepository.updateUsername({ id, username });
+    await this.repository.update(id, { username });
+  }
+
+  async updatePasswordBySecret(secretKey: string, hashedPassword: string): Promise<void> {
+    this.logger.debug('UserService.updatePasswordBySecret: Called');
+
+    const id = await this.secretService.getUserIdBySecret(secretKey, 'PASSWORD');
+
+    if (!id) {
+      throw new UnauthorizedException('Invalid or expired secret key');
+    }
+
+    await this.repository.update(id, {
+      password: hashedPassword,
+    });
+
+    this.logger.debug(`Password updated successfully for user: ${id}`);
+  }
+
+  async update(id: string, input: any): Promise<UserInterface> {
+    this.logger.debug('UserService.update: Called');
+    const user = await this.repository.findOne({ id });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updateData = Object.entries(input)
+      .filter(([_, value]) => value !== undefined)
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+    if (Object.keys(updateData).length === 0) {
+      return user;
+    }
+
+    return this.repository.update(id, updateData);
   }
 
   async requestChangeEmail({ email, id }: RequestChangeEmailInput): Promise<void> {
     this.logger.debug('UserService.updateEmail: Called');
-    const isValid = await this.usersRepository.validateEmail({ email });
-    if (!isValid) {
+    const hasUser = await this.repository.findOne({ email });
+    if (hasUser) {
       throw new UnauthorizedException('Email already in use');
     }
-    const user = await this.usersRepository.findOne(id);
+    const user = await this.repository.findOne({ id });
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
@@ -86,7 +126,7 @@ export class UsersService implements UsersServiceInterface {
     });
   }
 
-  async changeEmail({ secret, ...input }: ChangeEmailInput): Promise<void> {
+  async changeEmail({ secret, email, id }: ChangeEmailInput): Promise<void> {
     this.logger.debug('UserService.changeEmail: Called');
     const isValid = await this.secretService.validateSecret({ secret, type: 'EMAIL' });
     if (!isValid) {
@@ -94,7 +134,9 @@ export class UsersService implements UsersServiceInterface {
     }
 
     try {
-      await this.usersRepository.updateEmail(input);
+      await this.repository.update(id, {
+        email,
+      });
       await this.secretService.deleteSecret(secret);
     } catch (error) {
       this.logger.error('Failed to update email:', error.message);
@@ -102,51 +144,13 @@ export class UsersService implements UsersServiceInterface {
     }
   }
 
-  async createUser(input: any): Promise<UserInterface> {
+  async create(input: any): Promise<UserInterface> {
     this.logger.debug('UserService.createUser: Called');
-    return this.usersRepository.createUser(input);
+    return this.repository.create(input);
   }
 
   async delete(id: string): Promise<void> {
     this.logger.debug('UserService.remove: Called');
-    await this.usersRepository.delete(id);
-  }
-
-  async updatePasswordBySecret(secretKey: string, hashedPassword: string): Promise<void> {
-    this.logger.debug('UserService.updatePasswordBySecret: Called');
-
-    // Validate the secret key and get the associated userId
-    const userId = await this.secretService.getUserIdBySecret(secretKey, 'PASSWORD');
-
-    if (!userId) {
-      throw new UnauthorizedException('Invalid or expired secret key');
-    }
-
-    // Update the user's password
-    await this.usersRepository.updatePassword({
-      id: userId,
-      password: hashedPassword,
-    });
-
-    this.logger.debug(`Password updated successfully for user: ${userId}`);
-  }
-
-  async updateUser(id: string, input: any): Promise<UserInterface> {
-    this.logger.debug('UserService.updateUser: Called');
-    const user = await this.usersRepository.findOne(id);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    // Filter out undefined values
-    const updateData = Object.entries(input)
-      .filter(([_, value]) => value !== undefined)
-      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
-
-    if (Object.keys(updateData).length === 0) {
-      return user;
-    }
-
-    return this.usersRepository.update(id, updateData);
+    await this.repository.delete(id);
   }
 }

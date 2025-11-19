@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  ProcessTemplateService as IProcessTemplateService,
+  ProcessTemplateServiceInterface,
   ProcessTemplate,
   ProcessTemplateFilters,
 } from './interfaces/process-template.service.interface';
 
 @Injectable()
-export class ProcessTemplateServiceImpl implements IProcessTemplateService {
-  private readonly logger = new Logger(ProcessTemplateServiceImpl.name);
+export class ProcessTemplateService implements ProcessTemplateServiceInterface {
+  private readonly logger = new Logger(ProcessTemplateService.name);
 
   async findAll(filters?: ProcessTemplateFilters): Promise<{
     templates: ProcessTemplate[];

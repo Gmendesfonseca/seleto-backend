@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { StepService } from './interfaces/step.service.interface';
 import { StepRepository } from './repositories/step.repository.interface';
 import { CreateStepDto, UpdateStepDto } from './dto/step.dto';
@@ -8,7 +8,10 @@ import { Step, StepFilters } from './interfaces/step.interface';
 export class StepServiceImpl implements StepService {
   private readonly logger = new Logger(StepServiceImpl.name);
 
-  constructor(private readonly stepRepository: StepRepository) {}
+  constructor(
+    @Inject(StepRepository)
+    private readonly stepRepository: StepRepository,
+  ) {}
 
   async create(createStepDto: CreateStepDto): Promise<Step> {
     this.logger.debug('StepService.create: Called');

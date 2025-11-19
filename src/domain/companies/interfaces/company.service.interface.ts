@@ -1,73 +1,29 @@
 import {
-  CreateCompanyRequest,
-  UpdateCompanyRequest,
-  CompanyResponse,
-  CompanyListResponse,
+  CompaniesOutputDto,
+  CompanyOutputDto,
+  CreateCompanyDto,
+  UpdateCompanyDto,
 } from '../dto/company.dto';
 import { PaginationParams, SearchParams } from '../../../shared/interfaces/entities';
 
-export abstract class CompanyService {
-  /**
-   * Create a new company
-   */
-  abstract create(request: CreateCompanyRequest): Promise<CompanyResponse>;
-
-  /**
-   * Get company by ID
-   */
-  abstract findById(companyId: string): Promise<CompanyResponse>;
-
-  /**
-   * Update company information
-   */
-  abstract update(companyId: string, request: UpdateCompanyRequest): Promise<CompanyResponse>;
-
-  /**
-   * Delete company by ID
-   */
-  abstract delete(companyId: string): Promise<void>;
-
-  /**
-   * Get paginated list of companies
-   */
+export abstract class CompanyServiceInterface {
+  abstract findById(companyId: string): Promise<CompanyOutputDto>;
   abstract findAll(
     pagination: PaginationParams,
     search?: SearchParams,
-  ): Promise<CompanyListResponse>;
-
-  /**
-   * Check if company exists by name
-   */
-  abstract existsByName(name: string): Promise<boolean>;
-
-  /**
-   * Get company users count
-   */
-  abstract getUsersCount(companyId: string): Promise<number>;
-
-  /**
-   * Activate/Deactivate company
-   */
+  ): Promise<CompaniesOutputDto>;
+  abstract create(request: CreateCompanyDto): Promise<CompanyOutputDto>;
+  abstract update(companyId: string, request: UpdateCompanyDto): Promise<CompanyOutputDto>;
+  abstract delete(companyId: string): Promise<void>;
+  abstract count(companyId: string): Promise<number>;
   abstract setActiveStatus(companyId: string, isActive: boolean): Promise<void>;
-
-  /**
-   * Get company vacancies with filters
-   */
-  abstract getVacancies(
+  abstract findVacancies(
     companyId: string,
     filters?: { status?: string; area?: string; page?: number; limit?: number },
   ): Promise<any[]>;
-
-  /**
-   * Get company users with filters
-   */
-  abstract getUsers(
+  abstract findUsers(
     companyId: string,
     filters?: { type?: string; status?: string; page?: number; limit?: number },
   ): Promise<any[]>;
-
-  /**
-   * Get company statistics
-   */
-  abstract getStatistics(companyId: string): Promise<any>;
+  abstract statistics(companyId: string): Promise<any>;
 }

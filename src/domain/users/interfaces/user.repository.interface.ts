@@ -1,68 +1,49 @@
-import { User, Person, Company } from '../user.model';
+import { User } from '../user.model';
 
-export interface GetByCredentialsInputRepository {
-  email: string;
-  password: string;
-}
+type FindAllDto = {
+  email?: string;
+  username?: string;
+  status?: string;
+  type?: string;
+  isVerified?: boolean;
+  page?: number;
+  limit?: number;
+};
 
-export interface CreateUserInputRepository {
+type FindOneDto = {
+  id?: string;
+  email?: string;
+  username?: string;
+  password?: string;
+};
+
+type CreateDto = {
   email: string;
   password: string;
   username: string;
+  name: string;
   type: string;
-  name: string;
-  company: Company | null;
-  person: Person | null;
-}
+};
 
-export interface CreatePersonInputRepository {
-  userId: string;
-  name: string;
-  avatar: string | null;
-}
+type UpdateDto = Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>;
 
-export interface CreateCompanyInputRepository {
-  userId: string;
-  name: string;
-  avatar: string | null;
-}
+type UserDto = User | null;
 
-export interface UpdateUsernameInputRepository {
-  id: string;
-  username: string;
-}
+type UsersDto = { users: User[]; total: number };
 
-export interface UpdatePasswordInputRepository {
-  id: string;
-  password: string;
-}
-
-export interface UpdateEmailInputRepository {
-  id: string;
-  email: string;
-}
-
-export interface ActivateInputRepository {
-  id: string;
-}
-
-export interface ValidateEmailInput {
-  email: string;
-}
-
-export abstract class UsersRepositoryInterface {
-  abstract findOne(id: string): Promise<User | null>;
-  abstract findAll(filters?: any): Promise<{ users: User[]; total: number }>;
-  abstract findOneByEmail(email: string): Promise<User | null>;
-  abstract findOneByCredentials(input: GetByCredentialsInputRepository): Promise<User | null>;
-  abstract activate(input: ActivateInputRepository): Promise<void>;
-  abstract createUser(input: CreateUserInputRepository): Promise<User>;
-  abstract createPerson(input: CreatePersonInputRepository): Promise<Person>;
-  abstract createCompany(input: CreateCompanyInputRepository): Promise<Company>;
-  abstract updateUsername(input: UpdateUsernameInputRepository): Promise<User>;
-  abstract updatePassword(input: UpdatePasswordInputRepository): Promise<void>;
-  abstract updateEmail(input: UpdateEmailInputRepository): Promise<void>;
-  abstract update(id: string, data: Partial<User>): Promise<User>;
-  abstract validateEmail(input: ValidateEmailInput): Promise<boolean>;
+export abstract class UserRepositoryInterface {
+  abstract findOne(data: FindOneDto): Promise<UserDto>;
+  abstract findAll(data?: FindAllDto): Promise<UsersDto>;
+  abstract create(input: CreateDto): Promise<User>;
+  abstract update(id: string, data: UpdateDto): Promise<User>;
   abstract delete(id: string): Promise<void>;
 }
+
+export {
+  FindOneDto as FindUserDto,
+  CreateDto as CreateUserDto,
+  UpdateDto as UpdateUserDto,
+  FindAllDto as FindUsersDto,
+  UserDto as UserOutputDto,
+  UsersDto as UsersOutputDto,
+};

@@ -18,6 +18,7 @@ import { RefreshTokenRepository } from './repositories/refresh-token.repository.
 import { RefreshTokenSequelizeRepository } from './repositories/refresh-token.sequelize.repository';
 import { PasswordResetTokenRepository } from './repositories/password-reset-token.repository.interface';
 import { PasswordResetTokenSequelizeRepository } from './repositories/password-reset-token.sequelize.repository';
+import { PhoneModule } from '../phones';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PasswordResetTokenSequelizeRepository } from './repositories/password-r
     MailerModule,
     CompanyModule,
     PersonModule,
+    PhoneModule,
     SequelizeModule.forFeature([RefreshToken, PasswordResetToken]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

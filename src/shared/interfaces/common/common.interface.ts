@@ -1,6 +1,5 @@
 import { PaginationParams } from '../entities/pagination.interface';
 
-// Common response interfaces
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -21,7 +20,6 @@ export interface SuccessResponse<T = any> {
   message?: string;
 }
 
-// Common filter interfaces
 export interface DateFilter {
   startDate?: string;
   endDate?: string;
@@ -33,7 +31,6 @@ export interface BaseEntity {
   updatedAt: Date;
 }
 
-// Sort options
 export interface SortOptions {
   field: string;
   direction: 'ASC' | 'DESC';

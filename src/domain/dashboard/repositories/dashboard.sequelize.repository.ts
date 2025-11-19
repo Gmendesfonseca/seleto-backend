@@ -4,7 +4,7 @@ import { DashboardRepository } from './dashboard.repository.interface';
 import { DashboardFilters } from '../interfaces/dashboard.interface';
 import { Application } from '../../applications/application.model';
 import { Vacancy } from '../../vacancies/vacancy.model';
-import { Company } from '../../users/user.model';
+import { Company } from '../../companies/company.model';
 import { User } from '../../users/user.model';
 import { Op } from 'sequelize';
 

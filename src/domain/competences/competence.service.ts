@@ -12,48 +12,48 @@ import {
 export class CompetenceService implements CompetenceServiceInterface {
   private readonly logger = new Logger(CompetenceService.name);
 
-  constructor(private readonly competenceRepository: CompetenceRepository) {}
+  constructor(private readonly repository: CompetenceRepository) {}
 
-  async create(createCompetenceDto: CreateCompetenceDto): Promise<Competence> {
-    this.logger.debug('CompetenceService.create: Called');
-    return this.competenceRepository.create(createCompetenceDto);
+  async findOne(id: string): Promise<Competence | null> {
+    this.logger.debug('FindOne: Called');
+    return this.repository.findOne(id);
   }
 
   async findAll(filters?: CompetenceFilters): Promise<Competence[]> {
-    this.logger.debug('CompetenceService.findAll: Called');
-    return this.competenceRepository.findAll(filters);
+    this.logger.debug('FindAll: Called');
+    return this.repository.findAll(filters);
   }
 
-  async findOne(id: string): Promise<Competence | null> {
-    this.logger.debug('CompetenceService.findOne: Called');
-    return this.competenceRepository.findOne(id);
+  async create(createCompetenceDto: CreateCompetenceDto): Promise<Competence> {
+    this.logger.debug('Create: Called');
+    return this.repository.create(createCompetenceDto);
   }
 
   async update(id: string, updateCompetenceDto: UpdateCompetenceDto): Promise<Competence> {
-    this.logger.debug('CompetenceService.update: Called');
-    const competence = await this.competenceRepository.findOne(id);
+    this.logger.debug('Update: Called');
+    const competence = await this.repository.findOne(id);
     if (!competence) {
       throw new NotFoundException(`Competence with id ${id} not found`);
     }
-    return this.competenceRepository.update(id, updateCompetenceDto);
+    return this.repository.update(id, updateCompetenceDto);
   }
 
   async remove(id: string): Promise<void> {
-    this.logger.debug('CompetenceService.remove: Called');
-    const competence = await this.competenceRepository.findOne(id);
+    this.logger.debug('Remove: Called');
+    const competence = await this.repository.findOne(id);
     if (!competence) {
       throw new NotFoundException(`Competence with id ${id} not found`);
     }
-    await this.competenceRepository.delete(id);
+    await this.repository.delete(id);
   }
 
   async findByCategory(category: CompetenceCategory): Promise<Competence[]> {
-    this.logger.debug('CompetenceService.findByCategory: Called');
-    return this.competenceRepository.findByCategory(category);
+    this.logger.debug('FindByCategory: Called');
+    return this.repository.findByCategory(category);
   }
 
   async searchByName(name: string): Promise<Competence[]> {
-    this.logger.debug('CompetenceService.searchByName: Called');
-    return this.competenceRepository.searchByName(name);
+    this.logger.debug('SearchByName: Called');
+    return this.repository.searchByName(name);
   }
 }

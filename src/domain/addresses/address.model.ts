@@ -7,7 +7,8 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import { Person, Company } from '../users/user.model';
+import { Person } from '../persons/person.model';
+import { Company } from '../companies/company.model';
 
 @Table({ tableName: 'addresses', underscored: true, paranoid: true })
 export class Address extends Model<Address> {

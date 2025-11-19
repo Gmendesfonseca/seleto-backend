@@ -1,7 +1,7 @@
 import { VacancyTemplate, VacancyTemplateFilters } from './vacancy-template.interface';
 import { CreateVacancyTemplateDto, UpdateVacancyTemplateDto } from '../dto/vacancy-template.dto';
 
-export abstract class VacancyTemplateService {
+export abstract class VacancyTemplateServiceInterface {
   abstract create(createVacancyTemplateDto: CreateVacancyTemplateDto): Promise<VacancyTemplate>;
   abstract findAll(filters?: VacancyTemplateFilters): Promise<VacancyTemplate[]>;
   abstract findOne(id: string): Promise<VacancyTemplate | null>;

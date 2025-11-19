@@ -1,13 +1,7 @@
-import {
-  BelongsTo,
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  PrimaryKey,
-  Table,
-} from 'sequelize-typescript';
+import { HasOne, Column, DataType, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { UserInterface } from './interfaces';
+import { Person } from '../persons/person.model';
+import { Company } from '../companies/company.model';
 
 @Table({ tableName: 'users', underscored: true, paranoid: true })
 export class User extends Model<User> implements UserInterface {
@@ -44,43 +38,18 @@ export class User extends Model<User> implements UserInterface {
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   isVerified: boolean;
 
-  @ForeignKey(() => Person)
-  @Column({ type: DataType.UUID, allowNull: true })
-  person_id: string;
-
-  @ForeignKey(() => Company)
-  @Column({ type: DataType.UUID, allowNull: true })
-  company_id: string;
-
-  @BelongsTo(() => Person)
+  @HasOne(() => Person, { foreignKey: 'user_id' })
   person: Person | null;
 
-  @BelongsTo(() => Company)
+  @HasOne(() => Company, { foreignKey: 'user_id' })
   company: Company | null;
-}
 
-@Table({ tableName: 'companies', underscored: true, paranoid: true })
-export class Company extends Model<Company> {
-  @PrimaryKey
-  @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
-  id: string;
+  @Column({ type: DataType.DATE, allowNull: false })
+  createdAt: Date;
 
-  @Column({ type: DataType.STRING(255), allowNull: false })
-  name: string;
+  @Column({ type: DataType.DATE, allowNull: false })
+  updatedAt: Date;
 
-  @Column({ type: DataType.TEXT, allowNull: true })
-  address: string | null;
-}
-
-@Table({ tableName: 'persons', underscored: true, paranoid: true })
-export class Person extends Model<Person> {
-  @PrimaryKey
-  @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
-  id: string;
-
-  @Column({ type: DataType.STRING(255), allowNull: false })
-  name: string;
-
-  @Column({ type: DataType.TEXT, allowNull: true })
-  address: string | null;
+  @Column({ type: DataType.DATE, allowNull: true })
+  deletedAt: Date | null;
 }

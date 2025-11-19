@@ -14,14 +14,11 @@ async function bootstrap() {
   const corsOrigins =
     corsOriginsString === '*' ? ['*'] : corsOriginsString.split(',').map((origin) => origin.trim());
 
-  console.log('CORS Origins configured:', corsOrigins);
+  app.useLogger(new ConsoleLogger('Seleto Backend', { logLevels }));
 
-  app.useLogger(new ConsoleLogger('Chat Backend', { logLevels }));
-
-  // Set global prefix for all routes except health checks
   const apiPrefix = configService.get<string>('API_PREFIX') ?? 'api/v1';
   app.setGlobalPrefix(apiPrefix, {
-    exclude: ['/health', '/health/(.*)'],
+    exclude: ['/health', '/health/*path'],
   });
 
   app.useGlobalPipes(
