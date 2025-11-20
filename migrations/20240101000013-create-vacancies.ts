@@ -57,11 +57,6 @@ export = {
         type: Sequelize.ENUM('entry', 'junior', 'mid', 'senior', 'lead'),
         allowNull: false,
       },
-      remote: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-      },
       status: {
         type: Sequelize.ENUM('draft', 'published', 'paused', 'closed', 'expired'),
         allowNull: false,

@@ -103,9 +103,6 @@ export class Vacancy extends Model<Vacancy> {
   })
   level: ExperienceLevel;
 
-  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
-  remote: boolean;
-
   @Column({
     type: DataType.ENUM(...Object.values(VacancyStatus)),
     allowNull: false,

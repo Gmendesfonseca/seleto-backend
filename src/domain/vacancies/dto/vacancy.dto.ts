@@ -1,12 +1,4 @@
-import {
-  IsBoolean,
-  IsDate,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsArray,
-} from 'class-validator';
+import { IsDate, IsEnum, IsNumber, IsString, IsArray, ValidateIf } from 'class-validator';
 import {
   VacancyType,
   ExperienceLevel,
@@ -30,16 +22,16 @@ export class CreateVacancyDto {
   location: string;
 
   @IsNumber()
-  @IsOptional()
-  salaryMin?: number;
+  @ValidateIf((value) => value !== null)
+  salaryMin: number | null;
 
   @IsNumber()
-  @IsOptional()
-  salaryMax?: number;
+  @ValidateIf((value) => value !== null)
+  salaryMax: number | null;
 
   @IsString()
-  @IsOptional()
-  currency?: string;
+  @ValidateIf((value) => value !== null)
+  currency: string | null;
 
   @IsEnum(VacancyType)
   type: VacancyType;
@@ -53,12 +45,9 @@ export class CreateVacancyDto {
   @IsEnum(ExperienceLevel)
   level: ExperienceLevel;
 
-  @IsBoolean()
-  remote: boolean;
-
-  @IsOptional()
   @IsArray()
-  benefits?: string[];
+  @ValidateIf((value) => value !== null)
+  benefits: string[] | null;
 
   @IsArray()
   requirements: string[];
@@ -66,9 +55,13 @@ export class CreateVacancyDto {
   @IsArray()
   responsibilities: string[];
 
-  @IsOptional()
   @IsDate()
-  expirationDate?: DateTime;
+  @ValidateIf((value) => value !== null)
+  publicationDate: DateTime | null;
+
+  @IsDate()
+  @ValidateIf((value) => value !== null)
+  expirationDate: DateTime | null;
 }
 
 export class UpdateVacancyDto {
