@@ -27,6 +27,10 @@ import { PersonFormation } from '../../domain/persons/person-formation.model';
 import { VacancyStep } from '../../domain/vacancies/vacancy-step.model';
 import { VacancyResponsible } from '../../domain/vacancies/vacancy-responsible.model';
 import { StepCompetence } from '../../domain/steps/step-competence.model';
+import { VacancyBenefit } from 'src/domain/vacancies/vacancy-benefit.model';
+import { VacancyRequirement } from 'src/domain/vacancies/vacancy-requirement.model';
+import { VacancyResponsibility } from 'src/domain/vacancies/vacancy-responsibility.model';
+import { CandidateVacancyMatch } from 'src/domain/matching/candidate-vacancy-match.model';
 
 const models = [
   User,
@@ -52,6 +56,10 @@ const models = [
   VacancyStep,
   VacancyResponsible,
   StepCompetence,
+  VacancyBenefit,
+  VacancyRequirement,
+  VacancyResponsibility,
+  CandidateVacancyMatch,
 ];
 
 @Module({

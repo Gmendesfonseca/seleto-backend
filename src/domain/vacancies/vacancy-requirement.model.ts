@@ -20,7 +20,7 @@ export class VacancyRequirement extends Model<VacancyRequirement> {
   vacancy_id: string;
 
   @BelongsTo(() => Vacancy)
-  vacancy: Vacancy;
+  vacancy: () => Vacancy;
 
   @Column({ type: DataType.TEXT, allowNull: false })
   requirement: string;

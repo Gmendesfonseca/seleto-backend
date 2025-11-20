@@ -20,7 +20,7 @@ export class VacancyResponsibility extends Model<VacancyResponsibility> {
   vacancy_id: string;
 
   @BelongsTo(() => Vacancy)
-  vacancy: Vacancy;
+  vacancy: () => Vacancy;
 
   @Column({ type: DataType.TEXT, allowNull: false })
   responsibility: string;
