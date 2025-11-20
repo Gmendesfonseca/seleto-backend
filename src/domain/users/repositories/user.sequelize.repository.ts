@@ -15,6 +15,14 @@ import { WhereOptions } from 'sequelize';
 @Injectable()
 export class UserSequelizeRepository implements UserRepositoryInterface {
   private readonly logger = new Logger(UserSequelizeRepository.name);
+  private readonly excludeAttributes = [
+    'password',
+    'createdAt',
+    'updatedAt',
+    'status',
+    'isVerified',
+    'deletedAt',
+  ];
 
   constructor(@InjectModel(User) private readonly model: typeof User) {}
 
@@ -37,6 +45,7 @@ export class UserSequelizeRepository implements UserRepositoryInterface {
 
     return this.model.findOne({
       where,
+      attributes: { exclude: this.excludeAttributes },
     });
   }
 
@@ -68,6 +77,7 @@ export class UserSequelizeRepository implements UserRepositoryInterface {
       where,
       limit,
       offset,
+      attributes: { exclude: this.excludeAttributes },
     });
 
     return {

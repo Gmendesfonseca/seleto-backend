@@ -46,6 +46,13 @@ export class AuthService implements AuthServiceInterface {
     const payload = {
       sub: user.id,
       username: user.username,
+      config: {
+        auth2f: false,
+        default_interface: 'LIGHT',
+        default_language: 'pt',
+        default_timezone: 'UTC',
+        master: false,
+      },
     };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
