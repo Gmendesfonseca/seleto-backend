@@ -7,7 +7,13 @@ import {
   IsString,
   IsArray,
 } from 'class-validator';
-import { VacancyType, ExperienceLevel, VacancyStatus } from '../interfaces/vacancy.interface';
+import {
+  VacancyType,
+  ExperienceLevel,
+  VacancyStatus,
+  ContractType,
+  WorkModeType,
+} from '../interfaces/vacancy.interface';
 import { DateTime } from 'luxon';
 
 export class CreateVacancyDto {
@@ -37,6 +43,12 @@ export class CreateVacancyDto {
 
   @IsEnum(VacancyType)
   type: VacancyType;
+
+  @IsEnum(WorkModeType)
+  workMode: WorkModeType;
+
+  @IsEnum(ContractType)
+  contract: ContractType;
 
   @IsEnum(ExperienceLevel)
   level: ExperienceLevel;

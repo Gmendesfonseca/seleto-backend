@@ -10,11 +10,49 @@ import {
 } from 'sequelize-typescript';
 import { Company } from '../companies/company.model';
 import { Application } from '../applications/application.model';
+import { VacancyBenefit } from './vacancy-benefit.model';
+import { VacancyRequirement } from './vacancy-requirement.model';
+import { VacancyResponsibility } from './vacancy-responsibility.model';
+import { VacancyResponsible } from './vacancy-responsible.model';
 
 export enum VacancyStatus {
-  OPEN = 'open',
-  CLOSED = 'closed',
   DRAFT = 'draft',
+  PUBLISHED = 'published',
+  PAUSED = 'paused',
+  CLOSED = 'closed',
+  EXPIRED = 'expired',
+}
+
+export enum VacancyType {
+  CONTRACT = 'contract',
+  FULL_TIME = 'full_time',
+  PART_TIME = 'part_time',
+  TEMPORARY = 'temporary',
+  INTERNSHIP = 'internship',
+  APPRENTICESHIP = 'apprenticeship',
+}
+
+export enum ContractType {
+  CLT = 'clt',
+  PJ = 'pj',
+  FREELANCE = 'freelance',
+  INTERN = 'intern',
+  APPRENTICESHIP = 'apprenticeship',
+  TEMPORARY = 'temporary',
+}
+
+export enum WorkModeType {
+  ONSITE = 'onsite',
+  REMOTE = 'remote',
+  HYBRID = 'hybrid',
+}
+
+export enum ExperienceLevel {
+  ENTRY = 'entry',
+  JUNIOR = 'junior',
+  MID = 'mid',
+  SENIOR = 'senior',
+  LEAD = 'lead',
 }
 
 @Table({ tableName: 'vacancies', underscored: true, paranoid: true })
@@ -29,12 +67,57 @@ export class Vacancy extends Model<Vacancy> {
   @Column({ type: DataType.TEXT, allowNull: true })
   description: string;
 
+  @Column({ type: DataType.STRING(255), allowNull: true })
+  location: string;
+
+  @Column({ type: DataType.DECIMAL(10, 2), allowNull: true })
+  salary_min: number;
+
+  @Column({ type: DataType.DECIMAL(10, 2), allowNull: true })
+  salary_max: number;
+
+  @Column({ type: DataType.STRING(3), allowNull: true, defaultValue: 'BRL' })
+  currency: string;
+
+  @Column({
+    type: DataType.ENUM(...Object.values(VacancyType)),
+    allowNull: false,
+  })
+  type: VacancyType;
+
+  @Column({
+    type: DataType.ENUM(...Object.values(ContractType)),
+    allowNull: false,
+  })
+  contract: ContractType;
+
+  @Column({
+    type: DataType.ENUM(...Object.values(WorkModeType)),
+    allowNull: false,
+  })
+  work_mode: WorkModeType;
+
+  @Column({
+    type: DataType.ENUM(...Object.values(ExperienceLevel)),
+    allowNull: false,
+  })
+  level: ExperienceLevel;
+
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
+  remote: boolean;
+
   @Column({
     type: DataType.ENUM(...Object.values(VacancyStatus)),
     allowNull: false,
     defaultValue: VacancyStatus.DRAFT,
   })
   status: VacancyStatus;
+
+  @Column({ type: DataType.DATE, allowNull: true })
+  publication_date: Date;
+
+  @Column({ type: DataType.DATE, allowNull: true })
+  expiration_date: Date;
 
   @Column({ type: DataType.STRING(100), allowNull: true })
   area: string;
@@ -48,6 +131,18 @@ export class Vacancy extends Model<Vacancy> {
 
   @HasMany(() => Application, { foreignKey: 'vacancy_id' })
   applications: Application[];
+
+  @HasMany(() => VacancyBenefit, { foreignKey: 'vacancy_id' })
+  benefits: VacancyBenefit[];
+
+  @HasMany(() => VacancyRequirement, { foreignKey: 'vacancy_id' })
+  requirements: VacancyRequirement[];
+
+  @HasMany(() => VacancyResponsibility, { foreignKey: 'vacancy_id' })
+  responsibilities: VacancyResponsibility[];
+
+  @HasMany(() => VacancyResponsible, { foreignKey: 'vacancy_id' })
+  responsibles: VacancyResponsible[];
 
   @Column({ type: DataType.DATE, allowNull: false })
   created_at: Date;

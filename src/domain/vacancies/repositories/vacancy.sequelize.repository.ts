@@ -14,18 +14,12 @@ export class VacancySequelizeRepository implements VacancyRepository {
 
   constructor(
     @InjectModel(Vacancy)
-    private readonly vacancyModel: typeof Vacancy,
+    private readonly model: typeof Vacancy,
   ) {}
 
   async create(createVacancyDto: CreateVacancyDto): Promise<Vacancy> {
     this.logger.debug('VacancySequelizeRepository.create: Called');
-    return this.vacancyModel.create({
-      title: createVacancyDto.title,
-      description: createVacancyDto.description,
-      company_id: createVacancyDto.companyId,
-      area: createVacancyDto.location,
-      status: VacancyStatus.DRAFT,
-    } as any);
+    return this.model.create(createVacancyDto);
   }
 
   async findAll(filters?: VacancyFilters): Promise<Vacancy[]> {
@@ -45,7 +39,7 @@ export class VacancySequelizeRepository implements VacancyRepository {
       where.status = filters.status;
     }
 
-    return this.vacancyModel.findAll({
+    return this.model.findAll({
       where,
       include: [
         {
@@ -58,7 +52,7 @@ export class VacancySequelizeRepository implements VacancyRepository {
 
   async findOne(id: string): Promise<Vacancy | null> {
     this.logger.debug('VacancySequelizeRepository.findOne: Called');
-    return this.vacancyModel.findOne({
+    return this.model.findOne({
       where: { id },
       include: [
         {
@@ -74,7 +68,7 @@ export class VacancySequelizeRepository implements VacancyRepository {
 
   async update(id: string, updateVacancyDto: UpdateVacancyDto): Promise<Vacancy> {
     this.logger.debug('VacancySequelizeRepository.update: Called');
-    const vacancy = await this.vacancyModel.findByPk(id);
+    const vacancy = await this.model.findByPk(id);
     if (!vacancy) {
       throw new Error('Vacancy not found');
     }
@@ -99,19 +93,19 @@ export class VacancySequelizeRepository implements VacancyRepository {
 
   async delete(id: string): Promise<void> {
     this.logger.debug('VacancySequelizeRepository.delete: Called');
-    await this.vacancyModel.destroy({ where: { id } });
+    await this.model.destroy({ where: { id } });
   }
 
   async findByCompany(companyId: string): Promise<Vacancy[]> {
     this.logger.debug('VacancySequelizeRepository.findByCompany: Called');
-    return this.vacancyModel.findAll({
+    return this.model.findAll({
       where: { company_id: companyId },
     });
   }
 
   async findPublished(): Promise<Vacancy[]> {
     this.logger.debug('VacancySequelizeRepository.findPublished: Called');
-    return this.vacancyModel.findAll({
+    return this.model.findAll({
       where: { status: VacancyStatus.PUBLISHED },
       include: [
         {
@@ -139,6 +133,6 @@ export class VacancySequelizeRepository implements VacancyRepository {
       where.status = filters.status;
     }
 
-    return this.vacancyModel.count({ where });
+    return this.model.count({ where });
   }
 }

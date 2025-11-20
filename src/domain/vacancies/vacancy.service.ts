@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { VacancyServiceInterface } from './interfaces/vacancy.service.interface';
 import { VacancyRepository } from './repositories/vacancy.repository.interface';
 import { CreateVacancyDto, UpdateVacancyDto } from './dto/vacancy.dto';
@@ -8,10 +8,7 @@ import { Vacancy, VacancyFilters, VacancyStatus } from './interfaces/vacancy.int
 export class VacancyService implements VacancyServiceInterface {
   private readonly logger = new Logger(VacancyService.name);
 
-  constructor(
-    @Inject(VacancyRepository)
-    private readonly repository: VacancyRepository,
-  ) {}
+  constructor(private readonly repository: VacancyRepository) {}
 
   async create(createVacancyDto: CreateVacancyDto): Promise<Vacancy> {
     this.logger.debug('VacancyService.create: Called');

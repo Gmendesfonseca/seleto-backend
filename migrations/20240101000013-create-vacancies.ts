@@ -17,10 +17,63 @@ export = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
+      location: {
+        type: Sequelize.STRING(255),
+        allowNull: true,
+      },
+      salary_min: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      salary_max: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      currency: {
+        type: Sequelize.STRING(3),
+        allowNull: true,
+        defaultValue: 'BRL',
+      },
+      type: {
+        type: Sequelize.ENUM(
+          'contract',
+          'full_time',
+          'part_time',
+          'temporary',
+          'internship',
+          'apprenticeship',
+        ),
+        allowNull: false,
+      },
+      contract: {
+        type: Sequelize.ENUM('clt', 'pj', 'freelance', 'intern', 'apprenticeship', 'temporary'),
+        allowNull: false,
+      },
+      work_mode: {
+        type: Sequelize.ENUM('onsite', 'remote', 'hybrid'),
+        allowNull: false,
+      },
+      level: {
+        type: Sequelize.ENUM('entry', 'junior', 'mid', 'senior', 'lead'),
+        allowNull: false,
+      },
+      remote: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
       status: {
-        type: Sequelize.ENUM('open', 'closed', 'draft'),
+        type: Sequelize.ENUM('draft', 'published', 'paused', 'closed', 'expired'),
         allowNull: false,
         defaultValue: 'draft',
+      },
+      publication_date: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      expiration_date: {
+        type: Sequelize.DATE,
+        allowNull: true,
       },
       area: {
         type: Sequelize.STRING(100),
@@ -57,6 +110,9 @@ export = {
     await query.addIndex('vacancies', ['status']);
     await query.addIndex('vacancies', ['area']);
     await query.addIndex('vacancies', ['title']);
+    await query.addIndex('vacancies', ['location']);
+    await query.addIndex('vacancies', ['type']);
+    await query.addIndex('vacancies', ['level']);
     await query.addIndex('vacancies', ['deleted_at']);
   },
 
