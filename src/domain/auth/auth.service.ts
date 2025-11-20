@@ -43,8 +43,11 @@ export class AuthService implements AuthServiceInterface {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { sub: user.id, username: user.username };
-    const accessToken = this.jwtService.sign(payload);
+    const payload = {
+      sub: user.id,
+      username: user.username,
+    };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
     const expiresIn = 3600;
 

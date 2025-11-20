@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Company } from '../company.model';
 import { CompanyRepository } from './company.repository.interface';
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
 import { PaginatedList, PaginationParams, SearchParams } from 'src/shared/interfaces';
 
 @Injectable()
@@ -24,9 +24,19 @@ export class CompanySequelizeRepository implements CompanyRepository {
     return this.model.findByPk(id);
   }
 
-  async findByName(name: string): Promise<Company | null> {
-    this.logger.debug('FindByName: Called');
-    return this.model.findOne({ where: { name } });
+  async findOne(data: { id?: string; cnpj?: string }): Promise<Company | null> {
+    this.logger.debug('FindOne: Called');
+    const where: WhereOptions<Company> = {};
+
+    if (data.id) {
+      where.id = data.id;
+    }
+
+    if (data.cnpj) {
+      where.cnpj = data.cnpj;
+    }
+
+    return this.model.findOne({ where });
   }
 
   async update(id: string, company: Partial<Company>): Promise<Company> {
