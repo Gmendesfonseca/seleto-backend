@@ -1,20 +1,62 @@
+import {
+  IsBoolean,
+  IsDate,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsArray,
+} from 'class-validator';
 import { VacancyType, ExperienceLevel, VacancyStatus } from '../interfaces/vacancy.interface';
+import { DateTime } from 'luxon';
 
 export class CreateVacancyDto {
+  @IsString()
   title: string;
+
+  @IsString()
   description: string;
+
+  @IsString()
   companyId: string;
+
+  @IsString()
   location: string;
+
+  @IsNumber()
+  @IsOptional()
   salaryMin?: number;
+
+  @IsNumber()
+  @IsOptional()
   salaryMax?: number;
+
+  @IsString()
+  @IsOptional()
   currency?: string;
+
+  @IsEnum(VacancyType)
   type: VacancyType;
+
+  @IsEnum(ExperienceLevel)
   level: ExperienceLevel;
+
+  @IsBoolean()
   remote: boolean;
+
+  @IsOptional()
+  @IsArray()
   benefits?: string[];
+
+  @IsArray()
   requirements: string[];
+
+  @IsArray()
   responsibilities: string[];
-  expirationDate?: Date;
+
+  @IsOptional()
+  @IsDate()
+  expirationDate?: DateTime;
 }
 
 export class UpdateVacancyDto {

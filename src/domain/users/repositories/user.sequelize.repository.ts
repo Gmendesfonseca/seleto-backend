@@ -16,7 +16,6 @@ import { WhereOptions } from 'sequelize';
 export class UserSequelizeRepository implements UserRepositoryInterface {
   private readonly logger = new Logger(UserSequelizeRepository.name);
   private readonly excludeAttributes = [
-    'password',
     'createdAt',
     'updatedAt',
     'status',

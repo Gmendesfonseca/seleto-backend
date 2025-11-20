@@ -25,7 +25,8 @@ export class UsersService implements UsersServiceInterface {
 
   async findById(id: string): Promise<UserInterface | null> {
     this.logger.debug('UserService.findOne: Called');
-    return this.repository.findOne({ id });
+    const model = await this.repository.findOne({ id });
+    return model;
   }
 
   async findAll(filters?: any): Promise<{ users: UserInterface[]; total: number }> {

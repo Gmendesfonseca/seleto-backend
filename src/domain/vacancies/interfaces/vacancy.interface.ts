@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 export interface Vacancy {
   id: string;
   title: string;
@@ -14,10 +16,10 @@ export interface Vacancy {
   requirements: string[];
   responsibilities: string[];
   status: VacancyStatus;
-  publicationDate: Date;
-  expirationDate?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  publicationDate: DateTime;
+  expirationDate?: DateTime;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export enum VacancyType {

@@ -61,7 +61,14 @@ export class UsersController {
     this.logger.debug('Me: Called');
     try {
       const userId = req.auth?.id || req.user?.id;
-      return await this.service.findById(userId);
+      const model = await this.service.findById(userId);
+      return {
+        id: model?.id,
+        email: model?.email,
+        username: model?.username,
+        name: model?.name,
+        type: model?.type,
+      };
     } catch (error) {
       this.logger.error(error.message);
       throw error instanceof NotFoundException ? error : new NotFoundException('User not found');
