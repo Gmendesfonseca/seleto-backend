@@ -6,7 +6,7 @@ import { CreateVacancyDto, UpdateVacancyDto } from '../dto/vacancy.dto';
 import { VacancyFilters, VacancyStatus } from '../interfaces/vacancy.interface';
 import { Company } from '../../companies/company.model';
 import { Application } from '../../applications/application.model';
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
 
 @Injectable()
 export class VacancySequelizeRepository implements VacancyRepository {
@@ -19,12 +19,29 @@ export class VacancySequelizeRepository implements VacancyRepository {
 
   async create(createVacancyDto: CreateVacancyDto): Promise<Vacancy> {
     this.logger.debug('VacancySequelizeRepository.create: Called');
-    return this.model.create(createVacancyDto);
+
+    const vacancyData = {
+      title: createVacancyDto.title,
+      description: createVacancyDto.description,
+      company_id: createVacancyDto.companyId,
+      location: createVacancyDto.location,
+      salary_min: createVacancyDto.salaryMin,
+      salary_max: createVacancyDto.salaryMax,
+      currency: createVacancyDto.currency,
+      type: createVacancyDto.type,
+      work_mode: createVacancyDto.workMode,
+      contract: createVacancyDto.contract,
+      level: createVacancyDto.level,
+      publication_date: createVacancyDto.publicationDate,
+      expiration_date: createVacancyDto.expirationDate,
+    } as unknown as Vacancy;
+
+    return this.model.create(vacancyData);
   }
 
   async findAll(filters?: VacancyFilters): Promise<Vacancy[]> {
     this.logger.debug('VacancySequelizeRepository.findAll: Called');
-    const where: any = {};
+    const where: WhereOptions<Vacancy> = {};
 
     if (filters?.companyId) {
       where.company_id = filters.companyId;

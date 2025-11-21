@@ -14,6 +14,7 @@ import { VacancyBenefit } from './vacancy-benefit.model';
 import { VacancyRequirement } from './vacancy-requirement.model';
 import { VacancyResponsibility } from './vacancy-responsibility.model';
 import { VacancyResponsible } from './vacancy-responsible.model';
+import { DateTime } from 'luxon';
 
 export enum VacancyStatus {
   DRAFT = 'draft',
@@ -111,10 +112,10 @@ export class Vacancy extends Model<Vacancy> {
   status: VacancyStatus;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  publication_date: Date;
+  publication_date: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  expiration_date: Date;
+  expiration_date: DateTime;
 
   @Column({ type: DataType.STRING(100), allowNull: true })
   area: string;
@@ -141,12 +142,12 @@ export class Vacancy extends Model<Vacancy> {
   @HasMany(() => VacancyResponsible, { foreignKey: 'vacancy_id' })
   responsibles: VacancyResponsible[];
 
-  @Column({ type: DataType.DATE, allowNull: false })
-  created_at: Date;
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DateTime.now() })
+  created_at: DateTime;
 
-  @Column({ type: DataType.DATE, allowNull: false })
-  updated_at: Date;
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DateTime.now() })
+  updated_at: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  deleted_at: Date;
+  deleted_at: DateTime;
 }

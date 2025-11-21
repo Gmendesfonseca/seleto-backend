@@ -1,4 +1,4 @@
-import { IsDate, IsEnum, IsNumber, IsString, IsArray, ValidateIf } from 'class-validator';
+import { IsEnum, IsNumber, IsString, IsArray, ValidateIf, MaxLength } from 'class-validator';
 import {
   VacancyType,
   ExperienceLevel,
@@ -30,6 +30,7 @@ export class CreateVacancyDto {
   salaryMax: number | null;
 
   @IsString()
+  @MaxLength(3)
   @ValidateIf((value) => value !== null)
   currency: string | null;
 
@@ -55,11 +56,11 @@ export class CreateVacancyDto {
   @IsArray()
   responsibilities: string[];
 
-  @IsDate()
+  @IsString()
   @ValidateIf((value) => value !== null)
   publicationDate: DateTime | null;
 
-  @IsDate()
+  @IsString()
   @ValidateIf((value) => value !== null)
   expirationDate: DateTime | null;
 }
