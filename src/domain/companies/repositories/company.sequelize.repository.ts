@@ -24,7 +24,7 @@ export class CompanySequelizeRepository implements CompanyRepository {
     return this.model.findByPk(id);
   }
 
-  async findOne(data: { id?: string; cnpj?: string }): Promise<Company | null> {
+  async findOne(data: { id?: string; cnpj?: string; user_id?: string }): Promise<Company | null> {
     this.logger.debug('FindOne: Called');
     const where: WhereOptions<Company> = {};
 
@@ -34,6 +34,10 @@ export class CompanySequelizeRepository implements CompanyRepository {
 
     if (data.cnpj) {
       where.cnpj = data.cnpj;
+    }
+
+    if (data.user_id) {
+      where.user_id = data.user_id;
     }
 
     return this.model.findOne({ where });

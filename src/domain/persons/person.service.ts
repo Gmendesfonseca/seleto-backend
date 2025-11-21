@@ -31,12 +31,21 @@ export class PersonService implements PersonServiceInterface {
 
   async findOne(id: string): Promise<Person | null> {
     this.logger.debug('PersonService.findOne: Called');
-    return this.personRepository.findOne(id);
+    return this.personRepository.findOne({ id });
+  }
+
+  async findByUserId(userId: string): Promise<Person | null> {
+    this.logger.debug('PersonService.findByUserId: Called');
+    const person = await this.personRepository.findOne({ user_id: userId });
+    if (!person) {
+      throw new NotFoundException(`Person with userId ${userId} not found`);
+    }
+    return person;
   }
 
   async update(id: string, updatePersonDto: UpdatePersonDto): Promise<Person> {
     this.logger.debug('PersonService.update: Called');
-    const person = await this.personRepository.findOne(id);
+    const person = await this.personRepository.findOne({ id });
     if (!person) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
@@ -45,29 +54,29 @@ export class PersonService implements PersonServiceInterface {
 
   async remove(id: string): Promise<void> {
     this.logger.debug('PersonService.remove: Called');
-    const person = await this.personRepository.findOne(id);
+    const person = await this.personRepository.findOne({ id });
     if (!person) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
     await this.personRepository.delete(id);
   }
 
-  async addCompetence(personId: string, _addCompetenceDto: AddCompetenceDto): Promise<Person> {
+  async addCompetence(id: string, _addCompetenceDto: AddCompetenceDto): Promise<Person> {
     this.logger.debug('PersonService.addCompetence: Called');
-    const person = await this.personRepository.findOne(personId);
+    const person = await this.personRepository.findOne({ id });
     if (!person) {
-      throw new NotFoundException(`Person with id ${personId} not found`);
+      throw new NotFoundException(`Person with id ${id} not found`);
     }
     // This would need to be implemented with a junction table
     // For now, return the person as-is
     return person;
   }
 
-  async removeCompetence(personId: string, _competenceId: string): Promise<Person> {
+  async removeCompetence(id: string, _competenceId: string): Promise<Person> {
     this.logger.debug('PersonService.removeCompetence: Called');
-    const person = await this.personRepository.findOne(personId);
+    const person = await this.personRepository.findOne({ id });
     if (!person) {
-      throw new NotFoundException(`Person with id ${personId} not found`);
+      throw new NotFoundException(`Person with id ${id} not found`);
     }
     // This would need to be implemented with a junction table
     // For now, return the person as-is
@@ -75,46 +84,46 @@ export class PersonService implements PersonServiceInterface {
   }
 
   async addWorkExperience(
-    personId: string,
+    id: string,
     _addWorkExperienceDto: AddWorkExperienceDto,
   ): Promise<Person> {
     this.logger.debug('PersonService.addWorkExperience: Called');
-    const person = await this.personRepository.findOne(personId);
+    const person = await this.personRepository.findOne({ id });
     if (!person) {
-      throw new NotFoundException(`Person with id ${personId} not found`);
+      throw new NotFoundException(`Person with id ${id} not found`);
     }
     // This would need to be implemented with a separate work_experiences table
     // For now, return the person as-is
     return person;
   }
 
-  async removeWorkExperience(personId: string, _experienceId: string): Promise<Person> {
+  async removeWorkExperience(id: string, _experienceId: string): Promise<Person> {
     this.logger.debug('PersonService.removeWorkExperience: Called');
-    const person = await this.personRepository.findOne(personId);
+    const person = await this.personRepository.findOne({ id });
     if (!person) {
-      throw new NotFoundException(`Person with id ${personId} not found`);
+      throw new NotFoundException(`Person with id ${id} not found`);
     }
     // This would need to be implemented with a separate work_experiences table
     // For now, return the person as-is
     return person;
   }
 
-  async addEducation(personId: string, _addEducationDto: AddEducationDto): Promise<Person> {
+  async addEducation(id: string, _addEducationDto: AddEducationDto): Promise<Person> {
     this.logger.debug('PersonService.addEducation: Called');
-    const person = await this.personRepository.findOne(personId);
+    const person = await this.personRepository.findOne({ id });
     if (!person) {
-      throw new NotFoundException(`Person with id ${personId} not found`);
+      throw new NotFoundException(`Person with id ${id} not found`);
     }
     // This would need to be implemented with a separate education table
     // For now, return the person as-is
     return person;
   }
 
-  async removeEducation(personId: string, _educationId: string): Promise<Person> {
+  async removeEducation(id: string, _educationId: string): Promise<Person> {
     this.logger.debug('PersonService.removeEducation: Called');
-    const person = await this.personRepository.findOne(personId);
+    const person = await this.personRepository.findOne({ id });
     if (!person) {
-      throw new NotFoundException(`Person with id ${personId} not found`);
+      throw new NotFoundException(`Person with id ${id} not found`);
     }
     // This would need to be implemented with a separate education table
     // For now, return the person as-is

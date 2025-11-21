@@ -8,6 +8,7 @@ import { PaginationParams, SearchParams } from '../../../shared/interfaces/entit
 
 export abstract class CompanyServiceInterface {
   abstract findById(companyId: string): Promise<CompanyOutputDto>;
+  abstract findByUserId(userId: string): Promise<CompanyOutputDto>;
   abstract findAll(
     pagination: PaginationParams,
     search?: SearchParams,

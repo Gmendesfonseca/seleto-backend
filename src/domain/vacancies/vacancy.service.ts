@@ -2,7 +2,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { VacancyServiceInterface } from './interfaces/vacancy.service.interface';
 import { VacancyRepository } from './repositories/vacancy.repository.interface';
 import { CreateVacancyDto, UpdateVacancyDto } from './dto/vacancy.dto';
-import { Vacancy, VacancyFilters, VacancyStatus } from './interfaces/vacancy.interface';
+import { VacancyFilters, VacancyStatus } from './interfaces/vacancy.interface';
+import { Vacancy } from './vacancy.model';
 
 @Injectable()
 export class VacancyService implements VacancyServiceInterface {

@@ -16,6 +16,15 @@ import { PersonServiceInterface } from '../persons/interfaces/person.service.int
 import { UserType } from 'src/shared/utils/constants';
 import { PhoneServiceInterface, PhoneType } from '../phones';
 
+type JwtPayload = {
+  sub: string;
+  username: string;
+  companyId: string | null;
+  profileId: string;
+  profile: any;
+  config: any;
+};
+
 @Injectable()
 export class AuthService implements AuthServiceInterface {
   private readonly logger = new Logger(AuthService.name);
@@ -33,6 +42,8 @@ export class AuthService implements AuthServiceInterface {
   async signIn(email: string, password: string): Promise<SignInResponse> {
     this.logger.debug('AuthService.signIn: Called');
 
+    const payload = {} as JwtPayload;
+
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -43,17 +54,35 @@ export class AuthService implements AuthServiceInterface {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = {
-      sub: user.id,
-      username: user.username,
-      config: {
-        auth2f: false,
-        default_interface: 'LIGHT',
-        default_language: 'pt',
-        default_timezone: 'UTC',
-        master: false,
-      },
+    payload['sub'] = user.id;
+    payload['username'] = user.username;
+
+    if (user.type === UserType.COMPANY) {
+      const company = await this.companyService.findByUserId(user.id);
+      if (!company) {
+        throw new NotFoundException('Company not found');
+      }
+      payload['companyId'] = company.id;
+      payload['profileId'] = company.id;
+      payload['profile'] = company;
+    } else if (user.type === UserType.PERSON) {
+      const person = await this.personService.findByUserId(user.id);
+      if (!person) {
+        throw new NotFoundException('Person not found');
+      }
+      payload['companyId'] = null;
+      payload['profileId'] = person.id;
+      payload['profile'] = person;
+    }
+
+    payload['config'] = {
+      auth2f: false,
+      default_interface: 'LIGHT',
+      default_language: 'pt',
+      default_timezone: 'UTC',
+      master: false,
     };
+
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
     const expiresIn = 3600;
@@ -65,6 +94,7 @@ export class AuthService implements AuthServiceInterface {
       user: {
         id: user.id,
         username: user.username,
+        profileId: payload.profileId,
         email: user.email,
         type: user.type,
         status: user.status || 'ACTIVE',
@@ -196,22 +226,51 @@ export class AuthService implements AuthServiceInterface {
       if (!user) {
         throw new UnauthorizedException('Invalid refresh token');
       }
+      const payload = {} as JwtPayload;
+      payload['sub'] = user.id;
+      payload['username'] = user.username;
 
-      const payload = { sub: user.id, username: user.username };
-      const accessToken = this.jwtService.sign(payload);
-      const newRefreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+      if (user.type === UserType.COMPANY) {
+        const company = await this.companyService.findByUserId(user.id);
+        if (!company) {
+          throw new NotFoundException('Company not found');
+        }
+        payload['companyId'] = company.id;
+        payload['profileId'] = company.id;
+        payload['profile'] = company;
+      } else if (user.type === UserType.PERSON) {
+        const person = await this.personService.findByUserId(user.id);
+        if (!person) {
+          throw new NotFoundException('Person not found');
+        }
+        payload['companyId'] = null;
+        payload['profileId'] = person.id;
+        payload['profile'] = person;
+      }
+
+      payload['config'] = {
+        auth2f: false,
+        default_interface: 'LIGHT',
+        default_language: 'pt',
+        default_timezone: 'UTC',
+        master: false,
+      };
+
+      const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
+      const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
       const expiresIn = 3600;
 
       return {
         accessToken,
-        refreshToken: newRefreshToken,
+        refreshToken,
         expiresIn,
         user: {
           id: user.id,
           username: user.username,
+          profileId: payload.profileId,
           email: user.email,
-          type: user.type || 'PERSON',
-          status: 'ACTIVE',
+          type: user.type,
+          status: user.status || 'ACTIVE',
         },
       };
     } catch {

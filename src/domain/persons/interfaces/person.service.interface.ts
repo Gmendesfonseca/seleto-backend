@@ -8,9 +8,10 @@ import {
 } from '../dto/person.dto';
 
 export abstract class PersonServiceInterface {
-  abstract create(createPersonDto: CreatePersonDto): Promise<Person>;
   abstract findAll(filters?: PersonFilters): Promise<Person[]>;
   abstract findOne(id: string): Promise<Person | null>;
+  abstract findByUserId(userId: string): Promise<Person | null>;
+  abstract create(createPersonDto: CreatePersonDto): Promise<Person>;
   abstract update(id: string, updatePersonDto: UpdatePersonDto): Promise<Person>;
   abstract remove(id: string): Promise<void>;
   abstract addCompetence(personId: string, addCompetenceDto: AddCompetenceDto): Promise<Person>;

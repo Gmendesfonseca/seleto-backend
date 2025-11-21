@@ -7,6 +7,7 @@ export interface SignInResponse {
     username: string;
     email: string;
     type: string;
+    profileId: string;
     status: string;
   };
 }

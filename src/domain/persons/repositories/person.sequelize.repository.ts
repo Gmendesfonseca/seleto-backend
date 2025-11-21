@@ -37,12 +37,24 @@ export class PersonSequelizeRepository implements PersonRepository {
     return persons.map((person) => this.toInterface(person));
   }
 
-  async findOne(id: string): Promise<PersonInterface | null> {
+  async findOne({
+    id,
+    user_id,
+  }: {
+    id?: string;
+    user_id?: string;
+  }): Promise<PersonInterface | null> {
     this.logger.debug('PersonSequelizeRepository.findOne: Called');
-    const person = await this.model.findByPk(id);
+    const where: WhereOptions<Person> = {};
+    if (id) {
+      where.id = id;
+    }
+    if (user_id) {
+      where.user_id = user_id;
+    }
+    const person = await this.model.findOne({ where });
     return person ? this.toInterface(person) : null;
   }
-
   async update(id: string, data: UpdatePersonDto): Promise<PersonInterface> {
     this.logger.debug('PersonSequelizeRepository.update: Called');
     const person = await this.model.findByPk(id);

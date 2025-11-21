@@ -34,6 +34,15 @@ export class CompanyService implements CompanyServiceInterface {
     return this.toResponse(company);
   }
 
+  async findByUserId(userId: string): Promise<CompanyOutputDto> {
+    this.logger.debug('CompanyService.findByUserId: Called');
+    const company = await this.repository.findOne({ user_id: userId });
+    if (!company) {
+      throw new NotFoundException(`Company with userId ${userId} not found`);
+    }
+    return this.toResponse(company);
+  }
+
   async update(id: string, data: UpdateCompanyDto): Promise<CompanyOutputDto> {
     this.logger.debug('CompanyService.update: Called');
     const company = await this.repository.update(id, {

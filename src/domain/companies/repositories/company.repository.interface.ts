@@ -2,7 +2,7 @@ import { PaginatedList, PaginationParams, SearchParams } from 'src/shared/interf
 import { Company } from '../interfaces/company.interface';
 
 export abstract class CompanyRepository {
-  abstract findOne(data: { id?: string; cnpj?: string }): Promise<Company | null>;
+  abstract findOne(data: { id?: string; cnpj?: string; user_id?: string }): Promise<Company | null>;
   abstract findAll(
     pagination: PaginationParams,
     search?: SearchParams,
