@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Vacancy } from './vacancy.model';
 import { VacancyController } from './vacancy.controller';
@@ -6,6 +6,7 @@ import { VacancyService } from './vacancy.service';
 import { VacancySequelizeRepository } from './repositories/vacancy.sequelize.repository';
 import { VacancyRepository } from './repositories/vacancy.repository.interface';
 import { VacancyServiceInterface } from './interfaces/vacancy.service.interface';
+import { CompanyContextMiddleware } from '../../shared/middlewares/company-context.middleware';
 
 @Module({
   imports: [SequelizeModule.forFeature([Vacancy])],
@@ -27,4 +28,8 @@ import { VacancyServiceInterface } from './interfaces/vacancy.service.interface'
     },
   ],
 })
-export class VacancyModule {}
+export class VacancyModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CompanyContextMiddleware).forRoutes(VacancyController);
+  }
+}

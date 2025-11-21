@@ -10,9 +10,11 @@ import {
   Logger,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { VacancyServiceInterface } from './interfaces/vacancy.service.interface';
 import { CreateVacancyDto, UpdateVacancyDto, VacancyQueryDto } from './dto/vacancy.dto';
+import { RequestWithCompany } from '../../shared/middlewares/company-context.middleware';
 
 @Controller('vacancies')
 export class VacancyController {
@@ -21,9 +23,9 @@ export class VacancyController {
   constructor(private readonly service: VacancyServiceInterface) {}
 
   @Get()
-  async findAll(@Query() filters: VacancyQueryDto, request: Request) {
+  async findAll(@Query() filters: VacancyQueryDto, @Req() request: RequestWithCompany) {
     this.logger.debug('VacancyController.findAll: Called', { filters });
-    const companyId = request.headers.get('companyId') as string | undefined;
+    const companyId = request.companyId;
     return this.service.findAll({ ...filters, companyId });
   }
 
