@@ -54,7 +54,7 @@ export class DashboardService implements DashboardServiceInterface {
         id: vac.id,
         title: vac.title,
         companyName: vac.company ? vac.company.user.name : 'Unknown',
-        applicationCount: vac.applications.length,
+        applicationCount: vac.applications?.length || 0,
         publishedAt: vac.publication_date.toISO(),
       })),
       applicationsByStatus: applicationsByStatus.map((stat: any) => ({
