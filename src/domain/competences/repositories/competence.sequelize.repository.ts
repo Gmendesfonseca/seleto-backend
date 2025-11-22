@@ -4,8 +4,8 @@ import { Competence } from '../competence.model';
 import { CompetenceRepository } from './competence.repository.interface';
 import { CreateCompetenceDto, UpdateCompetenceDto } from '../dto/competence.dto';
 import { CompetenceFilters } from '../interfaces/competence.interface';
-import { Company } from '../../users/user.model';
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
+import { Company } from 'src/domain/companies/company.model';
 
 @Injectable()
 export class CompetenceSequelizeRepository implements CompetenceRepository {
@@ -13,17 +13,17 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
 
   constructor(
     @InjectModel(Competence)
-    private readonly competenceModel: typeof Competence,
+    private readonly model: typeof Competence,
   ) {}
 
-  async create(createCompetenceDto: CreateCompetenceDto): Promise<Competence> {
+  async create(dto: CreateCompetenceDto): Promise<Competence> {
     this.logger.debug('CompetenceSequelizeRepository.create: Called');
-    return this.competenceModel.create(createCompetenceDto as Competence);
+    return this.model.create(dto as Competence);
   }
 
   async findAll(filters?: CompetenceFilters): Promise<Competence[]> {
     this.logger.debug('CompetenceSequelizeRepository.findAll: Called');
-    const where: any = {};
+    const where: WhereOptions<Competence> = {};
 
     if (filters?.name) {
       where.name = { [Op.like]: `%${filters.name}%` };
@@ -35,7 +35,7 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
       where.level = filters.level;
     }
 
-    return this.competenceModel.findAll({
+    return this.model.findAll({
       where,
       include: [
         {
@@ -48,7 +48,7 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
 
   async findOne(id: string): Promise<Competence | null> {
     this.logger.debug('CompetenceSequelizeRepository.findOne: Called');
-    return this.competenceModel.findOne({
+    return this.model.findOne({
       where: { id },
       include: [
         {
@@ -61,7 +61,7 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
 
   async update(id: string, updateCompetenceDto: UpdateCompetenceDto): Promise<Competence> {
     this.logger.debug('CompetenceSequelizeRepository.update: Called');
-    const competence = await this.competenceModel.findByPk(id);
+    const competence = await this.model.findByPk(id);
     if (!competence) {
       throw new Error('Competence not found');
     }
@@ -72,19 +72,19 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
 
   async delete(id: string): Promise<void> {
     this.logger.debug('CompetenceSequelizeRepository.delete: Called');
-    await this.competenceModel.destroy({ where: { id } });
+    await this.model.destroy({ where: { id } });
   }
 
   async findByCategory(category: string): Promise<Competence[]> {
     this.logger.debug('CompetenceSequelizeRepository.findByCategory: Called');
-    return this.competenceModel.findAll({
+    return this.model.findAll({
       where: { category },
     });
   }
 
   async searchByName(name: string): Promise<Competence[]> {
     this.logger.debug('CompetenceSequelizeRepository.searchByName: Called');
-    return this.competenceModel.findAll({
+    return this.model.findAll({
       where: {
         name: { [Op.like]: `%${name}%` },
       },
@@ -93,7 +93,7 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
 
   async countByFilters(filters?: CompetenceFilters): Promise<number> {
     this.logger.debug('CompetenceSequelizeRepository.countByFilters: Called');
-    const where: any = {};
+    const where: WhereOptions<Competence> = {};
 
     if (filters?.name) {
       where.name = { [Op.like]: `%${filters.name}%` };
@@ -105,6 +105,6 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
       where.level = filters.level;
     }
 
-    return this.competenceModel.count({ where });
+    return this.model.count({ where });
   }
 }

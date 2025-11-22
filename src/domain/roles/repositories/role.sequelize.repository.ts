@@ -5,7 +5,7 @@ import { RoleRepository } from './role.repository.interface';
 import { CreateRoleDto, UpdateRoleDto } from '../dto/role.dto';
 import { RoleFilters } from '../interfaces/role.interface';
 import { Company } from '../../companies/company.model';
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
 
 @Injectable()
 export class RoleSequelizeRepository implements RoleRepository {
@@ -23,16 +23,14 @@ export class RoleSequelizeRepository implements RoleRepository {
 
   async findAll(filters?: RoleFilters): Promise<Role[]> {
     this.logger.debug('RoleSequelizeRepository.findAll: Called');
-    const where: any = {};
+    const where: WhereOptions<Role> = {};
 
     if (filters?.name) {
       where.name = { [Op.like]: `%${filters.name}%` };
     }
-    if (filters?.isActive !== undefined) {
-      where.is_active = filters.isActive;
-    }
+
     if (filters?.isDefault !== undefined) {
-      where.is_default = filters.isDefault;
+      where.is_system = filters.isDefault;
     }
 
     return this.roleModel.findAll({
@@ -84,16 +82,13 @@ export class RoleSequelizeRepository implements RoleRepository {
 
   async countByFilters(filters?: RoleFilters): Promise<number> {
     this.logger.debug('RoleSequelizeRepository.countByFilters: Called');
-    const where: any = {};
+    const where: WhereOptions<Role> = {};
 
     if (filters?.name) {
       where.name = { [Op.like]: `%${filters.name}%` };
     }
-    if (filters?.isActive !== undefined) {
-      where.is_active = filters.isActive;
-    }
     if (filters?.isDefault !== undefined) {
-      where.is_default = filters.isDefault;
+      where.is_system = filters.isDefault;
     }
 
     return this.roleModel.count({ where });

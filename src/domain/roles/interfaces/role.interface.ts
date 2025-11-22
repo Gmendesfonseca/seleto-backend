@@ -22,7 +22,6 @@ export interface Permission {
 
 export interface RoleFilters {
   name?: string;
-  isActive?: boolean;
   isDefault?: boolean;
 }
 

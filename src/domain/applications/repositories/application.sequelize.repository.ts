@@ -5,9 +5,9 @@ import { ApplicationRepository } from './application.repository.interface';
 import { CreateApplicationDto } from '../dto/create.dto';
 import { UpdateApplicationDto } from '../dto/update.dto';
 import { ApplicationFilters } from '../interfaces/application.interface';
-import { Person } from '../../users/user.model';
 import { Vacancy } from '../../vacancies/vacancy.model';
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
+import { Person } from 'src/domain/persons/person.model';
 
 @Injectable()
 export class ApplicationSequelizeRepository implements ApplicationRepository {
@@ -20,7 +20,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
 
   async findAll(filters?: ApplicationFilters): Promise<Application[]> {
     this.logger.debug('ApplicationSequelizeRepository.findAll: Called');
-    const where: any = {};
+    const where: WhereOptions<Application> = {};
 
     if (filters?.applicantId) {
       where.applicant_id = filters.applicantId;
@@ -34,10 +34,14 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
     if (filters?.dateFrom || filters?.dateTo) {
       where.created_at = {};
       if (filters.dateFrom) {
-        where.created_at[Op.gte] = new Date(filters.dateFrom);
+        where.created_at = {
+          [Op.gte]: new Date(filters.dateFrom),
+        };
       }
       if (filters.dateTo) {
-        where.created_at[Op.lte] = new Date(filters.dateTo);
+        where.created_at = {
+          [Op.lte]: new Date(filters.dateTo),
+        };
       }
     }
 
@@ -138,7 +142,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
 
   async countByFilters(filters?: ApplicationFilters): Promise<number> {
     this.logger.debug('ApplicationSequelizeRepository.countByFilters: Called');
-    const where: any = {};
+    const where: WhereOptions<Application> = {};
 
     if (filters?.applicantId) {
       where.applicant_id = filters.applicantId;

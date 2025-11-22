@@ -9,13 +9,7 @@ import {
 } from 'sequelize-typescript';
 import { Person } from '../persons/person.model';
 import { Vacancy } from '../vacancies/vacancy.model';
-
-export enum ApplicationStatus {
-  PENDING = 'pending',
-  REVIEWING = 'reviewing',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-}
+import { ApplicationStatus } from './interfaces/application.interface';
 
 @Table({ tableName: 'applications', underscored: true, paranoid: true })
 export class Application extends Model<Application> {

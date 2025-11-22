@@ -1,17 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Address as AddressModel } from '../address.model';
+import { Address } from '../address.model';
 import { AddressRepository } from './address.repository.interface';
-import { Address, AddressFilters } from '../interfaces/address.interface';
+import { AddressFilters } from '../interfaces/address.interface';
 import { CreateAddressDto, UpdateAddressDto } from '../dto/address.dto';
+import { WhereOptions } from 'sequelize';
 
 @Injectable()
 export class AddressSequelizeRepository implements AddressRepository {
   private readonly logger = new Logger(AddressSequelizeRepository.name);
 
   constructor(
-    @InjectModel(AddressModel)
-    private readonly addressModel: typeof AddressModel,
+    @InjectModel(Address)
+    private readonly addressModel: typeof Address,
   ) {}
 
   async create(createAddressDto: CreateAddressDto): Promise<Address> {
@@ -34,7 +35,7 @@ export class AddressSequelizeRepository implements AddressRepository {
 
   async findAll(filters?: AddressFilters): Promise<Address[]> {
     this.logger.debug('AddressSequelizeRepository.findAll: Called');
-    const where: any = {};
+    const where: WhereOptions<Address> = {};
 
     if (filters?.personId) {
       where.personId = filters.personId;
@@ -114,7 +115,7 @@ export class AddressSequelizeRepository implements AddressRepository {
     return address ? this.toInterface(address) : null;
   }
 
-  private toInterface(address: AddressModel): Address {
+  private toInterface(address: Address): Address {
     return {
       id: address.id,
       personId: address.personId,

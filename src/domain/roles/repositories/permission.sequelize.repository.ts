@@ -4,7 +4,7 @@ import { Permission } from '../../permissions/permission.model';
 import { PermissionRepository } from './role.repository.interface';
 import { CreatePermissionDto, UpdatePermissionDto } from '../dto/role.dto';
 import { PermissionFilters } from '../interfaces/role.interface';
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
 
 @Injectable()
 export class PermissionSequelizeRepository implements PermissionRepository {
@@ -26,7 +26,7 @@ export class PermissionSequelizeRepository implements PermissionRepository {
 
   async findAll(filters?: PermissionFilters): Promise<Permission[]> {
     this.logger.debug('PermissionSequelizeRepository.findAll: Called');
-    const where: any = {};
+    const where: WhereOptions<Permission> = {};
 
     if (filters?.name) {
       where.name = { [Op.like]: `%${filters.name}%` };
@@ -79,7 +79,7 @@ export class PermissionSequelizeRepository implements PermissionRepository {
 
   async countByFilters(filters?: PermissionFilters): Promise<number> {
     this.logger.debug('PermissionSequelizeRepository.countByFilters: Called');
-    const where: any = {};
+    const where: WhereOptions<Permission> = {};
 
     if (filters?.name) {
       where.name = { [Op.like]: `%${filters.name}%` };

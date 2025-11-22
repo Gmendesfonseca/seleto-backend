@@ -63,6 +63,10 @@ export class VacancySequelizeRepository implements VacancyRepository {
           model: Company,
           attributes: ['id', 'cnpj'],
         },
+        {
+          model: Application,
+          attributes: ['id'],
+        },
       ],
     });
   }
@@ -135,7 +139,7 @@ export class VacancySequelizeRepository implements VacancyRepository {
 
   async countByFilters(filters?: VacancyFilters): Promise<number> {
     this.logger.debug('VacancySequelizeRepository.countByFilters: Called');
-    const where: any = {};
+    const where: WhereOptions<Vacancy> = {};
 
     if (filters?.companyId) {
       where.company_id = filters.companyId;

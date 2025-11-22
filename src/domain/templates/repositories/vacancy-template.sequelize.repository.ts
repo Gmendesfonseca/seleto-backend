@@ -5,7 +5,7 @@ import { VacancyTemplateRepository } from './vacancy-template.repository.interfa
 import { CreateVacancyTemplateDto, UpdateVacancyTemplateDto } from '../dto/vacancy-template.dto';
 import { VacancyTemplateFilters } from '../interfaces/vacancy-template.interface';
 import { Company } from '../../users/user.model';
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
 
 @Injectable()
 export class VacancyTemplateSequelizeRepository implements VacancyTemplateRepository {
@@ -26,7 +26,7 @@ export class VacancyTemplateSequelizeRepository implements VacancyTemplateReposi
 
   async findAll(filters?: VacancyTemplateFilters): Promise<VacancyTemplate[]> {
     this.logger.debug('VacancyTemplateSequelizeRepository.findAll: Called');
-    const where: any = {};
+    const where: WhereOptions<VacancyTemplate> = {};
 
     if (filters?.name) {
       where.name = { [Op.like]: `%${filters.name}%` };
@@ -103,7 +103,7 @@ export class VacancyTemplateSequelizeRepository implements VacancyTemplateReposi
 
   async countByFilters(filters?: VacancyTemplateFilters): Promise<number> {
     this.logger.debug('VacancyTemplateSequelizeRepository.countByFilters: Called');
-    const where: any = {};
+    const where: WhereOptions<VacancyTemplate> = {};
 
     if (filters?.name) {
       where.name = { [Op.like]: `%${filters.name}%` };

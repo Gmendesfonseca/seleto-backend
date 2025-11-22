@@ -4,6 +4,7 @@ import { Phone as PhoneModel } from '../phone.model';
 import { PhoneRepository } from './phone.repository.interface';
 import { Phone, PhoneFilters } from '../interfaces/phone.interface';
 import { CreatePhoneDto, UpdatePhoneDto } from '../dto/phone.dto';
+import { WhereOptions } from 'sequelize';
 
 @Injectable()
 export class PhoneSequelizeRepository implements PhoneRepository {
@@ -28,7 +29,7 @@ export class PhoneSequelizeRepository implements PhoneRepository {
 
   async findAll(filters?: PhoneFilters): Promise<Phone[]> {
     this.logger.debug('PhoneSequelizeRepository.findAll: Called');
-    const where: any = {};
+    const where: WhereOptions<PhoneModel> = {};
 
     if (filters?.userId) {
       where.userId = filters.userId;

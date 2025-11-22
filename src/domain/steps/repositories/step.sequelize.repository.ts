@@ -5,7 +5,7 @@ import { StepRepository } from './step.repository.interface';
 import { CreateStepDto, UpdateStepDto } from '../dto/step.dto';
 import { StepFilters } from '../interfaces/step.interface';
 import { Company } from '../../companies/company.model';
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
 
 @Injectable()
 export class StepSequelizeRepository implements StepRepository {
@@ -23,7 +23,7 @@ export class StepSequelizeRepository implements StepRepository {
 
   async findAll(filters?: StepFilters): Promise<Step[]> {
     this.logger.debug('StepSequelizeRepository.findAll: Called');
-    const where: any = {};
+    const where: WhereOptions<Step> = {};
 
     if (filters?.templateId) {
       where.template_id = filters.templateId;
@@ -95,7 +95,7 @@ export class StepSequelizeRepository implements StepRepository {
 
   async countByFilters(filters?: StepFilters): Promise<number> {
     this.logger.debug('StepSequelizeRepository.countByFilters: Called');
-    const where: any = {};
+    const where: WhereOptions<Step> = {};
 
     if (filters?.templateId) {
       where.template_id = filters.templateId;
