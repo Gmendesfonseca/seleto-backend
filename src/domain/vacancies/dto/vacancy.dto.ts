@@ -54,6 +54,9 @@ export class CreateVacancyDto {
   benefits: string[] | null;
 
   @IsArray()
+  steps: string[];
+
+  @IsArray()
   requirements: string[];
 
   @IsArray()

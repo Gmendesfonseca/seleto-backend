@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize/dist/common/sequelize.decorators';
-import { VacancyResponsibilityRepository } from './vacancy-responsibility.repository.interface';
+import { VacancyResponsibilityRepository } from '../interfaces/vacancy-responsibility.repository.interface';
 import { VacancyResponsibility } from '../vacancy-responsibility.model';
 import { WhereOptions } from 'sequelize';
 import {

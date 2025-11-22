@@ -6,4 +6,4 @@ export * from './interfaces/vacancy.service.interface';
 export * from './dto/vacancy.dto';
 
 // Vacancy repositories
-export * from './repositories/vacancy.repository.interface';
+export * from './interfaces/vacancy.repository.interface';

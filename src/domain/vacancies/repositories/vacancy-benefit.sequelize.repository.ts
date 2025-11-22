@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize/dist/common/sequelize.decorators';
-import { VacancyBenefitRepository } from './vacancy-benefit.repository.interface';
+import { VacancyBenefitRepository } from '../interfaces/vacancy-benefit.repository.interface';
 import { VacancyBenefit } from '../vacancy-benefit.model';
 import { WhereOptions } from 'sequelize/types/model';
 import {

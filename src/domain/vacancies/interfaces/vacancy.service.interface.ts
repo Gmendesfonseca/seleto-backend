@@ -3,6 +3,7 @@ import { CreateVacancyDto, UpdateVacancyDto } from '../dto/vacancy.dto';
 import { Vacancy } from '../vacancy.model';
 import { PaginatedList } from 'src/shared/interfaces';
 import { DateTime } from 'luxon';
+import { VacancyStep } from '../vacancy-step.model';
 
 export class CreateVacancyResult {
   id: string;
@@ -25,6 +26,7 @@ export class CreateVacancyResult {
   benefits: string[];
   responsibilities: string[];
   requirements: string[];
+  steps: VacancyStep[];
 }
 export abstract class VacancyServiceInterface {
   abstract create(createVacancyDto: CreateVacancyDto): Promise<CreateVacancyResult>;

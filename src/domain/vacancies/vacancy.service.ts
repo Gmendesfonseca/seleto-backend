@@ -3,14 +3,15 @@ import {
   VacancyServiceInterface,
   CreateVacancyResult,
 } from './interfaces/vacancy.service.interface';
-import { VacancyRepository } from './repositories/vacancy.repository.interface';
+import { VacancyRepository } from './interfaces/vacancy.repository.interface';
 import { CreateVacancyDto, UpdateVacancyDto } from './dto/vacancy.dto';
 import { VacancyFilters, VacancyStatus } from './interfaces/vacancy.interface';
 import { Vacancy } from './vacancy.model';
 import { PaginatedList } from 'src/shared/interfaces';
-import { VacancyBenefitRepository } from './repositories/vacancy-benefit.repository.interface';
-import { VacancyRequirementRepository } from './repositories/vacancy-requirement.repository.interface';
-import { VacancyResponsibilityRepository } from './repositories/vacancy-responsibility.repository.interface';
+import { VacancyBenefitRepository } from './interfaces/vacancy-benefit.repository.interface';
+import { VacancyRequirementRepository } from './interfaces/vacancy-requirement.repository.interface';
+import { VacancyResponsibilityRepository } from './interfaces/vacancy-responsibility.repository.interface';
+import { VacancyStepRepository } from './interfaces/vacancy-step.repository.interface';
 
 @Injectable()
 export class VacancyService implements VacancyServiceInterface {
@@ -21,6 +22,7 @@ export class VacancyService implements VacancyServiceInterface {
     private readonly benefitRepository: VacancyBenefitRepository,
     private readonly requirementRepository: VacancyRequirementRepository,
     private readonly responsibilityRepository: VacancyResponsibilityRepository,
+    private readonly stepRepository: VacancyStepRepository,
   ) {}
 
   async findOne(id: string): Promise<Vacancy | null> {
@@ -41,11 +43,13 @@ export class VacancyService implements VacancyServiceInterface {
     benefits,
     responsibilities,
     requirements,
+    steps,
     ...dto
   }: CreateVacancyDto): Promise<CreateVacancyResult> {
     this.logger.debug('VacancyService.create: Called');
 
     const model = await this.repository.create(dto);
+
     const benefitModels = await this.benefitRepository.bulkCreate(
       benefits?.map((benefit) => ({ benefit, vacancyId: model.id })) || [],
     );
@@ -55,12 +59,20 @@ export class VacancyService implements VacancyServiceInterface {
     const requirementModels = await this.requirementRepository.bulkCreate(
       requirements?.map((requirement) => ({ requirement, vacancyId: model.id })) || [],
     );
+    const stepModels = await this.stepRepository.bulkCreate(
+      steps?.map((step, index) => ({
+        stepId: step,
+        vacancyId: model.id,
+        order: index,
+      })) || [],
+    );
 
     return {
       ...model.get(),
       benefits: benefitModels.map((b) => b.benefit),
       responsibilities: responsibilityModels.map((r) => r.responsibility),
       requirements: requirementModels.map((r) => r.requirement),
+      steps: stepModels,
     };
   }
 

@@ -15,6 +15,7 @@ import { VacancyRequirement } from './vacancy-requirement.model';
 import { VacancyResponsibility } from './vacancy-responsibility.model';
 import { VacancyResponsible } from './vacancy-responsible.model';
 import { DateTime } from 'luxon';
+import { VacancyStep } from './vacancy-step.model';
 
 export enum VacancyStatus {
   DRAFT = 'draft',
@@ -126,6 +127,9 @@ export class Vacancy extends Model<Vacancy> {
 
   @BelongsTo(() => Company)
   company: Company;
+
+  @HasMany(() => VacancyStep)
+  steps: VacancyStep[];
 
   @HasMany(() => Application, { foreignKey: 'vacancy_id' })
   applications: Application[];

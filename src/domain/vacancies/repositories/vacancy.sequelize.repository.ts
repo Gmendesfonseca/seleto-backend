@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Vacancy } from '../vacancy.model';
-import { VacancyRepository } from './vacancy.repository.interface';
+import { VacancyRepository } from '../interfaces/vacancy.repository.interface';
 import { CreateVacancyDto, UpdateVacancyDto } from '../dto/vacancy.dto';
 import { VacancyFilters, VacancyStatus } from '../interfaces/vacancy.interface';
 import { Company } from '../../companies/company.model';

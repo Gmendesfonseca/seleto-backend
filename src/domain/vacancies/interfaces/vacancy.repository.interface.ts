@@ -1,10 +1,10 @@
-import { VacancyFilters } from '../interfaces/vacancy.interface';
+import { VacancyFilters } from './vacancy.interface';
 import { CreateVacancyDto, UpdateVacancyDto } from '../dto/vacancy.dto';
 import { Vacancy } from '../vacancy.model';
 
 export abstract class VacancyRepository {
   abstract create(
-    dto: Omit<CreateVacancyDto, 'benefits' | 'responsibilities' | 'requirements'>,
+    dto: Omit<CreateVacancyDto, 'benefits' | 'responsibilities' | 'requirements' | 'steps'>,
   ): Promise<Vacancy>;
   abstract findAll(filters?: VacancyFilters): Promise<Vacancy[]>;
   abstract findOne(id: string): Promise<Vacancy | null>;

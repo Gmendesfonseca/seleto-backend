@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VacancyRequirement } from '../vacancy-requirement.model';
 import { InjectModel } from '@nestjs/sequelize/dist/common/sequelize.decorators';
-import { VacancyRequirementRepository } from './vacancy-requirement.repository.interface';
+import { VacancyRequirementRepository } from '../interfaces/vacancy-requirement.repository.interface';
 import {
   CreateVacancyRequirementDto,
   UpdateVacancyRequirementDto,
