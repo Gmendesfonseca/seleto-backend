@@ -11,7 +11,6 @@ import {
   Controller,
   ParseUUIDPipe,
   ValidationPipe,
-  Request,
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
@@ -51,27 +50,6 @@ export class UsersController {
     } catch (error) {
       this.logger.error(error.message);
       throw new BadRequestException('Failed to list users');
-    }
-  }
-
-  @Get('/me')
-  @HttpCode(200)
-  @Authorized()
-  async me(@Request() req: any) {
-    this.logger.debug('Me: Called');
-    try {
-      const userId = req.auth?.id || req.user?.id;
-      const model = await this.service.findById(userId);
-      return {
-        id: model?.id,
-        email: model?.email,
-        username: model?.username,
-        name: model?.name,
-        type: model?.type,
-      };
-    } catch (error) {
-      this.logger.error(error.message);
-      throw error instanceof NotFoundException ? error : new NotFoundException('User not found');
     }
   }
 

@@ -12,6 +12,11 @@ export class VacancyService implements VacancyServiceInterface {
 
   constructor(private readonly repository: VacancyRepository) {}
 
+  async findOne(id: string): Promise<Vacancy | null> {
+    this.logger.debug('VacancyService.findOne: Called');
+    return this.repository.findOne(id);
+  }
+
   async findAll(filters?: VacancyFilters): Promise<PaginatedList<Vacancy>> {
     this.logger.debug('VacancyService.findAll: Called');
     const models = await this.repository.findAll(filters);
@@ -19,11 +24,6 @@ export class VacancyService implements VacancyServiceInterface {
       data: models,
       meta: { total: models.length, currentPage: 1, lastPage: 1, perPage: models.length },
     };
-  }
-
-  async findOne(id: string): Promise<Vacancy | null> {
-    this.logger.debug('VacancyService.findOne: Called');
-    return this.repository.findOne(id);
   }
 
   async create(createVacancyDto: CreateVacancyDto): Promise<Vacancy> {

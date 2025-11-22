@@ -21,15 +21,8 @@ export class AddressController {
 
   constructor(private readonly service: AddressServiceInterface) {}
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createAddressDto: CreateAddressDto) {
-    this.logger.debug('AddressController.create: Called');
-    return this.service.create(createAddressDto);
-  }
-
   @Get()
-  async findAll(
+  async index(
     @Query('personId') personId?: string,
     @Query('companyId') companyId?: string,
     @Query('city') city?: string,
@@ -37,32 +30,34 @@ export class AddressController {
     @Query('country') country?: string,
     @Query('isPrimary') isPrimary?: boolean,
   ) {
-    this.logger.debug('AddressController.findAll: Called');
+    this.logger.debug('Index: Called', {
+      personId,
+      companyId,
+      city,
+      state,
+      country,
+      isPrimary,
+    });
     return this.service.findAll({ personId, companyId, city, state, country, isPrimary });
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    this.logger.debug('AddressController.findOne: Called');
+  async show(@Param('id') id: string) {
+    this.logger.debug('Show: Called');
     return this.service.findOne(id);
   }
 
-  @Get('person/:personId')
-  async findByPerson(@Param('personId') personId: string) {
-    this.logger.debug('AddressController.findByPerson: Called');
-    return this.service.findByPerson(personId);
-  }
-
-  @Get('company/:companyId')
-  async findByCompany(@Param('companyId') companyId: string) {
-    this.logger.debug('AddressController.findByCompany: Called');
-    return this.service.findByCompany(companyId);
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async store(@Body() dto: CreateAddressDto) {
+    this.logger.debug('Store: Called');
+    return this.service.create(dto);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateAddressDto: UpdateAddressDto) {
-    this.logger.debug('AddressController.update: Called');
-    return this.service.update(id, updateAddressDto);
+  async update(@Param('id') id: string, @Body() dto: UpdateAddressDto) {
+    this.logger.debug('Update: Called');
+    return this.service.update(id, dto);
   }
 
   @Patch(':id/set-primary')
@@ -71,14 +66,14 @@ export class AddressController {
     @Body('ownerId') ownerId: string,
     @Body('ownerType') ownerType: 'person' | 'company',
   ) {
-    this.logger.debug('AddressController.setPrimary: Called');
+    this.logger.debug('SetPrimary: Called');
     return this.service.setPrimary(id, ownerId, ownerType);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    this.logger.debug('AddressController.remove: Called');
+    this.logger.debug('Remove: Called');
     await this.service.remove(id);
   }
 }

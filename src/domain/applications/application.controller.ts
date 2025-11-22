@@ -28,14 +28,14 @@ export class ApplicationController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @Authorized()
-  public async list(@Query(ValidationPipe) queryDto: ApplicationQueryDto) {
-    this.logger.debug('List: called', { queryDto });
+  public async index(@Query(ValidationPipe) dto: ApplicationQueryDto) {
+    this.logger.debug('Index: called', { dto });
     const filters: ApplicationFilters = {
-      applicantId: queryDto.applicantId,
-      vacancyId: queryDto.vacancyId,
-      status: queryDto.status,
-      dateFrom: queryDto.dateFrom,
-      dateTo: queryDto.dateTo,
+      applicantId: dto.applicantId,
+      vacancyId: dto.vacancyId,
+      status: dto.status,
+      dateFrom: dto.dateFrom,
+      dateTo: dto.dateTo,
     };
     return this.service.findAll(filters);
   }
@@ -82,8 +82,8 @@ export class ApplicantController {
   @Get(':applicantId/applications')
   @HttpCode(HttpStatus.OK)
   @Authorized()
-  public async getApplicationsByApplicant(@Param('applicantId') applicantId: string) {
-    this.logger.debug('GetApplicationsByApplicant: called', { applicantId });
+  public async indexByApplicant(@Param('applicantId') applicantId: string) {
+    this.logger.debug('IndexByApplicant: called', { applicantId });
     const filters: ApplicationFilters = { applicantId };
     return this.service.findAll(filters);
   }

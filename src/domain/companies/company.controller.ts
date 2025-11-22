@@ -45,27 +45,14 @@ export class CompanyController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    this.logger.debug('CompanyController.indexVacancies: Called', { id, status, area });
+    this.logger.debug('IndexVacancies: Called', { id, status, area });
     return this.service.findVacancies(id, { status, area, page, limit });
-  }
-
-  @Get(':id/users')
-  @Authorized()
-  async indexUsers(
-    @Param('id') id: string,
-    @Query('type') type?: string,
-    @Query('status') status?: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ) {
-    this.logger.debug('CompanyController.indexUsers: Called', { id, type, status });
-    return this.service.findUsers(id, { type, status, page, limit });
   }
 
   @Get(':id/statistics')
   @Authorized()
   async showStatistics(@Param('id') id: string) {
-    this.logger.debug('CompanyController.showStatistics: Called', { id });
+    this.logger.debug('ShowStatistics: Called', { id });
     return this.service.statistics(id);
   }
 

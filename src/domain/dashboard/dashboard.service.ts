@@ -20,14 +20,12 @@ export class DashboardService implements DashboardServiceInterface {
     const [
       totalVacancies = 0,
       totalApplications = 0,
-      recentApplications = [],
       topVacancies = [],
       applicationsByStatus = [],
       monthlyApplications = [],
     ] = await Promise.all([
       this.dashboardRepository.getVacancyCount(filters),
       this.dashboardRepository.getApplicationCount(filters),
-      this.dashboardRepository.getRecentApplications(10, filters?.companyId),
       this.dashboardRepository.getTopVacancies(10, filters?.companyId),
       this.dashboardRepository.getApplicationsByStatus(filters?.companyId),
       this.dashboardRepository.getMonthlyApplications(6, filters?.companyId),
@@ -36,14 +34,6 @@ export class DashboardService implements DashboardServiceInterface {
     return {
       totalVacancies,
       totalApplications,
-      recentApplications: recentApplications.map((app) => ({
-        id: app.id,
-        applicantName: app.applicant.user.name || 'Unknown',
-        vacancyTitle: app.vacancy.title,
-        companyName: app.vacancy.company ? app.vacancy.company.user.name : 'Unknown',
-        status: app.status,
-        appliedAt: app.created_at,
-      })),
       topVacancies: topVacancies.map((vac) => ({
         id: vac.id,
         title: vac.title,

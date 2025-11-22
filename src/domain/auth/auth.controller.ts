@@ -43,18 +43,18 @@ export class AuthController {
     await this.service.signUp(input);
   }
 
-  @Patch('forgot-password')
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body(ValidationPipe) { email }: ForgotPasswordDto) {
-    await this.service.forgotPassword(email);
-  }
-
   @Patch('password')
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   async checkSecretKey(@Body(ValidationPipe) { secretKey }: CheckSecretKeyDto) {
     await this.service.checkSecretKey(secretKey);
+  }
+
+  @Patch('forgot-password')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body(ValidationPipe) { email }: ForgotPasswordDto) {
+    await this.service.forgotPassword(email);
   }
 
   @Patch('reset-password')

@@ -83,7 +83,6 @@ export class UpdateVacancyDto {
 }
 
 export class VacancyQueryDto {
-  companyId?: string;
   title?: string;
   location?: string;
   type?: VacancyType;

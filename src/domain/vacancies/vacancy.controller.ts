@@ -23,10 +23,10 @@ export class VacancyController {
   constructor(private readonly service: VacancyServiceInterface) {}
 
   @Get()
-  async findAll(@Query() filters: VacancyQueryDto, @Req() request: RequestWithCompany) {
-    this.logger.debug('VacancyController.findAll: Called', { filters });
+  async findAll(@Query() dto: VacancyQueryDto, @Req() request: RequestWithCompany) {
+    this.logger.debug('VacancyController.findAll: Called', { dto });
     const companyId = request.companyId;
-    return this.service.findAll({ ...filters, companyId });
+    return this.service.findAll({ ...dto, companyId });
   }
 
   @Get('published')
@@ -42,15 +42,15 @@ export class VacancyController {
   }
 
   @Post()
-  async create(@Body() createVacancyDto: CreateVacancyDto) {
-    this.logger.debug('VacancyController.create: Called', { createVacancyDto });
-    return this.service.create(createVacancyDto);
+  async create(@Body() dto: CreateVacancyDto) {
+    this.logger.debug('VacancyController.create: Called', { dto });
+    return this.service.create(dto);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateVacancyDto: UpdateVacancyDto) {
-    this.logger.debug('VacancyController.update: Called', { id, updateVacancyDto });
-    return this.service.update(id, updateVacancyDto);
+  async update(@Param('id') id: string, @Body() dto: UpdateVacancyDto) {
+    this.logger.debug('VacancyController.update: Called', { id, dto });
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')
@@ -90,8 +90,8 @@ export class VacancyController {
   //   return this.service.getStats(id);
   // }
 
-  @Get('company/:companyId')
-  async findByCompany(@Param('companyId') companyId: string) {
+  @Get('company/:id')
+  async findByCompany(@Param('id') companyId: string) {
     this.logger.debug('VacancyController.findByCompany: Called', { companyId });
     return this.service.findByCompany(companyId);
   }

@@ -10,8 +10,8 @@ export class CompetenceController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  public async list(filters?: CompetenceFilters) {
-    this.logger.debug('List: called', { filters });
+  public async index(filters?: CompetenceFilters) {
+    this.logger.debug('Index: called', { filters });
     return this.service.findAll(filters);
   }
 

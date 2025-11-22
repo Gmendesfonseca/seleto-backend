@@ -13,11 +13,6 @@ export class VacancyTemplateService implements VacancyTemplateServiceInterface {
     private readonly repository: VacancyTemplateRepository,
   ) {}
 
-  async create(createVacancyTemplateDto: CreateVacancyTemplateDto): Promise<VacancyTemplate> {
-    this.logger.debug('VacancyTemplateService.create: Called');
-    return this.repository.create(createVacancyTemplateDto);
-  }
-
   async findAll(filters?: VacancyTemplateFilters): Promise<VacancyTemplate[]> {
     this.logger.debug('VacancyTemplateService.findAll: Called');
     return this.repository.findAll(filters);
@@ -28,16 +23,18 @@ export class VacancyTemplateService implements VacancyTemplateServiceInterface {
     return this.repository.findOne(id);
   }
 
-  async update(
-    id: string,
-    updateVacancyTemplateDto: UpdateVacancyTemplateDto,
-  ): Promise<VacancyTemplate> {
+  async create(dto: CreateVacancyTemplateDto): Promise<VacancyTemplate> {
+    this.logger.debug('VacancyTemplateService.create: Called');
+    return this.repository.create(dto);
+  }
+
+  async update(id: string, dto: UpdateVacancyTemplateDto): Promise<VacancyTemplate> {
     this.logger.debug('VacancyTemplateService.update: Called');
     const template = await this.repository.findOne(id);
     if (!template) {
       throw new NotFoundException(`Vacancy template with id ${id} not found`);
     }
-    return this.repository.update(id, updateVacancyTemplateDto);
+    return this.repository.update(id, dto);
   }
 
   async remove(id: string): Promise<void> {
