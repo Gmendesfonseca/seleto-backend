@@ -22,9 +22,9 @@ export class DashboardController {
   @Get('stats')
   @HttpCode(HttpStatus.OK)
   @Authorized()
-  public async stats(@Req() request: RequestWithCompany, @Query() filters?: any) {
+  public async stats(@Req() { companyId }: RequestWithCompany, @Query() filters?: any) {
     this.logger.debug('Stats: called', { filters });
-    return this.service.getStats({ ...filters, companyId: request.companyId });
+    return this.service.getStats({ ...filters, companyId });
   }
 
   @Get('recent-applications')

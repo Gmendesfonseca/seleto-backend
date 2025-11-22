@@ -27,6 +27,7 @@ import { DatabaseModule } from './infrastructure/config/database.module';
 
 import { PaginationMiddleware } from './shared/middleware/pagination/pagination.middleware';
 import { MailerModule } from './domain/mailers/mailer.module';
+import { CompanyContextMiddleware } from './shared/middlewares/company-context.middleware';
 
 @Module({
   imports: [
@@ -58,6 +59,10 @@ import { MailerModule } from './domain/mailers/mailer.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(PaginationMiddleware).forRoutes({ path: '*path', method: RequestMethod.GET });
+    consumer
+      .apply(PaginationMiddleware)
+      .forRoutes({ path: '*path', method: RequestMethod.GET })
+      .apply(CompanyContextMiddleware)
+      .forRoutes({ path: '*path', method: RequestMethod.ALL });
   }
 }

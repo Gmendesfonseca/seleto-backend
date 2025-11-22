@@ -13,7 +13,9 @@ export class DashboardService implements DashboardServiceInterface {
   ) {}
 
   async getStats(filters?: DashboardFilters): Promise<DashboardStats> {
-    this.logger.debug('DashboardService.getStats: Called');
+    this.logger.debug('DashboardService.getStats: Called', {
+      filters,
+    });
 
     const [
       totalVacancies = 0,
