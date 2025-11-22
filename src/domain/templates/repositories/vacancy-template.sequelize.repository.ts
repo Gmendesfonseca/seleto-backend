@@ -29,7 +29,7 @@ export class VacancyTemplateSequelizeRepository implements VacancyTemplateReposi
     const where: WhereOptions<VacancyTemplate> = {};
 
     if (filters?.name) {
-      where.name = { [Op.like]: `%${filters.name}%` };
+      where.name = { [Op.iLike]: `%${filters.name}%` };
     }
     if (filters?.companyId) {
       where.company_id = filters.companyId;
@@ -106,7 +106,7 @@ export class VacancyTemplateSequelizeRepository implements VacancyTemplateReposi
     const where: WhereOptions<VacancyTemplate> = {};
 
     if (filters?.name) {
-      where.name = { [Op.like]: `%${filters.name}%` };
+      where.name = { [Op.iLike]: `%${filters.name}%` };
     }
     if (filters?.companyId) {
       where.company_id = filters.companyId;

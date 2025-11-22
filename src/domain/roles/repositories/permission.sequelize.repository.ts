@@ -29,7 +29,7 @@ export class PermissionSequelizeRepository implements PermissionRepository {
     const where: WhereOptions<Permission> = {};
 
     if (filters?.name) {
-      where.name = { [Op.like]: `%${filters.name}%` };
+      where.name = { [Op.iLike]: `%${filters.name}%` };
     }
     if (filters?.resource) {
       where.module = filters.resource;
@@ -82,7 +82,7 @@ export class PermissionSequelizeRepository implements PermissionRepository {
     const where: WhereOptions<Permission> = {};
 
     if (filters?.name) {
-      where.name = { [Op.like]: `%${filters.name}%` };
+      where.name = { [Op.iLike]: `%${filters.name}%` };
     }
     if (filters?.resource) {
       where.module = filters.resource;

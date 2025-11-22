@@ -26,7 +26,7 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
     const where: WhereOptions<Competence> = {};
 
     if (filters?.name) {
-      where.name = { [Op.like]: `%${filters.name}%` };
+      where.name = { [Op.iLike]: `%${filters.name}%` };
     }
     if (filters?.category) {
       where.category = filters.category;
@@ -86,7 +86,7 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
     this.logger.debug('CompetenceSequelizeRepository.searchByName: Called');
     return this.model.findAll({
       where: {
-        name: { [Op.like]: `%${name}%` },
+        name: { [Op.iLike]: `%${name}%` },
       },
     });
   }
@@ -96,7 +96,7 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
     const where: WhereOptions<Competence> = {};
 
     if (filters?.name) {
-      where.name = { [Op.like]: `%${filters.name}%` };
+      where.name = { [Op.iLike]: `%${filters.name}%` };
     }
     if (filters?.category) {
       where.category = filters.category;

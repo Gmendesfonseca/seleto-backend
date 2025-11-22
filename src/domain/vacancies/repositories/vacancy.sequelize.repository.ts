@@ -50,10 +50,10 @@ export class VacancySequelizeRepository implements VacancyRepository {
       where.company_id = filters.companyId;
     }
     if (filters?.title) {
-      where.title = { [Op.like]: `%${filters.title}%` };
+      where.title = { [Op.iLike]: `%${filters.title}%` };
     }
     if (filters?.location) {
-      where.area = { [Op.like]: `%${filters.location}%` };
+      where.area = { [Op.iLike]: `%${filters.location}%` };
     }
     if (filters?.status) {
       where.status = filters.status;
@@ -160,10 +160,10 @@ export class VacancySequelizeRepository implements VacancyRepository {
       where.company_id = filters.companyId;
     }
     if (filters?.title) {
-      where.title = { [Op.like]: `%${filters.title}%` };
+      where.title = { [Op.iLike]: `%${filters.title}%` };
     }
     if (filters?.location) {
-      where.area = { [Op.like]: `%${filters.location}%` };
+      where.area = { [Op.iLike]: `%${filters.location}%` };
     }
     if (filters?.status) {
       where.status = filters.status;

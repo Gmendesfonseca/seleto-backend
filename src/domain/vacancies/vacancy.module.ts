@@ -7,6 +7,12 @@ import { VacancySequelizeRepository } from './repositories/vacancy.sequelize.rep
 import { VacancyRepository } from './repositories/vacancy.repository.interface';
 import { VacancyServiceInterface } from './interfaces/vacancy.service.interface';
 import { CompanyContextMiddleware } from '../../shared/middlewares/company-context.middleware';
+import { VacancyBenefitRepository } from './repositories/vacancy-benefit.repository.interface';
+import { VacancyBenefitSequelizeRepository } from './repositories/vacancy-benefit.sequelize.repository';
+import { VacancyRequirementRepository } from './repositories/vacancy-requirement.repository.interface';
+import { VacancyRequirementSequelizeRepository } from './repositories/vacancy-requirement.sequelize.repository';
+import { VacancyResponsibilityRepository } from './repositories/vacancy-responsibility.repository.interface';
+import { VacancyResponsibilitySequelizeRepository } from './repositories/vacancy-responsibility.sequelize.repository';
 
 @Module({
   imports: [SequelizeModule.forFeature([Vacancy])],
@@ -19,6 +25,18 @@ import { CompanyContextMiddleware } from '../../shared/middlewares/company-conte
     {
       provide: VacancyServiceInterface,
       useClass: VacancyService,
+    },
+    {
+      provide: VacancyBenefitRepository,
+      useClass: VacancyBenefitSequelizeRepository,
+    },
+    {
+      provide: VacancyRequirementRepository,
+      useClass: VacancyRequirementSequelizeRepository,
+    },
+    {
+      provide: VacancyResponsibilityRepository,
+      useClass: VacancyResponsibilitySequelizeRepository,
     },
   ],
   exports: [

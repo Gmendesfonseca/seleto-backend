@@ -26,7 +26,7 @@ export class RoleSequelizeRepository implements RoleRepository {
     const where: WhereOptions<Role> = {};
 
     if (filters?.name) {
-      where.name = { [Op.like]: `%${filters.name}%` };
+      where.name = { [Op.iLike]: `%${filters.name}%` };
     }
 
     if (filters?.isDefault !== undefined) {
@@ -85,7 +85,7 @@ export class RoleSequelizeRepository implements RoleRepository {
     const where: WhereOptions<Role> = {};
 
     if (filters?.name) {
-      where.name = { [Op.like]: `%${filters.name}%` };
+      where.name = { [Op.iLike]: `%${filters.name}%` };
     }
     if (filters?.isDefault !== undefined) {
       where.is_system = filters.isDefault;

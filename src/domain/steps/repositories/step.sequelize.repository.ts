@@ -29,7 +29,7 @@ export class StepSequelizeRepository implements StepRepository {
       where.template_id = filters.templateId;
     }
     if (filters?.name) {
-      where.name = { [Op.like]: `%${filters.name}%` };
+      where.name = { [Op.iLike]: `%${filters.name}%` };
     }
     if (filters?.type) {
       where.type = filters.type;
@@ -101,7 +101,7 @@ export class StepSequelizeRepository implements StepRepository {
       where.template_id = filters.templateId;
     }
     if (filters?.name) {
-      where.name = { [Op.like]: `%${filters.name}%` };
+      where.name = { [Op.iLike]: `%${filters.name}%` };
     }
     if (filters?.type) {
       where.type = filters.type;
