@@ -17,5 +17,14 @@ export abstract class DashboardRepository {
       percentage: number;
     }[]
   >;
-  abstract getMonthlyApplications(months: number, compApplicationId?: string): Promise<any[]>;
+  abstract getMonthlyApplications(
+    months: number,
+    companyId?: string,
+  ): Promise<
+    {
+      month: string;
+      year: number;
+      count: number;
+    }[]
+  >;
 }

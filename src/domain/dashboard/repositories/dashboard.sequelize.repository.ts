@@ -237,27 +237,55 @@ export class DashboardSequelizeRepository implements DashboardRepository {
     return results;
   }
 
-  async getMonthlyApplications(months: number, companyId?: string): Promise<Application[]> {
+  async getMonthlyApplications(
+    months: number,
+    companyId?: string,
+  ): Promise<
+    {
+      month: string;
+      year: number;
+      count: number;
+    }[]
+  > {
     this.logger.debug('DashboardSequelizeRepository.getMonthlyApplications: Called');
-    const include: IncludeOptions[] = [];
-    const where: WhereOptions<Application> = {
-      created_at: {
-        [Op.gte]: new Date(new Date().setMonth(new Date().getMonth() - months)),
-      },
-    };
+    const results = [];
+    const currentDate = new Date();
 
-    if (companyId) {
-      where['$vacancy.company_id$'] = companyId;
-      include.push({
-        model: this.vacancyModel,
-        as: 'vacancy',
-        required: true,
+    for (let i = 0; i < months; i++) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      const month = date.toLocaleString('default', { month: 'long' });
+      const year = date.getFullYear();
+
+      const where: WhereOptions<Application> = {
+        created_at: {
+          [Op.gte]: new Date(year, date.getMonth(), 1),
+          [Op.lt]: new Date(year, date.getMonth() + 1, 1),
+        },
+      };
+
+      const include: IncludeOptions[] = [];
+
+      if (companyId) {
+        where['$vacancy.company_id$'] = companyId;
+        include.push({
+          model: this.vacancyModel,
+          as: 'vacancy',
+          required: true,
+        });
+      }
+
+      const count = await this.applicationModel.count({
+        where,
+        ...(include.length > 0 && { include }),
+      });
+
+      results.push({
+        month,
+        year,
+        count,
       });
     }
 
-    return this.applicationModel.findAll({
-      where,
-      ...(include.length > 0 && { include }),
-    });
+    return results;
   }
 }
