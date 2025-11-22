@@ -12,9 +12,13 @@ export class VacancyService implements VacancyServiceInterface {
 
   constructor(private readonly repository: VacancyRepository) {}
 
-  async findAll(filters?: VacancyFilters): Promise<Vacancy[]> {
+  async findAll(filters?: VacancyFilters): Promise<PaginatedList<Vacancy>> {
     this.logger.debug('VacancyService.findAll: Called');
-    return this.repository.findAll(filters);
+    const models = await this.repository.findAll(filters);
+    return {
+      data: models,
+      meta: { total: models.length, currentPage: 1, lastPage: 1, perPage: models.length },
+    };
   }
 
   async findOne(id: string): Promise<Vacancy | null> {

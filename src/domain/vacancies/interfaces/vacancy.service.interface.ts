@@ -5,7 +5,7 @@ import { PaginatedList } from 'src/shared/interfaces';
 
 export abstract class VacancyServiceInterface {
   abstract create(createVacancyDto: CreateVacancyDto): Promise<Vacancy>;
-  abstract findAll(filters?: VacancyFilters): Promise<Vacancy[]>;
+  abstract findAll(filters?: VacancyFilters): Promise<PaginatedList<Vacancy>>;
   abstract findOne(id: string): Promise<Vacancy | null>;
   abstract update(id: string, updateVacancyDto: UpdateVacancyDto): Promise<Vacancy>;
   abstract remove(id: string): Promise<void>;
