@@ -13,9 +13,19 @@ import { VacancyRequirementRepository } from './repositories/vacancy-requirement
 import { VacancyRequirementSequelizeRepository } from './repositories/vacancy-requirement.sequelize.repository';
 import { VacancyResponsibilityRepository } from './repositories/vacancy-responsibility.repository.interface';
 import { VacancyResponsibilitySequelizeRepository } from './repositories/vacancy-responsibility.sequelize.repository';
+import { VacancyResponsibility } from './vacancy-responsibility.model';
+import { VacancyRequirement } from './vacancy-requirement.model';
+import { VacancyBenefit } from './vacancy-benefit.model';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Vacancy])],
+  imports: [
+    SequelizeModule.forFeature([
+      Vacancy,
+      VacancyBenefit,
+      VacancyRequirement,
+      VacancyResponsibility,
+    ]),
+  ],
   controllers: [VacancyController],
   providers: [
     {
