@@ -6,33 +6,40 @@ import { Application } from '../../applications/application.model';
 import { Vacancy } from '../../vacancies/vacancy.model';
 import { Company } from '../../companies/company.model';
 import { User } from '../../users/user.model';
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
+import { ApplicationStatus } from 'src/domain/applications';
 
 @Injectable()
 export class DashboardSequelizeRepository implements DashboardRepository {
   private readonly logger = new Logger(DashboardSequelizeRepository.name);
 
   constructor(
-    @InjectModel(Application) private readonly applicationModel: typeof Application,
+    @InjectModel(User) private readonly userModel: typeof User,
     @InjectModel(Vacancy) private readonly vacancyModel: typeof Vacancy,
     @InjectModel(Company) private readonly companyModel: typeof Company,
-    @InjectModel(User) private readonly userModel: typeof User,
+    @InjectModel(Application) private readonly applicationModel: typeof Application,
   ) {}
 
   async getApplicationCount(filters?: DashboardFilters): Promise<number> {
     this.logger.debug('DashboardSequelizeRepository.getApplicationCount: Called');
-    const where: any = {};
+    const where: WhereOptions<Application> = {};
 
     if (filters?.companyId) {
-      // Would need to join with vacancy to filter by company
+      where['$vacancy.company_id$'] = filters.companyId;
     }
+
     if (filters?.dateFrom || filters?.dateTo) {
       where.created_at = {};
       if (filters.dateFrom) {
-        where.created_at[Op.gte] = new Date(filters.dateFrom);
+        where.created_at = {
+          [Op.gte]: new Date(filters.dateFrom),
+        };
       }
       if (filters.dateTo) {
-        where.created_at[Op.lte] = new Date(filters.dateTo);
+        where.created_at = {
+          ...(where.created_at as object),
+          [Op.lte]: new Date(filters.dateTo),
+        };
       }
     }
 
@@ -41,7 +48,7 @@ export class DashboardSequelizeRepository implements DashboardRepository {
 
   async getVacancyCount(filters?: DashboardFilters): Promise<number> {
     this.logger.debug('DashboardSequelizeRepository.getVacancyCount: Called');
-    const where: any = {};
+    const where: WhereOptions<Vacancy> = {};
 
     if (filters?.companyId) {
       where.company_id = filters.companyId;
@@ -52,20 +59,53 @@ export class DashboardSequelizeRepository implements DashboardRepository {
 
   async getCompanyCount(filters?: DashboardFilters): Promise<number> {
     this.logger.debug('DashboardSequelizeRepository.getCompanyCount: Called');
-    return this.companyModel.count();
+    const where: WhereOptions<Company> = {};
+
+    if (filters?.dateFrom || filters?.dateTo) {
+      where.createdAt = {};
+      if (filters.dateFrom) {
+        where.createdAt = {
+          [Op.gte]: new Date(filters.dateFrom),
+        };
+      }
+      if (filters.dateTo) {
+        where.createdAt = {
+          ...(where.createdAt as object),
+          [Op.lte]: new Date(filters.dateTo),
+        };
+      }
+    }
+    return this.companyModel.count({ where });
   }
 
   async getUserCount(filters?: DashboardFilters): Promise<number> {
     this.logger.debug('DashboardSequelizeRepository.getUserCount: Called');
-    return this.userModel.count();
+    const where: WhereOptions<User> = {};
+
+    if (filters?.dateFrom || filters?.dateTo) {
+      where.createdAt = {};
+      if (filters.dateFrom) {
+        where.createdAt = {
+          [Op.gte]: new Date(filters.dateFrom),
+        };
+      }
+      if (filters.dateTo) {
+        where.createdAt = {
+          ...(where.createdAt as object),
+          [Op.lte]: new Date(filters.dateTo),
+        };
+      }
+    }
+
+    return this.userModel.count({ where });
   }
 
-  async getRecentApplications(limit: number, companyId?: string): Promise<any[]> {
+  async getRecentApplications(limit: number, companyId?: string): Promise<Application[]> {
     this.logger.debug('DashboardSequelizeRepository.getRecentApplications: Called');
-    const where: any = {};
+    const where: WhereOptions<Application> = {};
 
     if (companyId) {
-      // Would need to join with vacancy to filter by company
+      where['$vacancy.company_id$'] = companyId;
     }
 
     return this.applicationModel.findAll({
@@ -90,15 +130,34 @@ export class DashboardSequelizeRepository implements DashboardRepository {
     });
   }
 
-  async getApplicationsByStatus(companyId?: string): Promise<any[]> {
+  async getApplicationsByStatus(
+    status: ApplicationStatus,
+    companyId: string,
+  ): Promise<Application[]> {
     this.logger.debug('DashboardSequelizeRepository.getApplicationsByStatus: Called');
-    // This would need raw SQL or complex aggregation
-    return [];
+    const where: WhereOptions<Application> = { status };
+
+    if (companyId) {
+      where['$vacancy.company_id$'] = companyId;
+    }
+
+    return this.applicationModel.findAll({ where });
   }
 
-  async getMonthlyApplications(months: number, companyId?: string): Promise<any[]> {
+  async getMonthlyApplications(months: number, companyId?: string): Promise<Application[]> {
     this.logger.debug('DashboardSequelizeRepository.getMonthlyApplications: Called');
-    // This would need raw SQL or complex aggregation
-    return [];
+    const where: WhereOptions<Application> = {
+      created_at: {
+        [Op.gte]: new Date(new Date().setMonth(new Date().getMonth() - months)),
+      },
+    };
+
+    if (companyId) {
+      where['$vacancy.company_id$'] = companyId;
+    }
+
+    return this.applicationModel.findAll({
+      where,
+    });
   }
 }

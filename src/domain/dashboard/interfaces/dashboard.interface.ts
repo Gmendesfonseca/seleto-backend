@@ -1,3 +1,5 @@
+import { ApplicationStatus } from 'src/domain/applications';
+
 export interface DashboardStats {
   totalApplications: number;
   totalVacancies: number;
@@ -39,6 +41,7 @@ export interface MonthlyApplicationCount {
 }
 
 export interface DashboardFilters {
+  applicationStatus?: (typeof ApplicationStatus)[keyof typeof ApplicationStatus];
   companyId?: string;
   dateFrom?: string;
   dateTo?: string;

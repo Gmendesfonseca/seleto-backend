@@ -11,11 +11,6 @@ export class VacancyService implements VacancyServiceInterface {
 
   constructor(private readonly repository: VacancyRepository) {}
 
-  async create(createVacancyDto: CreateVacancyDto): Promise<Vacancy> {
-    this.logger.debug('VacancyService.create: Called');
-    return this.repository.create(createVacancyDto);
-  }
-
   async findAll(filters?: VacancyFilters): Promise<Vacancy[]> {
     this.logger.debug('VacancyService.findAll: Called');
     return this.repository.findAll(filters);
@@ -24,6 +19,11 @@ export class VacancyService implements VacancyServiceInterface {
   async findOne(id: string): Promise<Vacancy | null> {
     this.logger.debug('VacancyService.findOne: Called');
     return this.repository.findOne(id);
+  }
+
+  async create(createVacancyDto: CreateVacancyDto): Promise<Vacancy> {
+    this.logger.debug('VacancyService.create: Called');
+    return this.repository.create(createVacancyDto);
   }
 
   async update(id: string, updateVacancyDto: UpdateVacancyDto): Promise<Vacancy> {

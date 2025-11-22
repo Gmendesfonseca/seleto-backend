@@ -2,6 +2,7 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { DashboardServiceInterface } from './interfaces/dashboard.service.interface';
 import { DashboardRepository } from './repositories/dashboard.repository.interface';
 import { DashboardStats, DashboardFilters } from './interfaces/dashboard.interface';
+import { ApplicationStatus } from '../applications';
 
 @Injectable()
 export class DashboardService implements DashboardServiceInterface {
@@ -14,6 +15,7 @@ export class DashboardService implements DashboardServiceInterface {
 
   async getStats(filters?: DashboardFilters): Promise<DashboardStats> {
     this.logger.debug('DashboardService.getStats: Called');
+    const statusFilter: ApplicationStatus = filters?.applicationStatus || 'pending';
 
     const [
       totalApplications,
@@ -31,7 +33,7 @@ export class DashboardService implements DashboardServiceInterface {
       this.dashboardRepository.getUserCount(filters),
       this.dashboardRepository.getRecentApplications(10, filters?.companyId),
       this.dashboardRepository.getTopVacancies(10, filters?.companyId),
-      this.dashboardRepository.getApplicationsByStatus(filters?.companyId),
+      this.dashboardRepository.getApplicationsByStatus(statusFilter, filters?.companyId),
       this.dashboardRepository.getMonthlyApplications(6, filters?.companyId),
     ]);
 
@@ -83,9 +85,9 @@ export class DashboardService implements DashboardServiceInterface {
     return this.dashboardRepository.getTopVacancies(limit || 10, companyId);
   }
 
-  async getApplicationsByStatus(companyId?: string): Promise<any[]> {
+  async getApplicationsByStatus(status: ApplicationStatus, companyId?: string): Promise<any[]> {
     this.logger.debug('DashboardService.getApplicationsByStatus: Called');
-    return this.dashboardRepository.getApplicationsByStatus(companyId);
+    return this.dashboardRepository.getApplicationsByStatus(status, companyId);
   }
 
   async getMonthlyApplications(months?: number, companyId?: string): Promise<any[]> {
