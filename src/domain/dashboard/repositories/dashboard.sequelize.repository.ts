@@ -115,9 +115,9 @@ export class DashboardSequelizeRepository implements DashboardRepository {
     });
   }
 
-  async getTopVacancies(limit: number, companyId?: string): Promise<any[]> {
+  async getTopVacancies(limit: number, companyId?: string): Promise<Vacancy[]> {
     this.logger.debug('DashboardSequelizeRepository.getTopVacancies: Called');
-    const where: any = {};
+    const where: WhereOptions<Vacancy> = {};
 
     if (companyId) {
       where.company_id = companyId;
