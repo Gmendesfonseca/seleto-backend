@@ -42,20 +42,20 @@ export class DashboardService implements DashboardServiceInterface {
       totalVacancies,
       totalCompanies,
       totalUsers,
-      recentApplications: recentApplications.map((app: any) => ({
+      recentApplications: recentApplications.map((app) => ({
         id: app.id,
-        applicantName: 'Unknown',
-        vacancyTitle: 'Unknown',
-        companyName: 'Unknown',
+        applicantName: app.applicant.user.name || 'Unknown',
+        vacancyTitle: app.vacancy.title,
+        companyName: app.vacancy.company ? app.vacancy.company.user.name : 'Unknown',
         status: app.status,
         appliedAt: app.created_at,
       })),
-      topVacancies: topVacancies.map((vac: any) => ({
+      topVacancies: topVacancies.map((vac) => ({
         id: vac.id,
         title: vac.title,
-        companyName: 'Unknown',
+        companyName: vac.company ? vac.company.user.name : 'Unknown',
         applicationCount: 0,
-        publishedAt: vac.created_at,
+        publishedAt: vac.publication_date.toISO(),
       })),
       applicationsByStatus: applicationsByStatus.map((stat: any) => ({
         status: stat.status,

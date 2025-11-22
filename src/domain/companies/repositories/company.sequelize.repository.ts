@@ -63,7 +63,7 @@ export class CompanySequelizeRepository implements CompanyRepository {
     search?: SearchParams,
   ): Promise<PaginatedList<Company>> {
     this.logger.debug('FindAll: Called');
-    const where: any = {};
+    const where: WhereOptions<Company> = {};
 
     if (search?.query) {
       where.name = { [Op.like]: `%${search.query}%` };

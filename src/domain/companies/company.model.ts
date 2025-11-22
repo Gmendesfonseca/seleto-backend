@@ -1,4 +1,5 @@
-import { Column, DataType, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { User } from '../users/user.model';
 
 @Table({ tableName: 'companies', underscored: true, paranoid: true })
 export class Company extends Model<Company> {
@@ -20,4 +21,7 @@ export class Company extends Model<Company> {
 
   @Column({ type: DataType.DATE, allowNull: true })
   deletedAt: Date | null;
+
+  @BelongsTo(() => User)
+  user: User;
 }

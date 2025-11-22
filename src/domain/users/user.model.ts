@@ -38,12 +38,6 @@ export class User extends Model<User> implements UserInterface {
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   isVerified: boolean;
 
-  @HasOne(() => Person, { foreignKey: 'user_id' })
-  person: Person | null;
-
-  @HasOne(() => Company, { foreignKey: 'user_id' })
-  company: Company | null;
-
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt: Date;
 
@@ -52,4 +46,10 @@ export class User extends Model<User> implements UserInterface {
 
   @Column({ type: DataType.DATE, allowNull: true })
   deletedAt: Date | null;
+
+  @HasOne(() => Person)
+  person: () => Person;
+
+  @HasOne(() => Company)
+  company: () => Company;
 }

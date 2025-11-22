@@ -25,7 +25,7 @@ export interface TopVacancy {
   title: string;
   companyName: string;
   applicationCount: number;
-  publishedAt: Date;
+  publishedAt: string | null;
 }
 
 export interface ApplicationStatusCount {
