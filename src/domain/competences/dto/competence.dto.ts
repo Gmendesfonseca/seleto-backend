@@ -26,6 +26,6 @@ export class CompetenceResponseDto {
   category: CompetenceCategory;
   description?: string;
   level?: CompetenceLevel;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }

@@ -5,8 +5,8 @@ export interface Secret {
   type: SecretType;
   expiresAt: Date;
   isUsed: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export enum SecretType {

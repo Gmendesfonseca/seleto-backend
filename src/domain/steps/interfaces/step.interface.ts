@@ -8,8 +8,8 @@ export interface Step {
   isRequired: boolean;
   estimatedDuration?: number; // in minutes
   config?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export enum StepType {

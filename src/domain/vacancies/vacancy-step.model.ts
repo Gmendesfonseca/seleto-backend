@@ -9,6 +9,7 @@ import {
 } from 'sequelize-typescript';
 import { Vacancy } from './vacancy.model';
 import { Step } from '../steps/step.model';
+import { DateTime } from 'luxon';
 
 @Table({ tableName: 'vacancy_steps', underscored: true, paranoid: false })
 export class VacancyStep extends Model<VacancyStep> {
@@ -34,8 +35,8 @@ export class VacancyStep extends Model<VacancyStep> {
   order: number;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  createdAt: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updatedAt: Date;
+  updatedAt: DateTime;
 }

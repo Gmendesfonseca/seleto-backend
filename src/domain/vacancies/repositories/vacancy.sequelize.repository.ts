@@ -10,6 +10,7 @@ import { Op, WhereOptions } from 'sequelize';
 import { VacancyResponsibility } from '../vacancy-responsibility.model';
 import { VacancyBenefit } from '../vacancy-benefit.model';
 import { VacancyRequirement } from '../vacancy-requirement.model';
+import { VacancyStep } from '../vacancy-step.model';
 
 @Injectable()
 export class VacancySequelizeRepository implements VacancyRepository {
@@ -82,6 +83,10 @@ export class VacancySequelizeRepository implements VacancyRepository {
           model: VacancyResponsibility,
           attributes: ['responsibility'],
         },
+        {
+          model: VacancyStep,
+          attributes: ['stepId', 'order'],
+        },
       ],
     });
   }
@@ -97,6 +102,23 @@ export class VacancySequelizeRepository implements VacancyRepository {
         },
         {
           model: Application,
+          attributes: ['id'],
+        },
+        {
+          model: VacancyBenefit,
+          attributes: ['benefit'],
+        },
+        {
+          model: VacancyRequirement,
+          attributes: ['requirement'],
+        },
+        {
+          model: VacancyResponsibility,
+          attributes: ['responsibility'],
+        },
+        {
+          model: VacancyStep,
+          attributes: ['stepId', 'order'],
         },
       ],
     });

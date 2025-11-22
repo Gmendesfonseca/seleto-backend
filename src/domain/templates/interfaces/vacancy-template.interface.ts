@@ -7,8 +7,8 @@ export interface VacancyTemplate {
   isActive: boolean;
   steps: string[]; // Step IDs
   config?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export interface VacancyTemplateFilters {

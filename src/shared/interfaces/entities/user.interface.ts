@@ -3,8 +3,8 @@ export interface User {
   name: string;
   email: string;
   username?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
   companyId?: string;
   roleId?: string;
   isActive: boolean;

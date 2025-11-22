@@ -27,8 +27,8 @@ export interface DateFilter {
 
 export interface BaseEntity {
   id: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export interface SortOptions {

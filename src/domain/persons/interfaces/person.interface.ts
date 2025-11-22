@@ -13,8 +13,8 @@ export interface Person {
   competences?: PersonCompetence[];
   experiences?: WorkExperience[];
   education?: Education[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export interface Address {

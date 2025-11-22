@@ -10,8 +10,8 @@ export interface Address {
   country: string;
   postalCode: string;
   isPrimary: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export interface AddressFilters {

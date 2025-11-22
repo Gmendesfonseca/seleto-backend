@@ -31,8 +31,8 @@ export class UserRole extends Model<UserRole> {
   role: Role;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  createdAt: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updatedAt: Date;
+  updatedAt: DateTime;
 }

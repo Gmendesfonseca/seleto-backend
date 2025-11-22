@@ -29,8 +29,8 @@ export class RefreshToken extends Model<RefreshToken> {
   expires_at: Date;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  createdAt: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updatedAt: Date;
+  updatedAt: DateTime;
 }

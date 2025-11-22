@@ -6,8 +6,8 @@ export interface Phone {
   number: string;
   type: PhoneType;
   isPrimary: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export interface PhoneFilters {

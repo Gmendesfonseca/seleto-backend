@@ -36,10 +36,10 @@ export class Secret extends Model<Secret> {
   user: User;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  createdAt: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updatedAt: Date;
+  updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
   deletedAt: Date | null;

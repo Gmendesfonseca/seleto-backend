@@ -33,6 +33,6 @@ export class VacancyTemplateResponseDto {
   isActive: boolean;
   steps: string[];
   config?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }

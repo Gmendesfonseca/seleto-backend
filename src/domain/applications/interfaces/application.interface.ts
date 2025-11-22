@@ -6,8 +6,8 @@ export interface Application {
   resume?: string;
   coverLetter?: string;
   appliedAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export interface ApplicationFilters {

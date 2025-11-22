@@ -4,8 +4,8 @@ export interface Competence {
   category: CompetenceCategory;
   description?: string;
   level?: CompetenceLevel;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export const CompetenceCategory = {

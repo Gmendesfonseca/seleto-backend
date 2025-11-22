@@ -3,8 +3,8 @@ export interface RecruitmentProcess {
   vacancyId: string;
   status: string;
   steps: any[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export interface RecruitmentFilters {

@@ -32,5 +32,5 @@ export class PasswordResetToken extends Model<PasswordResetToken> {
   used: boolean;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  createdAt: Date;
+  createdAt: DateTime;
 }

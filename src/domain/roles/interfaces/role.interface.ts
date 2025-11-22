@@ -5,8 +5,8 @@ export interface Role {
   permissions: string[];
   isActive: boolean;
   isDefault: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export interface Permission {
@@ -16,8 +16,8 @@ export interface Permission {
   action: string;
   description?: string;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export interface RoleFilters {

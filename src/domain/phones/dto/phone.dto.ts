@@ -19,6 +19,6 @@ export class PhoneResponseDto {
   number: string;
   type: PhoneType;
   isPrimary: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }

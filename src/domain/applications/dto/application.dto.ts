@@ -15,7 +15,7 @@ export class ApplicationResponseDto {
 
   appliedAt: Date;
 
-  createdAt: Date;
+  createdAt: DateTime;
 
-  updatedAt: Date;
+  updatedAt: DateTime;
 }

@@ -31,8 +31,8 @@ export class RolePermission extends Model<RolePermission> {
   permission: Permission;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  createdAt: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updatedAt: Date;
+  updatedAt: DateTime;
 }

@@ -6,8 +6,8 @@ export interface ProcessTemplate {
   isDefault: boolean;
   companyId?: string;
   steps: any[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export interface ProcessTemplateFilters {

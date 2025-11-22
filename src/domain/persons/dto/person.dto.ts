@@ -48,8 +48,8 @@ export class PersonResponseDto {
   competences?: PersonCompetence[];
   experiences?: WorkExperience[];
   education?: Education[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export class AddCompetenceDto {

@@ -27,8 +27,8 @@ export class RoleResponseDto {
   permissions: string[];
   isActive: boolean;
   isDefault: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export class CreatePermissionDto {
@@ -61,6 +61,6 @@ export class PermissionResponseDto {
   action: string;
   description?: string;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }

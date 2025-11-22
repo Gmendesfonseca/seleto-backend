@@ -117,6 +117,6 @@ export class VacancyResponseDto {
   status: VacancyStatus;
   publicationDate: Date;
   expirationDate?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }

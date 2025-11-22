@@ -23,10 +23,10 @@ export class Company extends Model<Company> {
   user_id: string;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  createdAt: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updatedAt: Date;
+  updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
   deletedAt: Date | null;

@@ -38,6 +38,6 @@ export class StepResponseDto {
   isRequired: boolean;
   estimatedDuration?: number;
   config?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
