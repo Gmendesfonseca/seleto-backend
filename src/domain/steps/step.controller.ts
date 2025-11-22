@@ -18,49 +18,49 @@ import { CreateStepDto, UpdateStepDto, StepQueryDto } from './dto/step.dto';
 export class StepController {
   private readonly logger = new Logger(StepController.name);
 
-  constructor(private readonly stepService: StepService) {}
+  constructor(private readonly service: StepService) {}
 
   @Get()
-  async findAll(@Query() filters: StepQueryDto) {
-    this.logger.debug('StepController.findAll: Called', { filters });
-    return this.stepService.findAll(filters);
+  async index(@Query() filters: StepQueryDto) {
+    this.logger.debug('Index: Called', { filters });
+    return this.service.findAll(filters);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    this.logger.debug('StepController.findOne: Called', { id });
-    return this.stepService.findOne(id);
+  async show(@Param('id') id: string) {
+    this.logger.debug('Show: Called', { id });
+    return this.service.findOne(id);
   }
 
   @Post()
-  async create(@Body() createStepDto: CreateStepDto) {
-    this.logger.debug('StepController.create: Called', { createStepDto });
-    return this.stepService.create(createStepDto);
+  async store(@Body() dto: CreateStepDto) {
+    this.logger.debug('Store: Called', { dto });
+    return this.service.create(dto);
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateStepDto: UpdateStepDto) {
-    this.logger.debug('StepController.update: Called', { id, updateStepDto });
-    return this.stepService.update(id, updateStepDto);
+    this.logger.debug('Update: Called', { id, updateStepDto });
+    return this.service.update(id, updateStepDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    this.logger.debug('StepController.remove: Called', { id });
-    await this.stepService.remove(id);
+    this.logger.debug('Remove: Called', { id });
+    await this.service.remove(id);
   }
 
   @Get('template/:templateId')
   async findByTemplate(@Param('templateId') templateId: string) {
-    this.logger.debug('StepController.findByTemplate: Called', { templateId });
-    return this.stepService.findByTemplate(templateId);
+    this.logger.debug('FindByTemplate: Called', { templateId });
+    return this.service.findByTemplate(templateId);
   }
 
   @Post('reorder')
   async reorderSteps(@Body() payload: { templateId: string; stepIds: string[] }) {
-    this.logger.debug('StepController.reorderSteps: Called', { payload });
-    return this.stepService.reorderSteps(payload.templateId, payload.stepIds);
+    this.logger.debug('ReorderSteps: Called', { payload });
+    return this.service.reorderSteps(payload.templateId, payload.stepIds);
   }
 
   @Put('template/:templateId/reorder')
@@ -68,7 +68,7 @@ export class StepController {
     @Param('templateId') templateId: string,
     @Body('stepIds') stepIds: string[],
   ) {
-    this.logger.debug('StepController.reorderStepsByTemplate: Called', { templateId, stepIds });
-    return this.stepService.reorderSteps(templateId, stepIds);
+    this.logger.debug('ReorderStepsByTemplate: Called', { templateId, stepIds });
+    return this.service.reorderSteps(templateId, stepIds);
   }
 }

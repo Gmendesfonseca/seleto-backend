@@ -23,76 +23,70 @@ export class VacancyController {
   constructor(private readonly service: VacancyServiceInterface) {}
 
   @Get()
-  async findAll(@Query() dto: VacancyQueryDto, @Req() request: RequestWithCompany) {
-    this.logger.debug('VacancyController.findAll: Called', { dto });
+  async index(@Query() dto: VacancyQueryDto, @Req() request: RequestWithCompany) {
+    this.logger.debug('Index: Called', { dto });
     const companyId = request.companyId;
     return this.service.findAll({ ...dto, companyId });
   }
 
   @Get('published')
   async findPublished() {
-    this.logger.debug('VacancyController.findPublished: Called');
+    this.logger.debug('FindPublished: Called');
     return this.service.findPublished();
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    this.logger.debug('VacancyController.findOne: Called', { id });
+    this.logger.debug('FindOne: Called', { id });
     return this.service.findOne(id);
   }
 
   @Post()
-  async create(@Body() dto: CreateVacancyDto) {
-    this.logger.debug('VacancyController.create: Called', { dto });
+  async store(@Body() dto: CreateVacancyDto) {
+    this.logger.debug('Create: Called', { dto });
     return this.service.create(dto);
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: UpdateVacancyDto) {
-    this.logger.debug('VacancyController.update: Called', { id, dto });
+    this.logger.debug('Update: Called', { id, dto });
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    this.logger.debug('VacancyController.remove: Called', { id });
+    this.logger.debug('Remove: Called', { id });
     await this.service.remove(id);
   }
 
   @Post(':id/publish')
   async publish(@Param('id') id: string) {
-    this.logger.debug('VacancyController.publish: Called', { id });
+    this.logger.debug('Publish: Called', { id });
     return this.service.publishVacancy(id);
   }
 
   @Post(':id/close')
   async close(@Param('id') id: string) {
-    this.logger.debug('VacancyController.close: Called', { id });
+    this.logger.debug('Close: Called', { id });
     return this.service.closeVacancy(id);
   }
 
   // @Get(':vacancyId/applications')
   // async getVacancyApplications(@Param('vacancyId') vacancyId: string) {
-  //   this.logger.debug('VacancyController.getVacancyApplications: Called', { vacancyId });
+  //   this.logger.debug('GetVacancyApplications: Called', { vacancyId });
   //   return this.service.getApplications(vacancyId);
   // }
 
   // @Post(':vacancyId/apply')
   // async applyToVacancy(@Param('vacancyId') vacancyId: string, @Body() applicationData: any) {
-  //   this.logger.debug('VacancyController.applyToVacancy: Called', { vacancyId });
+  //   this.logger.debug('ApplyToVacancy: Called', { vacancyId });
   //   return this.service.createApplication(vacancyId, applicationData);
   // }
 
   // @Get(':id/stats')
   // async getVacancyStats(@Param('id') id: string) {
-  //   this.logger.debug('VacancyController.getVacancyStats: Called', { id });
+  //   this.logger.debug('GetVacancyStats: Called', { id });
   //   return this.service.getStats(id);
   // }
-
-  @Get('company/:id')
-  async findByCompany(@Param('id') companyId: string) {
-    this.logger.debug('VacancyController.findByCompany: Called', { companyId });
-    return this.service.findByCompany(companyId);
-  }
 }

@@ -34,6 +34,7 @@ export class DashboardController {
     @Req() request: RequestWithCompany,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
   ) {
+    this.logger.debug('RecentApplications: called', { limit, companyId: request.companyId });
     return this.service.getRecentApplications(limit, request.companyId);
   }
 
@@ -44,6 +45,7 @@ export class DashboardController {
     @Req() request: RequestWithCompany,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
   ) {
+    this.logger.debug('TopVacancies: called', { limit, companyId: request.companyId });
     return this.service.getTopVacancies(limit, request.companyId);
   }
 
@@ -51,6 +53,7 @@ export class DashboardController {
   @HttpCode(HttpStatus.OK)
   @Authorized()
   public async applicationsByStatus(@Req() request: RequestWithCompany) {
+    this.logger.debug('ApplicationsByStatus: called', { companyId: request.companyId });
     return this.service.getApplicationsByStatus(request.companyId);
   }
 
@@ -61,6 +64,7 @@ export class DashboardController {
     @Req() request: RequestWithCompany,
     @Query('months', new DefaultValuePipe(6), ParseIntPipe) months?: number,
   ) {
+    this.logger.debug('MonthlyApplications: called', { months, companyId: request.companyId });
     return this.service.getMonthlyApplications(months, request.companyId);
   }
 }

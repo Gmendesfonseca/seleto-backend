@@ -20,53 +20,53 @@ import { PhoneType } from './phone.model';
 export class PhoneController {
   private readonly logger = new Logger(PhoneController.name);
 
-  constructor(private readonly phoneService: PhoneServiceInterface) {}
+  constructor(private readonly service: PhoneServiceInterface) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createPhoneDto: CreatePhoneDto) {
-    this.logger.debug('PhoneController.create: Called');
-    return this.phoneService.create(createPhoneDto);
+  async store(@Body() createPhoneDto: CreatePhoneDto) {
+    this.logger.debug('Store: Called');
+    return this.service.create(createPhoneDto);
   }
 
   @Get()
-  async findAll(
+  async index(
     @Query('personId') personId?: string,
     @Query('type') type?: PhoneType,
     @Query('isPrimary') isPrimary?: boolean,
   ) {
-    this.logger.debug('PhoneController.findAll: Called');
-    return this.phoneService.findAll({ personId, type, isPrimary });
+    this.logger.debug('Index: Called');
+    return this.service.findAll({ personId, type, isPrimary });
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    this.logger.debug('PhoneController.findOne: Called');
-    return this.phoneService.findOne(id);
+  async show(@Param('id') id: string) {
+    this.logger.debug('Show: Called');
+    return this.service.findOne(id);
   }
 
   @Get('person/:personId')
-  async findByPerson(@Param('personId') personId: string) {
-    this.logger.debug('PhoneController.findByPerson: Called');
-    return this.phoneService.findByPerson(personId);
+  async showByPerson(@Param('personId') personId: string) {
+    this.logger.debug('ShowByPerson: Called');
+    return this.service.findByPerson(personId);
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updatePhoneDto: UpdatePhoneDto) {
-    this.logger.debug('PhoneController.update: Called');
-    return this.phoneService.update(id, updatePhoneDto);
+    this.logger.debug('Update: Called');
+    return this.service.update(id, updatePhoneDto);
   }
 
   @Patch(':id/set-primary')
   async setPrimary(@Param('id') id: string, @Body('personId') personId: string) {
-    this.logger.debug('PhoneController.setPrimary: Called');
-    return this.phoneService.setPrimary(id, personId);
+    this.logger.debug('SetPrimary: Called');
+    return this.service.setPrimary(id, personId);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    this.logger.debug('PhoneController.remove: Called');
-    await this.phoneService.remove(id);
+    this.logger.debug('Remove: Called');
+    await this.service.remove(id);
   }
 }

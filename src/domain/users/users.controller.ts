@@ -53,7 +53,7 @@ export class UsersController {
     }
   }
 
-  @Get('/:id')
+  @Get(':id')
   @HttpCode(200)
   async show(@Param('id', new ParseUUIDPipe()) id: string) {
     this.logger.debug('Show: Called');
@@ -65,7 +65,7 @@ export class UsersController {
     }
   }
 
-  @Post('/')
+  @Post()
   @HttpCode(201)
   @Authorized()
   async activate(@Body() activateUserDto: ActivateUserDto) {

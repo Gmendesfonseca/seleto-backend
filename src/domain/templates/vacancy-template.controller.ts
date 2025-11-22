@@ -10,6 +10,7 @@ import {
   Logger,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { VacancyTemplateServiceInterface } from './interfaces/vacancy-template.service.interface';
 import {
@@ -17,6 +18,7 @@ import {
   UpdateVacancyTemplateDto,
   VacancyTemplateQueryDto,
 } from './dto/vacancy-template.dto';
+import { RequestWithCompany } from 'src/shared/middlewares/company-context.middleware';
 
 @Controller('vacancy-templates')
 export class VacancyTemplateController {
@@ -25,21 +27,21 @@ export class VacancyTemplateController {
   constructor(private readonly service: VacancyTemplateServiceInterface) {}
 
   @Get()
-  async index(@Query() filters: VacancyTemplateQueryDto) {
-    this.logger.debug('VacancyTemplateController.index: Called', { filters });
-    return this.service.findAll(filters);
+  async index(@Query() filters: VacancyTemplateQueryDto, @Req() request: RequestWithCompany) {
+    this.logger.debug('Index: Called', { filters });
+    return this.service.findAll({ ...filters, companyId: request.companyId });
   }
 
   @Get(':id')
   async show(@Param('id') id: string) {
-    this.logger.debug('VacancyTemplateController.show: Called', { id });
+    this.logger.debug('Show: Called', { id });
     return this.service.findOne(id);
   }
 
   @Post()
-  async create(@Body() createVacancyTemplateDto: CreateVacancyTemplateDto) {
-    this.logger.debug('VacancyTemplateController.create: Called', { createVacancyTemplateDto });
-    return this.service.create(createVacancyTemplateDto);
+  async store(@Body() dto: CreateVacancyTemplateDto) {
+    this.logger.debug('Store: Called', { dto });
+    return this.service.create(dto);
   }
 
   @Put(':id')
@@ -47,32 +49,32 @@ export class VacancyTemplateController {
     @Param('id') id: string,
     @Body() updateVacancyTemplateDto: UpdateVacancyTemplateDto,
   ) {
-    this.logger.debug('VacancyTemplateController.update: Called', { id, updateVacancyTemplateDto });
+    this.logger.debug('Update: Called', { id, updateVacancyTemplateDto });
     return this.service.update(id, updateVacancyTemplateDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async destroy(@Param('id') id: string) {
-    this.logger.debug('VacancyTemplateController.destroy: Called', { id });
+    this.logger.debug('Destroy: Called', { id });
     await this.service.remove(id);
   }
 
   @Get('company/:companyId')
   async showByCompany(@Param('companyId') companyId: string) {
-    this.logger.debug('VacancyTemplateController.showByCompany: Called', { companyId });
+    this.logger.debug('ShowByCompany: Called', { companyId });
     return this.service.findByCompany(companyId);
   }
 
   @Get('company/:companyId/default')
   async showDefault(@Param('companyId') companyId: string) {
-    this.logger.debug('VacancyTemplateController.showDefault: Called', { companyId });
+    this.logger.debug('ShowDefault: Called', { companyId });
     return this.service.findDefault(companyId);
   }
 
   @Put(':id/set-default')
   async setAsDefault(@Param('id') id: string) {
-    this.logger.debug('VacancyTemplateController.setAsDefault: Called', { id });
+    this.logger.debug('SetAsDefault: Called', { id });
     return this.service.setAsDefault(id);
   }
 }

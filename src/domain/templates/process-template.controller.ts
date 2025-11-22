@@ -24,7 +24,7 @@ export class ProcessTemplateController {
 
   @Get()
   @Authorized()
-  async findAll(
+  async index(
     @Query('companyId') companyId?: string,
     @Query('category') category?: string,
     @Query('isDefault') isDefault?: boolean,
@@ -32,7 +32,7 @@ export class ProcessTemplateController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset?: number,
   ) {
-    this.logger.debug('ProcessTemplateController.findAll: Called', {
+    this.logger.debug('Index: Called', {
       companyId,
       category,
       isDefault,
@@ -53,28 +53,28 @@ export class ProcessTemplateController {
   @Get('defaults')
   @Authorized()
   async getDefaults() {
-    this.logger.debug('ProcessTemplateController.getDefaults: Called');
+    this.logger.debug('GetDefaults: Called');
     return this.service.getDefaults();
   }
 
   @Get(':id')
   @Authorized()
   async findOne(@Param('id') id: string) {
-    this.logger.debug('ProcessTemplateController.findOne: Called', { id });
+    this.logger.debug('FindOne: Called', { id });
     return this.service.findOne(id);
   }
 
   @Post()
   @Authorized()
-  async create(@Body() createTemplateDto: any) {
-    this.logger.debug('ProcessTemplateController.create: Called', { createTemplateDto });
+  async store(@Body() createTemplateDto: any) {
+    this.logger.debug('Store: Called', { createTemplateDto });
     return this.service.create(createTemplateDto);
   }
 
   @Put(':id')
   @Authorized()
   async update(@Param('id') id: string, @Body() updateTemplateDto: any) {
-    this.logger.debug('ProcessTemplateController.update: Called', { id, updateTemplateDto });
+    this.logger.debug('Update: Called', { id, updateTemplateDto });
     return this.service.update(id, updateTemplateDto);
   }
 
@@ -82,14 +82,14 @@ export class ProcessTemplateController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Authorized()
   async remove(@Param('id') id: string) {
-    this.logger.debug('ProcessTemplateController.remove: Called', { id });
+    this.logger.debug('Remove: Called', { id });
     await this.service.remove(id);
   }
 
   @Post(':id/duplicate')
   @Authorized()
   async duplicate(@Param('id') id: string, @Body('name') name?: string) {
-    this.logger.debug('ProcessTemplateController.duplicate: Called', { id, name });
+    this.logger.debug('Duplicate: Called', { id, name });
     return this.service.duplicate(id, name);
   }
 }

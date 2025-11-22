@@ -29,14 +29,14 @@ export class PersonController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createPersonDto: CreatePersonDto) {
-    this.logger.debug('PersonController.create: Called');
+  async store(@Body() createPersonDto: CreatePersonDto) {
+    this.logger.debug('Store: Called');
     return this.service.create(createPersonDto);
   }
 
   @Get()
-  async findAll(@Query() query: PersonQueryDto) {
-    this.logger.debug('PersonController.findAll: Called');
+  async index(@Query() query: PersonQueryDto) {
+    this.logger.debug('Index: Called');
     return this.service.findAll({
       competences: query.competences,
       location: query.location,
@@ -44,34 +44,34 @@ export class PersonController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    this.logger.debug('PersonController.findOne: Called');
+  async show(@Param('id') id: string) {
+    this.logger.debug('Show: Called');
     return this.service.findOne(id);
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updatePersonDto: UpdatePersonDto) {
-    this.logger.debug('PersonController.update: Called');
+    this.logger.debug('Update: Called');
     return this.service.update(id, updatePersonDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    this.logger.debug('PersonController.remove: Called');
+    this.logger.debug('Remove: Called');
     await this.service.remove(id);
   }
 
   @Post(':id/competences')
   async addCompetence(@Param('id') id: string, @Body() addCompetenceDto: AddCompetenceDto) {
-    this.logger.debug('PersonController.addCompetence: Called');
+    this.logger.debug('AddCompetence: Called');
     return this.service.addCompetence(id, addCompetenceDto);
   }
 
   @Delete(':id/competences/:competenceId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeCompetence(@Param('id') id: string, @Param('competenceId') competenceId: string) {
-    this.logger.debug('PersonController.removeCompetence: Called');
+    this.logger.debug('RemoveCompetence: Called');
     await this.service.removeCompetence(id, competenceId);
   }
 
@@ -80,27 +80,27 @@ export class PersonController {
     @Param('id') id: string,
     @Body() addWorkExperienceDto: AddWorkExperienceDto,
   ) {
-    this.logger.debug('PersonController.addWorkExperience: Called');
+    this.logger.debug('AddWorkExperience: Called');
     return this.service.addWorkExperience(id, addWorkExperienceDto);
   }
 
   @Delete(':id/work-experiences/:experienceId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeWorkExperience(@Param('id') id: string, @Param('experienceId') experienceId: string) {
-    this.logger.debug('PersonController.removeWorkExperience: Called');
+    this.logger.debug('RemoveWorkExperience: Called');
     await this.service.removeWorkExperience(id, experienceId);
   }
 
   @Post(':id/education')
   async addEducation(@Param('id') id: string, @Body() addEducationDto: AddEducationDto) {
-    this.logger.debug('PersonController.addEducation: Called');
+    this.logger.debug('AddEducation: Called');
     return this.service.addEducation(id, addEducationDto);
   }
 
   @Delete(':id/education/:educationId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeEducation(@Param('id') id: string, @Param('educationId') educationId: string) {
-    this.logger.debug('PersonController.removeEducation: Called');
+    this.logger.debug('RemoveEducation: Called');
     await this.service.removeEducation(id, educationId);
   }
 }

@@ -25,14 +25,14 @@ export class CompanyController {
   @Get()
   @Authorized()
   async index(@Query() pagination: PaginationParams, @Query() search?: SearchParams) {
-    this.logger.debug('CompanyController.index: Called', { pagination, search });
+    this.logger.debug('Index: Called', { pagination, search });
     return this.service.findAll(pagination, search);
   }
 
   @Get(':id')
   @Authorized()
   async show(@Param('id') id: string) {
-    this.logger.debug('CompanyController.show: Called', { id });
+    this.logger.debug('Show: Called', { id });
     return this.service.findById(id);
   }
 
@@ -59,22 +59,21 @@ export class CompanyController {
   @Get(':id/addresses')
   @Authorized()
   async indexAddresses(@Param('id') id: string) {
-    this.logger.debug('CompanyController.indexAddresses: Called', { id });
-    // This will be handled by the address service
+    this.logger.debug('IndexAddresses: Called', { id });
     return [];
   }
 
   @Post()
   @Authorized()
   async create(@Body() dto: CreateCompanyDto) {
-    this.logger.debug('CompanyController.create: Called', { dto });
+    this.logger.debug('Create: Called', { dto });
     return this.service.create(dto);
   }
 
   @Put(':id')
   @Authorized()
   async update(@Param('id') id: string, @Body() dto: UpdateCompanyDto) {
-    this.logger.debug('CompanyController.update: Called', { id, dto });
+    this.logger.debug('Update: Called', { id, dto });
     return this.service.update(id, dto);
   }
 
@@ -82,14 +81,14 @@ export class CompanyController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Authorized()
   async delete(@Param('id') id: string) {
-    this.logger.debug('CompanyController.delete: Called', { id });
+    this.logger.debug('Delete: Called', { id });
     await this.service.delete(id);
   }
 
   @Put(':id/status')
   @Authorized()
   async updateStatus(@Param('id') id: string, @Body('isActive') isActive: boolean) {
-    this.logger.debug('CompanyController.updateStatus: Called', { id, isActive });
+    this.logger.debug('UpdateStatus: Called', { id, isActive });
     await this.service.setActiveStatus(id, isActive);
   }
 }

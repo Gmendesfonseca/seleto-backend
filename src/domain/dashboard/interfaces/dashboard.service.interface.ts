@@ -1,8 +1,8 @@
 import {
+  TopVacancy,
   DashboardStats,
   DashboardFilters,
   RecentApplication,
-  TopVacancy,
   ApplicationStatusCount,
   MonthlyApplicationCount,
 } from './dashboard.interface';
