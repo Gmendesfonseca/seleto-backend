@@ -1,10 +1,33 @@
-import { VacancyFilters } from './vacancy.interface';
+import { VacancyFilters, VacancyStatus } from './vacancy.interface';
 import { CreateVacancyDto, UpdateVacancyDto } from '../dto/vacancy.dto';
 import { Vacancy } from '../vacancy.model';
 import { PaginatedList } from 'src/shared/interfaces';
+import { DateTime } from 'luxon';
 
+export class CreateVacancyResult {
+  id: string;
+  title: string;
+  description: string;
+  company_id: string;
+  location: string;
+  salary_min: number;
+  salary_max: number;
+  currency: string;
+  type: string;
+  work_mode: string;
+  contract: string;
+  level: string;
+  publication_date: DateTime;
+  expiration_date: DateTime;
+  status: VacancyStatus;
+  created_at: DateTime;
+  updated_at: DateTime;
+  benefits: string[];
+  responsibilities: string[];
+  requirements: string[];
+}
 export abstract class VacancyServiceInterface {
-  abstract create(createVacancyDto: CreateVacancyDto): Promise<Vacancy>;
+  abstract create(createVacancyDto: CreateVacancyDto): Promise<CreateVacancyResult>;
   abstract findAll(filters?: VacancyFilters): Promise<PaginatedList<Vacancy>>;
   abstract findOne(id: string): Promise<Vacancy | null>;
   abstract update(id: string, updateVacancyDto: UpdateVacancyDto): Promise<Vacancy>;

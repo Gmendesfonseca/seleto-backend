@@ -7,6 +7,9 @@ import { VacancyFilters, VacancyStatus } from '../interfaces/vacancy.interface';
 import { Company } from '../../companies/company.model';
 import { Application } from '../../applications/application.model';
 import { Op, WhereOptions } from 'sequelize';
+import { VacancyResponsibility } from '../vacancy-responsibility.model';
+import { VacancyBenefit } from '../vacancy-benefit.model';
+import { VacancyRequirement } from '../vacancy-requirement.model';
 
 @Injectable()
 export class VacancySequelizeRepository implements VacancyRepository {
@@ -66,6 +69,18 @@ export class VacancySequelizeRepository implements VacancyRepository {
         {
           model: Application,
           attributes: ['id'],
+        },
+        {
+          model: VacancyBenefit,
+          attributes: ['benefit'],
+        },
+        {
+          model: VacancyRequirement,
+          attributes: ['requirement'],
+        },
+        {
+          model: VacancyResponsibility,
+          attributes: ['responsibility'],
         },
       ],
     });

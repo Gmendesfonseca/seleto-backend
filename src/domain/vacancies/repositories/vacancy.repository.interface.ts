@@ -3,10 +3,12 @@ import { CreateVacancyDto, UpdateVacancyDto } from '../dto/vacancy.dto';
 import { Vacancy } from '../vacancy.model';
 
 export abstract class VacancyRepository {
-  abstract create(createVacancyDto: CreateVacancyDto): Promise<Vacancy>;
+  abstract create(
+    dto: Omit<CreateVacancyDto, 'benefits' | 'responsibilities' | 'requirements'>,
+  ): Promise<Vacancy>;
   abstract findAll(filters?: VacancyFilters): Promise<Vacancy[]>;
   abstract findOne(id: string): Promise<Vacancy | null>;
-  abstract update(id: string, updateVacancyDto: UpdateVacancyDto): Promise<Vacancy>;
+  abstract update(id: string, dto: UpdateVacancyDto): Promise<Vacancy>;
   abstract delete(id: string): Promise<void>;
   abstract findByCompany(companyId: string): Promise<Vacancy[]>;
   abstract findPublished(): Promise<Vacancy[]>;

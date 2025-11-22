@@ -37,6 +37,9 @@ export class CreateVacancyDto {
   @IsEnum(VacancyType)
   type: VacancyType;
 
+  @IsString()
+  area: string;
+
   @IsEnum(WorkModeType)
   workMode: WorkModeType;
 

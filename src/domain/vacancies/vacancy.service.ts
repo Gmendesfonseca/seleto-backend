@@ -1,16 +1,27 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { VacancyServiceInterface } from './interfaces/vacancy.service.interface';
+import {
+  VacancyServiceInterface,
+  CreateVacancyResult,
+} from './interfaces/vacancy.service.interface';
 import { VacancyRepository } from './repositories/vacancy.repository.interface';
 import { CreateVacancyDto, UpdateVacancyDto } from './dto/vacancy.dto';
 import { VacancyFilters, VacancyStatus } from './interfaces/vacancy.interface';
 import { Vacancy } from './vacancy.model';
 import { PaginatedList } from 'src/shared/interfaces';
+import { VacancyBenefitRepository } from './repositories/vacancy-benefit.repository.interface';
+import { VacancyRequirementRepository } from './repositories/vacancy-requirement.repository.interface';
+import { VacancyResponsibilityRepository } from './repositories/vacancy-responsibility.repository.interface';
 
 @Injectable()
 export class VacancyService implements VacancyServiceInterface {
   private readonly logger = new Logger(VacancyService.name);
 
-  constructor(private readonly repository: VacancyRepository) {}
+  constructor(
+    private readonly repository: VacancyRepository,
+    private readonly benefitRepository: VacancyBenefitRepository,
+    private readonly requirementRepository: VacancyRequirementRepository,
+    private readonly responsibilityRepository: VacancyResponsibilityRepository,
+  ) {}
 
   async findOne(id: string): Promise<Vacancy | null> {
     this.logger.debug('VacancyService.findOne: Called');
@@ -26,9 +37,31 @@ export class VacancyService implements VacancyServiceInterface {
     };
   }
 
-  async create(createVacancyDto: CreateVacancyDto): Promise<Vacancy> {
+  async create({
+    benefits,
+    responsibilities,
+    requirements,
+    ...dto
+  }: CreateVacancyDto): Promise<CreateVacancyResult> {
     this.logger.debug('VacancyService.create: Called');
-    return this.repository.create(createVacancyDto);
+
+    const model = await this.repository.create(dto);
+    const benefitModels = await this.benefitRepository.bulkCreate(
+      benefits?.map((benefit) => ({ benefit, vacancyId: model.id })) || [],
+    );
+    const responsibilityModels = await this.responsibilityRepository.bulkCreate(
+      responsibilities?.map((responsibility) => ({ responsibility, vacancyId: model.id })) || [],
+    );
+    const requirementModels = await this.requirementRepository.bulkCreate(
+      requirements?.map((requirement) => ({ requirement, vacancyId: model.id })) || [],
+    );
+
+    return {
+      ...model.get(),
+      benefits: benefitModels.map((b) => b.benefit),
+      responsibilities: responsibilityModels.map((r) => r.responsibility),
+      requirements: requirementModels.map((r) => r.requirement),
+    };
   }
 
   async update(id: string, updateVacancyDto: UpdateVacancyDto): Promise<Vacancy> {

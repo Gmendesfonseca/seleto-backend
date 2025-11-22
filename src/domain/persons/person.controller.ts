@@ -29,9 +29,9 @@ export class PersonController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async store(@Body() createPersonDto: CreatePersonDto) {
+  async store(@Body() dto: CreatePersonDto) {
     this.logger.debug('Store: Called');
-    return this.service.create(createPersonDto);
+    return this.service.create(dto);
   }
 
   @Get()
@@ -50,9 +50,9 @@ export class PersonController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updatePersonDto: UpdatePersonDto) {
+  async update(@Param('id') id: string, @Body() dto: UpdatePersonDto) {
     this.logger.debug('Update: Called');
-    return this.service.update(id, updatePersonDto);
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')
@@ -63,9 +63,9 @@ export class PersonController {
   }
 
   @Post(':id/competences')
-  async addCompetence(@Param('id') id: string, @Body() addCompetenceDto: AddCompetenceDto) {
+  async addCompetence(@Param('id') id: string, @Body() dto: AddCompetenceDto) {
     this.logger.debug('AddCompetence: Called');
-    return this.service.addCompetence(id, addCompetenceDto);
+    return this.service.addCompetence(id, dto);
   }
 
   @Delete(':id/competences/:competenceId')
@@ -76,12 +76,9 @@ export class PersonController {
   }
 
   @Post(':id/work-experiences')
-  async addWorkExperience(
-    @Param('id') id: string,
-    @Body() addWorkExperienceDto: AddWorkExperienceDto,
-  ) {
+  async addWorkExperience(@Param('id') id: string, @Body() dto: AddWorkExperienceDto) {
     this.logger.debug('AddWorkExperience: Called');
-    return this.service.addWorkExperience(id, addWorkExperienceDto);
+    return this.service.addWorkExperience(id, dto);
   }
 
   @Delete(':id/work-experiences/:experienceId')
@@ -92,9 +89,9 @@ export class PersonController {
   }
 
   @Post(':id/education')
-  async addEducation(@Param('id') id: string, @Body() addEducationDto: AddEducationDto) {
+  async addEducation(@Param('id') id: string, @Body() dto: AddEducationDto) {
     this.logger.debug('AddEducation: Called');
-    return this.service.addEducation(id, addEducationDto);
+    return this.service.addEducation(id, dto);
   }
 
   @Delete(':id/education/:educationId')
