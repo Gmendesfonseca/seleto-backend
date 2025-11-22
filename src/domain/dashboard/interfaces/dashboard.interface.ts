@@ -1,4 +1,4 @@
-import { ApplicationStatus } from 'src/domain/applications';
+import { DateTime } from 'luxon';
 
 export interface DashboardStats {
   totalApplications: number;
@@ -25,7 +25,7 @@ export interface TopVacancy {
   title: string;
   companyName: string;
   applicationCount: number;
-  publishedAt: string | null;
+  publishedAt: DateTime | null;
 }
 
 export interface ApplicationStatusCount {
@@ -41,7 +41,6 @@ export interface MonthlyApplicationCount {
 }
 
 export interface DashboardFilters {
-  applicationStatus?: (typeof ApplicationStatus)[keyof typeof ApplicationStatus];
   companyId?: string;
   dateFrom?: string;
   dateTo?: string;

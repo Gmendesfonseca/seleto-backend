@@ -7,7 +7,7 @@ import { Vacancy } from '../../vacancies/vacancy.model';
 import { Company } from '../../companies/company.model';
 import { User } from '../../users/user.model';
 import { Person } from '../../persons/person.model';
-import { Op, WhereOptions } from 'sequelize';
+import { IncludeOptions, Op, WhereOptions } from 'sequelize';
 import { ApplicationStatus } from 'src/domain/applications';
 
 @Injectable()
@@ -25,9 +25,16 @@ export class DashboardSequelizeRepository implements DashboardRepository {
   async getApplicationCount(filters?: DashboardFilters): Promise<number> {
     this.logger.debug('DashboardSequelizeRepository.getApplicationCount: Called');
     const where: WhereOptions<Application> = {};
+    const include: IncludeOptions[] = [];
 
     if (filters?.companyId) {
       where['$vacancy.company_id$'] = filters.companyId;
+      include.push({
+        model: this.vacancyModel,
+        as: 'vacancy',
+        attributes: [],
+        required: true,
+      });
     }
 
     if (filters?.dateFrom || filters?.dateTo) {
@@ -47,15 +54,8 @@ export class DashboardSequelizeRepository implements DashboardRepository {
 
     return this.applicationModel.count({
       where,
-      include: filters?.companyId
-        ? [
-            {
-              model: this.vacancyModel,
-              as: 'vacancy',
-              attributes: [],
-            },
-          ]
-        : undefined,
+      ...(include.length > 0 && { include }),
+      distinct: true,
     });
   }
 
@@ -139,6 +139,7 @@ export class DashboardSequelizeRepository implements DashboardRepository {
         {
           model: this.vacancyModel,
           as: 'vacancy',
+          required: !!companyId,
           include: [
             {
               model: this.companyModel,
@@ -188,33 +189,57 @@ export class DashboardSequelizeRepository implements DashboardRepository {
     });
   }
 
-  async getApplicationsByStatus(
-    status: ApplicationStatus,
-    companyId: string,
-  ): Promise<Application[]> {
+  async getApplicationsByStatus(companyId?: string): Promise<
+    {
+      status: ApplicationStatus;
+      count: number;
+      percentage: number;
+    }[]
+  > {
     this.logger.debug('DashboardSequelizeRepository.getApplicationsByStatus: Called');
-    const where: WhereOptions<Application> = { status };
+    const results = [];
+    for (const status of Object.values(ApplicationStatus)) {
+      const include: IncludeOptions[] = [];
+      const where: WhereOptions<Application> = { status };
 
-    if (companyId) {
-      where['$vacancy.company_id$'] = companyId;
+      if (companyId) {
+        where['$vacancy.company_id$'] = companyId;
+        include.push({
+          model: this.vacancyModel,
+          as: 'vacancy',
+          required: true,
+        });
+      }
+      const totalApplications = await this.applicationModel.count({
+        where: companyId
+          ? {
+              ['$vacancy.company_id$']: companyId,
+            }
+          : {},
+        ...(include.length > 0 && { include }),
+      });
+
+      const statusCount = await this.applicationModel.count({
+        where,
+        ...(include.length > 0 && { include }),
+      });
+
+      const percentage = totalApplications
+        ? Number.parseFloat(((statusCount / totalApplications) * 100).toFixed(2))
+        : 0;
+
+      results.push({
+        status,
+        count: statusCount,
+        percentage,
+      });
     }
-
-    return this.applicationModel.findAll({
-      where,
-      include: companyId
-        ? [
-            {
-              model: this.vacancyModel,
-              as: 'vacancy',
-              attributes: [],
-            },
-          ]
-        : undefined,
-    });
+    return results;
   }
 
   async getMonthlyApplications(months: number, companyId?: string): Promise<Application[]> {
     this.logger.debug('DashboardSequelizeRepository.getMonthlyApplications: Called');
+    const include: IncludeOptions[] = [];
     const where: WhereOptions<Application> = {
       created_at: {
         [Op.gte]: new Date(new Date().setMonth(new Date().getMonth() - months)),
@@ -223,19 +248,16 @@ export class DashboardSequelizeRepository implements DashboardRepository {
 
     if (companyId) {
       where['$vacancy.company_id$'] = companyId;
+      include.push({
+        model: this.vacancyModel,
+        as: 'vacancy',
+        required: true,
+      });
     }
 
     return this.applicationModel.findAll({
       where,
-      include: companyId
-        ? [
-            {
-              model: this.vacancyModel,
-              as: 'vacancy',
-              attributes: [],
-            },
-          ]
-        : undefined,
+      ...(include.length > 0 && { include }),
     });
   }
 }

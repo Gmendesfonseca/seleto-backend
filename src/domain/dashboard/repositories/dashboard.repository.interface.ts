@@ -10,9 +10,12 @@ export abstract class DashboardRepository {
   abstract getUserCount(filters?: DashboardFilters): Promise<number>;
   abstract getRecentApplications(limit: number, companyId?: string): Promise<Application[]>;
   abstract getTopVacancies(limit: number, companyId?: string): Promise<Vacancy[]>;
-  abstract getApplicationsByStatus(
-    status: ApplicationStatus,
-    companyId?: string,
-  ): Promise<Application[]>;
+  abstract getApplicationsByStatus(companyId?: string): Promise<
+    {
+      status: ApplicationStatus;
+      count: number;
+      percentage: number;
+    }[]
+  >;
   abstract getMonthlyApplications(months: number, compApplicationId?: string): Promise<any[]>;
 }

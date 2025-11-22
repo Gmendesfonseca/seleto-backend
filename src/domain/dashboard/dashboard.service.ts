@@ -2,7 +2,6 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { DashboardServiceInterface } from './interfaces/dashboard.service.interface';
 import { DashboardRepository } from './repositories/dashboard.repository.interface';
 import { DashboardStats, DashboardFilters } from './interfaces/dashboard.interface';
-import { ApplicationStatus } from '../applications';
 
 @Injectable()
 export class DashboardService implements DashboardServiceInterface {
@@ -15,7 +14,6 @@ export class DashboardService implements DashboardServiceInterface {
 
   async getStats(filters?: DashboardFilters): Promise<DashboardStats> {
     this.logger.debug('DashboardService.getStats: Called');
-    const statusFilter: ApplicationStatus = filters?.applicationStatus || 'pending';
 
     const [
       totalApplications,
@@ -33,7 +31,7 @@ export class DashboardService implements DashboardServiceInterface {
       this.dashboardRepository.getUserCount(filters),
       this.dashboardRepository.getRecentApplications(10, filters?.companyId),
       this.dashboardRepository.getTopVacancies(10, filters?.companyId),
-      this.dashboardRepository.getApplicationsByStatus(statusFilter, filters?.companyId),
+      this.dashboardRepository.getApplicationsByStatus(filters?.companyId),
       this.dashboardRepository.getMonthlyApplications(6, filters?.companyId),
     ]);
 
@@ -55,14 +53,14 @@ export class DashboardService implements DashboardServiceInterface {
         title: vac.title,
         companyName: vac.company ? vac.company.user.name : 'Unknown',
         applicationCount: vac.applications?.length || 0,
-        publishedAt: vac.publication_date ? vac.publication_date.toISO() : null,
+        publishedAt: vac.publication_date,
       })),
-      applicationsByStatus: applicationsByStatus.map((stat: any) => ({
+      applicationsByStatus: applicationsByStatus.map((stat) => ({
         status: stat.status,
         count: stat.count,
         percentage: stat.percentage,
       })),
-      monthlyApplications: monthlyApplications.map((monthly: any) => ({
+      monthlyApplications: monthlyApplications.map((monthly) => ({
         month: monthly.month,
         year: monthly.year,
         count: monthly.count,
@@ -85,9 +83,9 @@ export class DashboardService implements DashboardServiceInterface {
     return this.dashboardRepository.getTopVacancies(limit || 10, companyId);
   }
 
-  async getApplicationsByStatus(status: ApplicationStatus, companyId?: string): Promise<any[]> {
+  async getApplicationsByStatus(companyId?: string): Promise<any[]> {
     this.logger.debug('DashboardService.getApplicationsByStatus: Called');
-    return this.dashboardRepository.getApplicationsByStatus(status, companyId);
+    return this.dashboardRepository.getApplicationsByStatus(companyId);
   }
 
   async getMonthlyApplications(months?: number, companyId?: string): Promise<any[]> {
