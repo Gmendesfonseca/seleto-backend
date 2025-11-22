@@ -22,7 +22,7 @@ export class VacancyResponsibilitySequelizeRepository implements VacancyResponsi
     const where: WhereOptions<VacancyResponsibility> = {};
 
     if (filters?.vacancyId) {
-      where.vacancy_id = filters.vacancyId;
+      where.vacancyId = filters.vacancyId;
     }
 
     this.logger.debug('FindAll: Called');

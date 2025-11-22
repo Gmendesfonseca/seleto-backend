@@ -17,7 +17,7 @@ export class VacancyResponsible extends Model<VacancyResponsible> {
   id: string;
 
   @ForeignKey(() => Vacancy)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({ type: DataType.UUID, allowNull: false, field: 'vacancy_id' })
   vacancyId: string;
 
   @BelongsTo(() => Vacancy)

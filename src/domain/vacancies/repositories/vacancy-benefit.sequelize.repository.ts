@@ -22,7 +22,7 @@ export class VacancyBenefitSequelizeRepository implements VacancyBenefitReposito
     const where: WhereOptions<VacancyBenefit> = {};
 
     if (filters?.vacancyId) {
-      where.vacancy_id = filters.vacancyId;
+      where.vacancyId = filters.vacancyId;
     }
 
     this.logger.debug('FindAll: Called');

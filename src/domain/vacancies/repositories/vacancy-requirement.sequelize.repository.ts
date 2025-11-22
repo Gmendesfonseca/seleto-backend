@@ -22,7 +22,7 @@ export class VacancyRequirementSequelizeRepository implements VacancyRequirement
     const where: WhereOptions<VacancyRequirement> = {};
 
     if (filters?.vacancyId) {
-      where.vacancy_id = filters.vacancyId;
+      where.vacancyId = filters.vacancyId;
     }
 
     this.logger.debug('FindAll: Called');

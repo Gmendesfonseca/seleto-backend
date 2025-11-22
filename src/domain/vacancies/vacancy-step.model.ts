@@ -17,14 +17,14 @@ export class VacancyStep extends Model<VacancyStep> {
   id: string;
 
   @ForeignKey(() => Vacancy)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({ type: DataType.UUID, allowNull: false, field: 'vacancy_id' })
   vacancyId: string;
 
   @BelongsTo(() => Vacancy)
   vacancy: () => Vacancy;
 
   @ForeignKey(() => Step)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({ type: DataType.UUID, allowNull: false, field: 'step_id' })
   stepId: string;
 
   @BelongsTo(() => Step)
