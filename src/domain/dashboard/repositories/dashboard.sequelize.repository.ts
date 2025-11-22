@@ -6,6 +6,7 @@ import { Application } from '../../applications/application.model';
 import { Vacancy } from '../../vacancies/vacancy.model';
 import { Company } from '../../companies/company.model';
 import { User } from '../../users/user.model';
+import { Person } from '../../persons/person.model';
 import { Op, WhereOptions } from 'sequelize';
 import { ApplicationStatus } from 'src/domain/applications';
 
@@ -17,6 +18,7 @@ export class DashboardSequelizeRepository implements DashboardRepository {
     @InjectModel(User) private readonly userModel: typeof User,
     @InjectModel(Vacancy) private readonly vacancyModel: typeof Vacancy,
     @InjectModel(Company) private readonly companyModel: typeof Company,
+    @InjectModel(Person) private readonly personModel: typeof Person,
     @InjectModel(Application) private readonly applicationModel: typeof Application,
   ) {}
 
@@ -43,7 +45,18 @@ export class DashboardSequelizeRepository implements DashboardRepository {
       }
     }
 
-    return this.applicationModel.count({ where });
+    return this.applicationModel.count({
+      where,
+      include: filters?.companyId
+        ? [
+            {
+              model: this.vacancyModel,
+              as: 'vacancy',
+              attributes: [],
+            },
+          ]
+        : undefined,
+    });
   }
 
   async getVacancyCount(filters?: DashboardFilters): Promise<number> {
@@ -112,6 +125,34 @@ export class DashboardSequelizeRepository implements DashboardRepository {
       where,
       limit,
       order: [['created_at', 'DESC']],
+      include: [
+        {
+          model: this.personModel,
+          as: 'applicant',
+          include: [
+            {
+              model: this.userModel,
+              as: 'user',
+            },
+          ],
+        },
+        {
+          model: this.vacancyModel,
+          as: 'vacancy',
+          include: [
+            {
+              model: this.companyModel,
+              as: 'company',
+              include: [
+                {
+                  model: this.userModel,
+                  as: 'user',
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
   }
 
@@ -127,6 +168,23 @@ export class DashboardSequelizeRepository implements DashboardRepository {
       where,
       limit,
       order: [['created_at', 'DESC']],
+      include: [
+        {
+          model: this.companyModel,
+          as: 'company',
+          include: [
+            {
+              model: this.userModel,
+              as: 'user',
+            },
+          ],
+        },
+        {
+          model: this.applicationModel,
+          as: 'applications',
+          attributes: [],
+        },
+      ],
     });
   }
 
@@ -141,7 +199,18 @@ export class DashboardSequelizeRepository implements DashboardRepository {
       where['$vacancy.company_id$'] = companyId;
     }
 
-    return this.applicationModel.findAll({ where });
+    return this.applicationModel.findAll({
+      where,
+      include: companyId
+        ? [
+            {
+              model: this.vacancyModel,
+              as: 'vacancy',
+              attributes: [],
+            },
+          ]
+        : undefined,
+    });
   }
 
   async getMonthlyApplications(months: number, companyId?: string): Promise<Application[]> {
@@ -158,6 +227,15 @@ export class DashboardSequelizeRepository implements DashboardRepository {
 
     return this.applicationModel.findAll({
       where,
+      include: companyId
+        ? [
+            {
+              model: this.vacancyModel,
+              as: 'vacancy',
+              attributes: [],
+            },
+          ]
+        : undefined,
     });
   }
 }

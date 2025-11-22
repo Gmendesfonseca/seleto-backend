@@ -8,9 +8,11 @@ import {
   HttpStatus,
   ParseIntPipe,
   DefaultValuePipe,
+  Req,
 } from '@nestjs/common';
 import { DashboardServiceInterface } from './interfaces/dashboard.service.interface';
 import { Authorized } from 'src/shared/decorators/authorization.decorator';
+import { RequestWithCompany } from 'src/shared/middlewares/company-context.middleware';
 
 @Controller('dashboard')
 export class DashboardController {
@@ -21,9 +23,9 @@ export class DashboardController {
   @Get('stats')
   @HttpCode(HttpStatus.OK)
   @Authorized()
-  public async stats(@Query() filters?: any) {
+  public async stats(@Req() request: RequestWithCompany, @Query() filters?: any) {
     this.logger.debug('Stats: called', { filters });
-    return this.service.getStats(filters);
+    return this.service.getStats({ ...filters, companyId: request.companyId });
   }
 
   @Get('company/:companyId/stats')
@@ -38,36 +40,36 @@ export class DashboardController {
   @HttpCode(HttpStatus.OK)
   @Authorized()
   public async recentApplications(
+    @Req() request: RequestWithCompany,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
-    @Query('companyId') companyId?: string,
   ) {
-    return this.service.getRecentApplications(limit, companyId);
+    return this.service.getRecentApplications(limit, request.companyId);
   }
 
   @Get('top-vacancies')
   @HttpCode(HttpStatus.OK)
   @Authorized()
   public async topVacancies(
+    @Req() request: RequestWithCompany,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
-    @Query('companyId') companyId?: string,
   ) {
-    return this.service.getTopVacancies(limit, companyId);
+    return this.service.getTopVacancies(limit, request.companyId);
   }
 
   @Get('applications-by-status')
   @HttpCode(HttpStatus.OK)
   @Authorized()
-  public async applicationsByStatus(@Query('companyId') companyId?: string) {
-    return this.service.getApplicationsByStatus(companyId);
+  public async applicationsByStatus(@Req() request: RequestWithCompany) {
+    return this.service.getApplicationsByStatus(request.companyId);
   }
 
   @Get('monthly-applications')
   @HttpCode(HttpStatus.OK)
   @Authorized()
   public async monthlyApplications(
+    @Req() request: RequestWithCompany,
     @Query('months', new DefaultValuePipe(6), ParseIntPipe) months?: number,
-    @Query('companyId') companyId?: string,
   ) {
-    return this.service.getMonthlyApplications(months, companyId);
+    return this.service.getMonthlyApplications(months, request.companyId);
   }
 }

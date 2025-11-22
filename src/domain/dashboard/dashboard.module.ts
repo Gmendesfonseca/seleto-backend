@@ -9,9 +9,10 @@ import { Application } from '../applications/application.model';
 import { Vacancy } from '../vacancies/vacancy.model';
 import { Company } from '../companies/company.model';
 import { User } from '../users/user.model';
+import { Person } from '../persons/person.model';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Application, Vacancy, Company, User])],
+  imports: [SequelizeModule.forFeature([Application, Vacancy, Company, User, Person])],
   controllers: [DashboardController],
   providers: [
     {
