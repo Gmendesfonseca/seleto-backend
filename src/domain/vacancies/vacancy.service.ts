@@ -4,6 +4,7 @@ import { VacancyRepository } from './repositories/vacancy.repository.interface';
 import { CreateVacancyDto, UpdateVacancyDto } from './dto/vacancy.dto';
 import { VacancyFilters, VacancyStatus } from './interfaces/vacancy.interface';
 import { Vacancy } from './vacancy.model';
+import { PaginatedList } from 'src/shared/interfaces';
 
 @Injectable()
 export class VacancyService implements VacancyServiceInterface {
@@ -49,9 +50,13 @@ export class VacancyService implements VacancyServiceInterface {
     return this.repository.findByCompany(companyId);
   }
 
-  async findPublished(): Promise<Vacancy[]> {
+  async findPublished(): Promise<PaginatedList<Vacancy>> {
     this.logger.debug('VacancyService.findPublished: Called');
-    return this.repository.findPublished();
+    const models = await this.repository.findPublished();
+    return {
+      data: models,
+      meta: { total: models.length, currentPage: 1, lastPage: 1, perPage: models.length },
+    };
   }
 
   async publishVacancy(id: string): Promise<Vacancy> {
