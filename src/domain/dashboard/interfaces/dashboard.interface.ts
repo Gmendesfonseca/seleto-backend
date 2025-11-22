@@ -3,8 +3,6 @@ import { DateTime } from 'luxon';
 export interface DashboardStats {
   totalApplications: number;
   totalVacancies: number;
-  totalCompanies: number;
-  totalUsers: number;
   recentApplications: RecentApplication[];
   topVacancies: TopVacancy[];
   applicationsByStatus: ApplicationStatusCount[];

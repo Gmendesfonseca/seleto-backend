@@ -16,19 +16,15 @@ export class DashboardService implements DashboardServiceInterface {
     this.logger.debug('DashboardService.getStats: Called');
 
     const [
-      totalApplications,
-      totalVacancies,
-      totalCompanies,
-      totalUsers,
-      recentApplications,
-      topVacancies,
-      applicationsByStatus,
-      monthlyApplications,
+      totalVacancies = 0,
+      totalApplications = 0,
+      recentApplications = [],
+      topVacancies = [],
+      applicationsByStatus = [],
+      monthlyApplications = [],
     ] = await Promise.all([
-      this.dashboardRepository.getApplicationCount(filters),
       this.dashboardRepository.getVacancyCount(filters),
-      this.dashboardRepository.getCompanyCount(filters),
-      this.dashboardRepository.getUserCount(filters),
+      this.dashboardRepository.getApplicationCount(filters),
       this.dashboardRepository.getRecentApplications(10, filters?.companyId),
       this.dashboardRepository.getTopVacancies(10, filters?.companyId),
       this.dashboardRepository.getApplicationsByStatus(filters?.companyId),
@@ -36,10 +32,8 @@ export class DashboardService implements DashboardServiceInterface {
     ]);
 
     return {
-      totalApplications,
       totalVacancies,
-      totalCompanies,
-      totalUsers,
+      totalApplications,
       recentApplications: recentApplications.map((app) => ({
         id: app.id,
         applicantName: app.applicant.user.name || 'Unknown',
@@ -66,11 +60,6 @@ export class DashboardService implements DashboardServiceInterface {
         count: monthly.count,
       })),
     };
-  }
-
-  async getCompanyStats(companyId: string, filters?: DashboardFilters): Promise<DashboardStats> {
-    this.logger.debug('DashboardService.getCompanyStats: Called');
-    return this.getStats({ ...filters, companyId });
   }
 
   async getRecentApplications(limit?: number, companyId?: string): Promise<any[]> {

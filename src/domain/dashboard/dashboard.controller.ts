@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Logger,
-  Param,
   Query,
   HttpCode,
   HttpStatus,
@@ -26,14 +25,6 @@ export class DashboardController {
   public async stats(@Req() request: RequestWithCompany, @Query() filters?: any) {
     this.logger.debug('Stats: called', { filters });
     return this.service.getStats({ ...filters, companyId: request.companyId });
-  }
-
-  @Get('company/:companyId/stats')
-  @HttpCode(HttpStatus.OK)
-  @Authorized()
-  public async companyStats(@Param('companyId') companyId: string, @Query() filters?: any) {
-    this.logger.debug('CompanyStats: called', { companyId, filters });
-    return this.service.getCompanyStats(companyId, filters);
   }
 
   @Get('recent-applications')
