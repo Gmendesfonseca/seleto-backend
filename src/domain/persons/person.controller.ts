@@ -13,12 +13,12 @@ import {
 } from '@nestjs/common';
 import { PersonServiceInterface } from './interfaces/person.service.interface';
 import {
+  PersonQueryDto,
+  AddEducationDto,
   CreatePersonDto,
   UpdatePersonDto,
-  PersonQueryDto,
   AddCompetenceDto,
   AddWorkExperienceDto,
-  AddEducationDto,
 } from './dto/person.dto';
 
 @Controller('persons')
