@@ -1,10 +1,12 @@
+import { DateTime } from 'luxon';
+
 export class CreatePersonExperienceDto {
   personId: string;
   companyName: string;
   position: string;
   description?: string;
-  startDate: Date;
-  endDate?: Date | null;
+  startDate: DateTime;
+  endDate?: DateTime | null;
   isCurrent: boolean;
   location?: string;
 }
@@ -12,8 +14,8 @@ export class UpdatePersonExperienceDto {
   companyName?: string;
   position?: string;
   description?: string;
-  startDate?: Date;
-  endDate?: Date | null;
+  startDate?: DateTime;
+  endDate?: DateTime | null;
   isCurrent?: boolean;
   location?: string;
 }

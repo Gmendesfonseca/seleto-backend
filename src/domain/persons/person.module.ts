@@ -10,6 +10,9 @@ import { MatchingModule } from '../matching/matching.module';
 import { PersonCompetenceRepository } from './interfaces/person-competence.repository.interface';
 import { PersonExperienceRepository } from './interfaces/person-experience.repository.interface';
 import { PersonFormationRepository } from './interfaces/person-formation.repository.interface';
+import { PersonExperienceSequelizeRepository } from './repositories/person-experience.sequelize.repository';
+import { PersonFormationSequelizeRepository } from './repositories/person-formation.sequelize.repository';
+import { PersonCompetenceSequelizeRepository } from './repositories/person-competence.sequelize.repository';
 
 @Module({
   imports: [SequelizeModule.forFeature([Person]), MatchingModule],
@@ -25,15 +28,15 @@ import { PersonFormationRepository } from './interfaces/person-formation.reposit
     },
     {
       provide: PersonCompetenceRepository,
-      useClass: PersonSequelizeRepository,
+      useClass: PersonCompetenceSequelizeRepository,
     },
     {
       provide: PersonExperienceRepository,
-      useClass: PersonSequelizeRepository,
+      useClass: PersonExperienceSequelizeRepository,
     },
     {
       provide: PersonFormationRepository,
-      useClass: PersonSequelizeRepository,
+      useClass: PersonFormationSequelizeRepository,
     },
   ],
   exports: [
