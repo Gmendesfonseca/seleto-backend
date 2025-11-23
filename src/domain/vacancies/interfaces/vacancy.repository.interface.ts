@@ -11,6 +11,5 @@ export abstract class VacancyRepository {
   abstract update(id: string, dto: UpdateVacancyDto): Promise<Vacancy>;
   abstract delete(id: string): Promise<void>;
   abstract findByCompany(companyId: string): Promise<Vacancy[]>;
-  abstract findPublished(): Promise<Vacancy[]>;
   abstract countByFilters(filters?: VacancyFilters): Promise<number>;
 }

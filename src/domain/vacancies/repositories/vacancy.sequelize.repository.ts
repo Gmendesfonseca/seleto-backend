@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Vacancy } from '../vacancy.model';
 import { VacancyRepository } from '../interfaces/vacancy.repository.interface';
 import { CreateVacancyDto, UpdateVacancyDto } from '../dto/vacancy.dto';
-import { VacancyFilters, VacancyStatus } from '../interfaces/vacancy.interface';
+import { VacancyFilters } from '../interfaces/vacancy.interface';
 import { Company } from '../../companies/company.model';
 import { Application } from '../../applications/application.model';
 import { Op, WhereOptions } from 'sequelize';
@@ -11,6 +11,7 @@ import { VacancyResponsibility } from '../vacancy-responsibility.model';
 import { VacancyBenefit } from '../vacancy-benefit.model';
 import { VacancyRequirement } from '../vacancy-requirement.model';
 import { VacancyStep } from '../vacancy-step.model';
+import { User } from 'src/domain/users/user.model';
 
 @Injectable()
 export class VacancySequelizeRepository implements VacancyRepository {
@@ -67,6 +68,12 @@ export class VacancySequelizeRepository implements VacancyRepository {
         {
           model: Company,
           attributes: ['id', 'cnpj'],
+          include: [
+            {
+              model: User,
+              attributes: ['name'],
+            },
+          ],
         },
         {
           model: Application,
@@ -159,19 +166,6 @@ export class VacancySequelizeRepository implements VacancyRepository {
     this.logger.debug('VacancySequelizeRepository.findByCompany: Called');
     return this.model.findAll({
       where: { company_id: companyId },
-    });
-  }
-
-  async findPublished(): Promise<Vacancy[]> {
-    this.logger.debug('VacancySequelizeRepository.findPublished: Called');
-    return this.model.findAll({
-      where: { status: VacancyStatus.PUBLISHED },
-      include: [
-        {
-          model: Company,
-          attributes: ['id', 'cnpj'],
-        },
-      ],
     });
   }
 

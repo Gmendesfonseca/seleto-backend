@@ -104,7 +104,7 @@ export class VacancyService implements VacancyServiceInterface {
 
   async findPublished(): Promise<PaginatedList<Vacancy>> {
     this.logger.debug('VacancyService.findPublished: Called');
-    const models = await this.repository.findPublished();
+    const models = await this.repository.findAll({ status: VacancyStatus.PUBLISHED });
     return {
       data: models,
       meta: { total: models.length, currentPage: 1, lastPage: 1, perPage: models.length },
