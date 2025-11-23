@@ -100,4 +100,14 @@ export class PersonController {
     this.logger.debug('RemoveEducation: Called');
     await this.service.removeEducation(id, educationId);
   }
+
+  @Get(':id/matching-vacancies')
+  async findMatchingVacancies(
+    @Param('id') id: string,
+    @Query('minScore') minScore?: number,
+    @Query('limit') limit?: number,
+  ) {
+    this.logger.debug('FindMatchingVacancies: Called');
+    return this.service.findMatchingVacancies(id, minScore, limit);
+  }
 }

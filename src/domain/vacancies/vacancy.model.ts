@@ -10,6 +10,7 @@ import {
 } from 'sequelize-typescript';
 import { Company } from '../companies/company.model';
 import { Application } from '../applications/application.model';
+import { CandidateVacancyMatch } from '../matching/candidate-vacancy-match.model';
 import { VacancyBenefit } from './vacancy-benefit.model';
 import { VacancyRequirement } from './vacancy-requirement.model';
 import { VacancyResponsibility } from './vacancy-responsibility.model';
@@ -145,6 +146,9 @@ export class Vacancy extends Model<Vacancy> {
 
   @HasMany(() => VacancyResponsible, { foreignKey: 'vacancy_id' })
   responsibles: VacancyResponsible[];
+
+  @HasMany(() => CandidateVacancyMatch, { foreignKey: 'vacancy_id' })
+  candidate_matches: CandidateVacancyMatch[];
 
   @Column({ type: DataType.DATE, allowNull: false, defaultValue: DateTime.now() })
   created_at: DateTime;

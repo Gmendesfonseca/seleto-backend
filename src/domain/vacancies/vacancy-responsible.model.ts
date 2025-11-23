@@ -9,6 +9,7 @@ import {
 } from 'sequelize-typescript';
 import { Vacancy } from './vacancy.model';
 import { User } from '../users/user.model';
+import { DateTime } from 'luxon';
 
 @Table({ tableName: 'vacancy_responsibles', underscored: true, paranoid: false })
 export class VacancyResponsible extends Model<VacancyResponsible> {

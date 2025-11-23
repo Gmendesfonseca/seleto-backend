@@ -6,6 +6,7 @@ import {
   AddWorkExperienceDto,
   AddEducationDto,
 } from '../dto/person.dto';
+import { CandidateVacancyMatch } from '../../matching/interfaces/candidate-vacancy-match.interface';
 
 export abstract class PersonServiceInterface {
   abstract findAll(filters?: PersonFilters): Promise<Person[]>;
@@ -23,4 +24,9 @@ export abstract class PersonServiceInterface {
   abstract removeWorkExperience(personId: string, experienceId: string): Promise<Person>;
   abstract addEducation(personId: string, addEducationDto: AddEducationDto): Promise<Person>;
   abstract removeEducation(personId: string, educationId: string): Promise<Person>;
+  abstract findMatchingVacancies(
+    personId: string,
+    minScore?: number,
+    limit?: number,
+  ): Promise<CandidateVacancyMatch[]>;
 }

@@ -8,6 +8,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { Person } from './person.model';
+import { DateTime } from 'luxon';
 
 @Table({ tableName: 'person_experiences', underscored: true, paranoid: true })
 export class PersonExperience extends Model<PersonExperience> {
@@ -32,10 +33,10 @@ export class PersonExperience extends Model<PersonExperience> {
   description: string | null;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  startDate: Date;
+  startDate: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  endDate: Date | null;
+  endDate: DateTime | null;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
   isCurrent: boolean;
@@ -50,5 +51,5 @@ export class PersonExperience extends Model<PersonExperience> {
   updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  deletedAt: Date | null;
+  deletedAt: DateTime | null;
 }

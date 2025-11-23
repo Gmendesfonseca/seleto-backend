@@ -72,6 +72,22 @@ export class VacancyController {
     return this.service.closeVacancy(id);
   }
 
+  @Get(':id/best-candidates')
+  async findBestCandidates(
+    @Param('id') id: string,
+    @Query('minScore') minScore?: number,
+    @Query('limit') limit?: number,
+  ) {
+    this.logger.debug('FindBestCandidates: Called', { id });
+    return this.service.findBestCandidates(id, minScore, limit);
+  }
+
+  @Get(':id/best-candidate')
+  async getBestCandidate(@Param('id') id: string) {
+    this.logger.debug('GetBestCandidate: Called', { id });
+    return this.service.getBestCandidate(id);
+  }
+
   // @Get(':vacancyId/applications')
   // async getVacancyApplications(@Param('vacancyId') vacancyId: string) {
   //   this.logger.debug('GetVacancyApplications: Called', { vacancyId });

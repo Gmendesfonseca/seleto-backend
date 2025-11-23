@@ -18,6 +18,7 @@ import { DashboardModule } from './domain/dashboard/dashboard.module';
 import { RecruitmentModule } from './domain/recruitment/recruitment.module';
 import { AddressModule } from './domain/addresses/address.module';
 import { PhoneModule } from './domain/phones/phone.module';
+import { MatchingModule } from './domain/matching/matching.module';
 
 import { I18nModule } from './infrastructure/config/i18n.module';
 import { LimitModule } from './infrastructure/config/limit.module';
@@ -54,6 +55,7 @@ import { CompanyContextMiddleware } from './shared/middlewares/company-context.m
     RecruitmentModule,
     AddressModule,
     PhoneModule,
+    MatchingModule,
   ],
   providers: [JwtService],
 })

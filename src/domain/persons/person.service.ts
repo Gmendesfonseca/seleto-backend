@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException, Inject } from '@nestjs/common';
 import { PersonServiceInterface } from './interfaces/person.service.interface';
-import { PersonRepository } from './repositories/person.repository.interface';
+import { PersonRepository } from './interfaces/person.repository.interface';
 import { Person, PersonFilters } from './interfaces/person.interface';
 import {
   CreatePersonDto,
@@ -9,6 +9,11 @@ import {
   AddWorkExperienceDto,
   AddEducationDto,
 } from './dto/person.dto';
+import { PersonExperienceRepository } from './interfaces/person-experience.repository.interface';
+import { PersonFormationRepository } from './interfaces/person-formation.repository.interface';
+import { PersonCompetenceRepository } from './interfaces/person-competence.repository.interface';
+import { MatchingService } from '../matching/matching.service';
+import { CandidateVacancyMatch } from '../matching/interfaces/candidate-vacancy-match.interface';
 
 @Injectable()
 export class PersonService implements PersonServiceInterface {
@@ -16,27 +21,34 @@ export class PersonService implements PersonServiceInterface {
 
   constructor(
     @Inject(PersonRepository)
-    private readonly personRepository: PersonRepository,
+    private readonly repository: PersonRepository,
+    @Inject(PersonExperienceRepository)
+    private readonly experienceRepository: PersonExperienceRepository,
+    @Inject(PersonFormationRepository)
+    private readonly formationRepository: PersonFormationRepository,
+    @Inject(PersonCompetenceRepository)
+    private readonly competenceRepository: PersonCompetenceRepository,
+    private readonly matchingService: MatchingService,
   ) {}
 
   async create(createPersonDto: CreatePersonDto): Promise<Person> {
     this.logger.debug('PersonService.create: Called');
-    return this.personRepository.create(createPersonDto);
+    return this.repository.create(createPersonDto);
   }
 
   async findAll(filters?: PersonFilters): Promise<Person[]> {
     this.logger.debug('PersonService.findAll: Called');
-    return this.personRepository.findAll(filters);
+    return this.repository.findAll(filters);
   }
 
   async findOne(id: string): Promise<Person | null> {
     this.logger.debug('PersonService.findOne: Called');
-    return this.personRepository.findOne({ id });
+    return this.repository.findOne({ id });
   }
 
   async findByUserId(userId: string): Promise<Person | null> {
     this.logger.debug('PersonService.findByUserId: Called');
-    const person = await this.personRepository.findOne({ user_id: userId });
+    const person = await this.repository.findOne({ user_id: userId });
     if (!person) {
       throw new NotFoundException(`Person with userId ${userId} not found`);
     }
@@ -45,88 +57,92 @@ export class PersonService implements PersonServiceInterface {
 
   async update(id: string, updatePersonDto: UpdatePersonDto): Promise<Person> {
     this.logger.debug('PersonService.update: Called');
-    const person = await this.personRepository.findOne({ id });
+    const person = await this.repository.findOne({ id });
     if (!person) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
-    return this.personRepository.update(id, updatePersonDto);
+    return this.repository.update(id, updatePersonDto);
   }
 
   async remove(id: string): Promise<void> {
     this.logger.debug('PersonService.remove: Called');
-    const person = await this.personRepository.findOne({ id });
+    const person = await this.repository.findOne({ id });
     if (!person) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
-    await this.personRepository.delete(id);
+    await this.repository.delete(id);
   }
 
-  async addCompetence(id: string, _addCompetenceDto: AddCompetenceDto): Promise<Person> {
+  async addCompetence(id: string, dto: AddCompetenceDto): Promise<Person> {
     this.logger.debug('PersonService.addCompetence: Called');
-    const person = await this.personRepository.findOne({ id });
+    const person = await this.repository.findOne({ id });
     if (!person) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
-    // This would need to be implemented with a junction table
-    // For now, return the person as-is
+    await this.competenceRepository.create(dto);
     return person;
   }
 
-  async removeCompetence(id: string, _competenceId: string): Promise<Person> {
+  async removeCompetence(id: string, competenceId: string): Promise<Person> {
     this.logger.debug('PersonService.removeCompetence: Called');
-    const person = await this.personRepository.findOne({ id });
+    const person = await this.repository.findOne({ id });
     if (!person) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
-    // This would need to be implemented with a junction table
-    // For now, return the person as-is
+    await this.competenceRepository.delete(competenceId);
     return person;
   }
 
-  async addWorkExperience(
-    id: string,
-    _addWorkExperienceDto: AddWorkExperienceDto,
-  ): Promise<Person> {
+  async addWorkExperience(id: string, dto: AddWorkExperienceDto): Promise<Person> {
     this.logger.debug('PersonService.addWorkExperience: Called');
-    const person = await this.personRepository.findOne({ id });
+    const person = await this.repository.findOne({ id });
     if (!person) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
-    // This would need to be implemented with a separate work_experiences table
-    // For now, return the person as-is
+    await this.experienceRepository.create(dto);
     return person;
   }
 
-  async removeWorkExperience(id: string, _experienceId: string): Promise<Person> {
+  async removeWorkExperience(id: string, experienceId: string): Promise<Person> {
     this.logger.debug('PersonService.removeWorkExperience: Called');
-    const person = await this.personRepository.findOne({ id });
+    const person = await this.repository.findOne({ id });
     if (!person) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
-    // This would need to be implemented with a separate work_experiences table
-    // For now, return the person as-is
+    await this.experienceRepository.delete(experienceId);
     return person;
   }
 
-  async addEducation(id: string, _addEducationDto: AddEducationDto): Promise<Person> {
+  async addEducation(id: string, dto: AddEducationDto): Promise<Person> {
     this.logger.debug('PersonService.addEducation: Called');
-    const person = await this.personRepository.findOne({ id });
+    const person = await this.repository.findOne({ id });
     if (!person) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
-    // This would need to be implemented with a separate education table
-    // For now, return the person as-is
+    await this.formationRepository.create(dto);
     return person;
   }
 
-  async removeEducation(id: string, _educationId: string): Promise<Person> {
+  async removeEducation(id: string, educationId: string): Promise<Person> {
     this.logger.debug('PersonService.removeEducation: Called');
-    const person = await this.personRepository.findOne({ id });
+    const person = await this.repository.findOne({ id });
     if (!person) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
-    // This would need to be implemented with a separate education table
-    // For now, return the person as-is
+    await this.formationRepository.delete(educationId);
     return person;
+  }
+
+  async findMatchingVacancies(
+    personId: string,
+    minScore?: number,
+    limit?: number,
+  ): Promise<CandidateVacancyMatch[]> {
+    this.logger.debug('PersonService.findMatchingVacancies: Called');
+    const person = await this.repository.findOne({ id: personId });
+    if (!person) {
+      throw new NotFoundException(`Person with id ${personId} not found`);
+    }
+    return this.matchingService.findMatchesForPerson(personId, minScore, limit);
   }
 }

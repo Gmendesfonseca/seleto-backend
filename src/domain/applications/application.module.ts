@@ -6,9 +6,10 @@ import { ApplicationService } from './application.service';
 import { ApplicationSequelizeRepository } from './repositories/application.sequelize.repository';
 import { ApplicationRepository } from './repositories/application.repository.interface';
 import { ApplicationServiceInterface } from './interfaces/application.service.interface';
+import { MatchingModule } from '../matching/matching.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Application])],
+  imports: [SequelizeModule.forFeature([Application]), MatchingModule],
   controllers: [ApplicationController, ApplicantController],
   providers: [
     {

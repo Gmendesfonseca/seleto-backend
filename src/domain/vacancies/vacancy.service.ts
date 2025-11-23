@@ -12,6 +12,8 @@ import { VacancyBenefitRepository } from './interfaces/vacancy-benefit.repositor
 import { VacancyRequirementRepository } from './interfaces/vacancy-requirement.repository.interface';
 import { VacancyResponsibilityRepository } from './interfaces/vacancy-responsibility.repository.interface';
 import { VacancyStepRepository } from './interfaces/vacancy-step.repository.interface';
+import { MatchingService } from '../matching/matching.service';
+import { CandidateVacancyMatch } from '../matching/interfaces/candidate-vacancy-match.interface';
 
 @Injectable()
 export class VacancyService implements VacancyServiceInterface {
@@ -23,6 +25,7 @@ export class VacancyService implements VacancyServiceInterface {
     private readonly requirementRepository: VacancyRequirementRepository,
     private readonly responsibilityRepository: VacancyResponsibilityRepository,
     private readonly stepRepository: VacancyStepRepository,
+    private readonly matchingService: MatchingService,
   ) {}
 
   async findOne(id: string): Promise<Vacancy | null> {
@@ -116,5 +119,19 @@ export class VacancyService implements VacancyServiceInterface {
   async closeVacancy(id: string): Promise<Vacancy> {
     this.logger.debug('VacancyService.closeVacancy: Called');
     return this.update(id, { status: VacancyStatus.CLOSED });
+  }
+
+  async findBestCandidates(
+    vacancyId: string,
+    minScore?: number,
+    limit?: number,
+  ): Promise<CandidateVacancyMatch[]> {
+    this.logger.debug('VacancyService.findBestCandidates: Called');
+    return this.matchingService.findMatchesForVacancy(vacancyId, minScore, limit);
+  }
+
+  async getBestCandidate(vacancyId: string): Promise<CandidateVacancyMatch | null> {
+    this.logger.debug('VacancyService.getBestCandidate: Called');
+    return this.matchingService.getBestMatchForVacancy(vacancyId);
   }
 }

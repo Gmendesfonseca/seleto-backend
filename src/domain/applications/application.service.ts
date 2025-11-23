@@ -5,6 +5,7 @@ import { CreateApplicationDto } from './dto/create.dto';
 import { UpdateApplicationDto } from './dto/update.dto';
 import { Application, ApplicationFilters } from './interfaces/application.interface';
 import { PaginatedList } from '../../shared/interfaces/entities/pagination.interface';
+import { MatchingService } from '../matching/matching.service';
 
 @Injectable()
 export class ApplicationService implements ApplicationServiceInterface {
@@ -13,6 +14,7 @@ export class ApplicationService implements ApplicationServiceInterface {
   constructor(
     @Inject(ApplicationRepository)
     private readonly repository: ApplicationRepository,
+    private readonly matchingService: MatchingService,
   ) {}
 
   async findOne(id: string): Promise<Application | null> {
@@ -38,7 +40,16 @@ export class ApplicationService implements ApplicationServiceInterface {
 
   async create(createApplicationDto: CreateApplicationDto): Promise<Application> {
     this.logger.debug('ApplicationService.create: Called');
-    return this.repository.create(createApplicationDto);
+    const application = await this.repository.create(createApplicationDto);
+
+    // Calculate candidate-vacancy match asynchronously
+    this.matchingService
+      .calculateMatch(createApplicationDto.applicantId, createApplicationDto.vacancyId)
+      .catch((error) => {
+        this.logger.error('Failed to calculate match for application', error);
+      });
+
+    return application;
   }
 
   async update(id: string, updateApplicationDto: UpdateApplicationDto): Promise<Application> {

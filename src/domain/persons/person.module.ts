@@ -6,9 +6,10 @@ import { PersonService } from './person.service';
 import { PersonSequelizeRepository } from './repositories/person.sequelize.repository';
 import { PersonRepository } from './repositories/person.repository.interface';
 import { PersonServiceInterface } from './interfaces/person.service.interface';
+import { MatchingModule } from '../matching/matching.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Person])],
+  imports: [SequelizeModule.forFeature([Person]), MatchingModule],
   controllers: [PersonController],
   providers: [
     {

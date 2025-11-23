@@ -8,6 +8,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { Person } from './person.model';
+import { DateTime } from 'luxon';
 
 export enum DegreeType {
   HIGH_SCHOOL = 'HIGH_SCHOOL',

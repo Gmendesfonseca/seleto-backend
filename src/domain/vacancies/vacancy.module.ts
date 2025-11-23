@@ -19,6 +19,7 @@ import { VacancyBenefit } from './vacancy-benefit.model';
 import { VacancyStepRepository } from './interfaces/vacancy-step.repository.interface';
 import { VacancyStepSequelizeRepository } from './repositories/vacancy-step.sequelize.repository';
 import { VacancyStep } from './vacancy-step.model';
+import { MatchingModule } from '../matching/matching.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { VacancyStep } from './vacancy-step.model';
       VacancyRequirement,
       VacancyResponsibility,
     ]),
+    MatchingModule,
   ],
   controllers: [VacancyController],
   providers: [

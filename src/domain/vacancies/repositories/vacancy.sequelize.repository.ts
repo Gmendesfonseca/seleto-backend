@@ -62,6 +62,7 @@ export class VacancySequelizeRepository implements VacancyRepository {
 
     return this.model.findAll({
       where,
+      order: [['created_at', 'DESC']],
       include: [
         {
           model: Company,

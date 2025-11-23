@@ -4,6 +4,7 @@ import { Vacancy } from '../vacancy.model';
 import { PaginatedList } from 'src/shared/interfaces';
 import { DateTime } from 'luxon';
 import { VacancyStep } from '../vacancy-step.model';
+import { CandidateVacancyMatch } from '../../matching/interfaces/candidate-vacancy-match.interface';
 
 export class CreateVacancyResult {
   id: string;
@@ -38,4 +39,10 @@ export abstract class VacancyServiceInterface {
   abstract findPublished(): Promise<PaginatedList<Vacancy>>;
   abstract publishVacancy(id: string): Promise<Vacancy>;
   abstract closeVacancy(id: string): Promise<Vacancy>;
+  abstract findBestCandidates(
+    vacancyId: string,
+    minScore?: number,
+    limit?: number,
+  ): Promise<CandidateVacancyMatch[]>;
+  abstract getBestCandidate(vacancyId: string): Promise<CandidateVacancyMatch | null>;
 }
