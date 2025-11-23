@@ -21,7 +21,7 @@ export class CandidateVacancyMatch extends Model<CandidateVacancyMatch> {
   person_id: string;
 
   @BelongsTo(() => Person)
-  person: Person;
+  person: () => Person;
 
   @ForeignKey(() => Vacancy)
   @Column({ type: DataType.UUID, allowNull: false })

@@ -22,14 +22,14 @@ export class Application extends Model<Application> {
   applicant_id: string;
 
   @BelongsTo(() => Person)
-  applicant: Person;
+  applicant: () => Person;
 
   @ForeignKey(() => Vacancy)
   @Column({ type: DataType.UUID, allowNull: false })
   vacancy_id: string;
 
   @BelongsTo(() => Vacancy)
-  vacancy: Vacancy;
+  vacancy: () => Vacancy;
 
   @Column({
     type: DataType.STRING(500),

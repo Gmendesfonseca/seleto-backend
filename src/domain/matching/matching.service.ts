@@ -5,7 +5,7 @@ import { CandidateVacancyMatchRepository } from './interfaces/candidate-vacancy-
 import { CandidateVacancyMatch } from './interfaces/candidate-vacancy-match.interface';
 import { Person } from '../persons/person.model';
 import { Vacancy } from '../vacancies/vacancy.model';
-import { PersonCompetence, ProficiencyLevel } from '../competences/person-competence.model';
+import { PersonCompetence, ProficiencyLevel } from '../persons/person-competence.model';
 import {
   VacancyCompetenceRequirement,
   RequirementPriority,

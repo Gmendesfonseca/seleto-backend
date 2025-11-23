@@ -8,9 +8,16 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { Person } from './person.model';
-import { DateTime } from 'luxon';
+import { Competence } from '../competences/competence.model';
 
-@Table({ tableName: 'person_competences', underscored: true, paranoid: true })
+export enum ProficiencyLevel {
+  BEGINNER = 'beginner',
+  INTERMEDIATE = 'intermediate',
+  ADVANCED = 'advanced',
+  EXPERT = 'expert',
+}
+
+@Table({ tableName: 'person_competences', underscored: true, paranoid: false })
 export class PersonCompetence extends Model<PersonCompetence> {
   @PrimaryKey
   @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
@@ -18,29 +25,41 @@ export class PersonCompetence extends Model<PersonCompetence> {
 
   @ForeignKey(() => Person)
   @Column({ type: DataType.UUID, allowNull: false })
-  personId: string;
+  person_id: string;
 
   @BelongsTo(() => Person)
   person: Person;
 
-  @Column({ type: DataType.STRING(255), allowNull: false, field: 'competence_name' })
-  competenceName: string;
+  @ForeignKey(() => Competence)
+  @Column({ type: DataType.UUID, allowNull: false })
+  competence_id: string;
 
-  @Column({ type: DataType.INTEGER, allowNull: false, field: 'proficiency_level' })
-  proficiencyLevel: number;
+  @BelongsTo(() => Competence)
+  competence: Competence;
+
+  @Column({
+    type: DataType.ENUM(...Object.values(ProficiencyLevel)),
+    allowNull: false,
+    defaultValue: ProficiencyLevel.INTERMEDIATE,
+  })
+  proficiency_level: ProficiencyLevel;
+
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  years_of_experience: number;
 
   @Column({ type: DataType.TEXT, allowNull: true })
-  description: string | null;
+  description: string;
 
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  yearsOfExperience: number;
+  // Link to where this competence was acquired (optional)
+  @Column({ type: DataType.UUID, allowNull: true })
+  source_experience_id: string; // References person_experiences.id
+
+  @Column({ type: DataType.UUID, allowNull: true })
+  source_formation_id: string; // References person_formations.id
 
   @Column({ type: DataType.DATE, allowNull: false })
-  createdAt: DateTime;
+  created_at: Date;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updatedAt: DateTime;
-
-  @Column({ type: DataType.DATE, allowNull: true })
-  deletedAt: DateTime | null;
+  updated_at: Date;
 }

@@ -3,7 +3,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { CandidateVacancyMatch } from './candidate-vacancy-match.model';
 import { Person } from '../persons/person.model';
 import { Vacancy } from '../vacancies/vacancy.model';
-import { PersonCompetence } from '../competences/person-competence.model';
+import { PersonCompetence } from '../persons/person-competence.model';
 import { VacancyCompetenceRequirement } from '../competences/vacancy-competence-requirement.model';
 import { PersonExperience } from '../persons/person-experience.model';
 import { PersonFormation } from '../persons/person-formation.model';
