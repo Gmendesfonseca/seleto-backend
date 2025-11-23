@@ -12,6 +12,7 @@ import { VacancyBenefit } from '../vacancy-benefit.model';
 import { VacancyRequirement } from '../vacancy-requirement.model';
 import { VacancyStep } from '../vacancy-step.model';
 import { User } from 'src/domain/users/user.model';
+import { Step } from 'src/domain/steps/step.model';
 
 @Injectable()
 export class VacancySequelizeRepository implements VacancyRepository {
@@ -67,7 +68,7 @@ export class VacancySequelizeRepository implements VacancyRepository {
       include: [
         {
           model: Company,
-          attributes: ['id', 'cnpj'],
+          attributes: ['id'],
           include: [
             {
               model: User,
@@ -93,7 +94,13 @@ export class VacancySequelizeRepository implements VacancyRepository {
         },
         {
           model: VacancyStep,
-          attributes: ['stepId', 'order'],
+          attributes: ['id', 'stepId', 'order'],
+          include: [
+            {
+              model: Step,
+              attributes: ['name', 'description'],
+            },
+          ],
         },
       ],
     });
