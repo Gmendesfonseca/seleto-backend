@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PersonServiceInterface } from './interfaces/person.service.interface';
 import { PersonRepository } from './interfaces/person.repository.interface';
 import { Person, PersonFilters } from './interfaces/person.interface';
@@ -20,13 +20,9 @@ export class PersonService implements PersonServiceInterface {
   private readonly logger = new Logger(PersonService.name);
 
   constructor(
-    @Inject(PersonRepository)
     private readonly repository: PersonRepository,
-    @Inject(PersonExperienceRepository)
     private readonly experienceRepository: PersonExperienceRepository,
-    @Inject(PersonFormationRepository)
     private readonly formationRepository: PersonFormationRepository,
-    @Inject(PersonCompetenceRepository)
     private readonly competenceRepository: PersonCompetenceRepository,
     private readonly matchingService: MatchingService,
   ) {}

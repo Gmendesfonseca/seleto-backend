@@ -13,9 +13,15 @@ import { PersonFormationRepository } from './interfaces/person-formation.reposit
 import { PersonExperienceSequelizeRepository } from './repositories/person-experience.sequelize.repository';
 import { PersonFormationSequelizeRepository } from './repositories/person-formation.sequelize.repository';
 import { PersonCompetenceSequelizeRepository } from './repositories/person-competence.sequelize.repository';
+import { PersonFormation } from './person-formation.model';
+import { PersonCompetence } from './person-competence.model';
+import { PersonExperience } from './person-experience.model';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Person]), MatchingModule],
+  imports: [
+    SequelizeModule.forFeature([Person, PersonCompetence, PersonExperience, PersonFormation]),
+    MatchingModule,
+  ],
   controllers: [PersonController],
   providers: [
     {
@@ -48,7 +54,6 @@ import { PersonCompetenceSequelizeRepository } from './repositories/person-compe
       provide: PersonServiceInterface,
       useClass: PersonService,
     },
-
     SequelizeModule,
   ],
 })
