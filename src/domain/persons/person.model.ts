@@ -10,6 +10,10 @@ import {
 } from 'sequelize-typescript';
 import { User } from '../users/user.model';
 import { CandidateVacancyMatch } from '../matching/candidate-vacancy-match.model';
+import { DateTime } from 'luxon';
+import { PersonExperience } from './person-experience.model';
+import { PersonFormation } from './person-formation.model';
+import { PersonCompetence } from './person-competence.model';
 
 @Table({ tableName: 'persons', underscored: true, paranoid: true })
 export class Person extends Model<Person> {
@@ -38,4 +42,13 @@ export class Person extends Model<Person> {
 
   @HasMany(() => CandidateVacancyMatch, { foreignKey: 'person_id' })
   vacancy_matches: CandidateVacancyMatch[];
+
+  @HasMany(() => PersonExperience, { foreignKey: 'person_id' })
+  experiences: PersonExperience[];
+
+  @HasMany(() => PersonFormation, { foreignKey: 'person_id' })
+  formations: PersonFormation[];
+
+  @HasMany(() => PersonCompetence, { foreignKey: 'person_id' })
+  competences: PersonCompetence[];
 }
