@@ -41,8 +41,6 @@ async function bootstrap() {
 
   const corsOptions: CorsOptions = {
     origin: function (origin, callback) {
-      console.log('CORS request from origin:', origin);
-
       if (!origin) {
         return callback(null, true);
       }
@@ -64,7 +62,6 @@ async function bootstrap() {
   app.enableCors(corsOptions);
 
   const port = configService.get<number>('PORT') ?? 5000;
-  console.log(`Server starting on port ${port}`);
 
   await app.listen(port, '0.0.0.0');
 }
