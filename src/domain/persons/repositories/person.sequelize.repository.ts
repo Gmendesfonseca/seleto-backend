@@ -5,6 +5,9 @@ import { PersonRepository } from './person.repository.interface';
 import { Person as PersonInterface, PersonFilters } from '../interfaces/person.interface';
 import { CreatePersonDto, UpdatePersonDto } from '../dto/person.dto';
 import { Op, WhereOptions } from 'sequelize';
+import { PersonExperience } from '../person-experience.model';
+import { PersonCompetence } from '../person-competence.model';
+import { PersonFormation } from '../person-formation.model';
 
 @Injectable()
 export class PersonSequelizeRepository implements PersonRepository {
@@ -52,7 +55,23 @@ export class PersonSequelizeRepository implements PersonRepository {
     if (user_id) {
       where.user_id = user_id;
     }
-    const person = await this.model.findOne({ where });
+    const person = await this.model.findOne({
+      where,
+      include: [
+        {
+          model: PersonExperience,
+          as: 'experiences',
+        },
+        {
+          model: PersonCompetence,
+          as: 'competences',
+        },
+        {
+          model: PersonFormation,
+          as: 'educations',
+        },
+      ],
+    });
     return person ? this.toInterface(person) : null;
   }
   async update(id: string, data: UpdatePersonDto): Promise<PersonInterface> {

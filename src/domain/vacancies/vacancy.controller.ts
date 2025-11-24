@@ -83,9 +83,15 @@ export class VacancyController {
   }
 
   @Get(':id/best-candidate')
-  async getBestCandidate(@Param('id') id: string) {
-    this.logger.debug('GetBestCandidate: Called', { id });
-    return this.service.getBestCandidate(id);
+  async findBestCandidate(@Param('id') id: string) {
+    this.logger.debug('FindBestCandidate: Called', { id });
+    return this.service.findBestCandidate(id);
+  }
+
+  @Put('reorder')
+  async reorderSteps(@Body() { vacancyId, stepIds }: { vacancyId: string; stepIds: string[] }) {
+    this.logger.debug('ReorderSteps: Called', { vacancyId, stepIds });
+    return this.service.reorderSteps(vacancyId, stepIds);
   }
 
   // @Get(':vacancyId/applications')

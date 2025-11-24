@@ -14,6 +14,7 @@ import { VacancyResponsibilityRepository } from './interfaces/vacancy-responsibi
 import { VacancyStepRepository } from './interfaces/vacancy-step.repository.interface';
 import { MatchingService } from '../matching/matching.service';
 import { CandidateVacancyMatch } from '../matching/interfaces/candidate-vacancy-match.interface';
+import { VacancyStep } from './vacancy-step.model';
 
 @Injectable()
 export class VacancyService implements VacancyServiceInterface {
@@ -130,8 +131,26 @@ export class VacancyService implements VacancyServiceInterface {
     return this.matchingService.findMatchesForVacancy(vacancyId, minScore, limit);
   }
 
-  async getBestCandidate(vacancyId: string): Promise<CandidateVacancyMatch | null> {
+  async findBestCandidate(vacancyId: string): Promise<CandidateVacancyMatch | null> {
     this.logger.debug('VacancyService.getBestCandidate: Called');
     return this.matchingService.getBestMatchForVacancy(vacancyId);
+  }
+
+  async reorderSteps(vacancyId: string, stepIds: string[]): Promise<VacancyStep[]> {
+    this.logger.debug('VacancyService.reorderSteps: Called');
+    const steps = await this.stepRepository.findByVacancyId(vacancyId);
+    const stepMap = new Map(steps.map((step) => [step.stepId, step]));
+
+    const reorderedSteps: VacancyStep[] = [];
+    for (let i = 0; i < stepIds.length; i++) {
+      const stepId = stepIds[i];
+      const step = stepMap.get(stepId);
+      if (step) {
+        step.order = i;
+        await this.stepRepository.update(step.id, { order: i });
+        reorderedSteps.push(step);
+      }
+    }
+    return reorderedSteps;
   }
 }

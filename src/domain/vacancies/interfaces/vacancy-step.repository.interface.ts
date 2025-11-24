@@ -12,4 +12,5 @@ export abstract class VacancyStepRepository {
   abstract findOne(id: string): Promise<VacancyStep | null>;
   abstract update(id: string, dto: UpdateVacancyStepDto): Promise<VacancyStep>;
   abstract delete(id: string): Promise<void>;
+  abstract findByVacancyId(vacancyId: string): Promise<VacancyStep[]>;
 }

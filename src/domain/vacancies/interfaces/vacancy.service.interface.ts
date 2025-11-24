@@ -44,5 +44,6 @@ export abstract class VacancyServiceInterface {
     minScore?: number,
     limit?: number,
   ): Promise<CandidateVacancyMatch[]>;
-  abstract getBestCandidate(vacancyId: string): Promise<CandidateVacancyMatch | null>;
+  abstract findBestCandidate(vacancyId: string): Promise<CandidateVacancyMatch | null>;
+  abstract reorderSteps(vacancyId: string, stepIds: string[]): Promise<VacancyStep[]>;
 }
