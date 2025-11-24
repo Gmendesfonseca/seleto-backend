@@ -3,6 +3,7 @@ import { StepService } from './interfaces/step.service.interface';
 import { StepRepository } from './repositories/step.repository.interface';
 import { CreateStepDto, UpdateStepDto } from './dto/step.dto';
 import { Step, StepFilters } from './interfaces/step.interface';
+import { PaginatedList } from 'src/shared/interfaces';
 
 @Injectable()
 export class StepServiceImpl implements StepService {
@@ -18,9 +19,13 @@ export class StepServiceImpl implements StepService {
     return this.stepRepository.create(createStepDto);
   }
 
-  async findAll(filters?: StepFilters): Promise<Step[]> {
+  async findAll(filters?: StepFilters): Promise<PaginatedList<Step>> {
     this.logger.debug('StepService.findAll: Called');
-    return this.stepRepository.findAll(filters);
+    const models = await this.stepRepository.findAll(filters);
+    return {
+      data: models,
+      meta: { total: models.length, currentPage: 1, lastPage: 1, perPage: models.length },
+    };
   }
 
   async findOne(id: string): Promise<Step | null> {
