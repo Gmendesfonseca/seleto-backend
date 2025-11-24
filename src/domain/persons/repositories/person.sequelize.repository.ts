@@ -8,6 +8,7 @@ import { Op, WhereOptions } from 'sequelize';
 import { PersonExperience } from '../person-experience.model';
 import { PersonCompetence } from '../person-competence.model';
 import { PersonFormation } from '../person-formation.model';
+import { User } from 'src/domain/users/user.model';
 
 @Injectable()
 export class PersonSequelizeRepository implements PersonRepository {
@@ -58,6 +59,9 @@ export class PersonSequelizeRepository implements PersonRepository {
     const person = await this.model.findOne({
       where,
       include: [
+        {
+          model: User,
+        },
         {
           model: PersonExperience,
           as: 'experiences',
