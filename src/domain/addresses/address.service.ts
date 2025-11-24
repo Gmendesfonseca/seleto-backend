@@ -3,6 +3,7 @@ import { AddressServiceInterface } from './interfaces/address.service.interface'
 import { AddressRepository } from './repositories/address.repository.interface';
 import { Address, AddressFilters } from './interfaces/address.interface';
 import { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
+import { PaginatedList } from 'src/shared/interfaces';
 
 @Injectable()
 export class AddressService implements AddressServiceInterface {
@@ -18,9 +19,13 @@ export class AddressService implements AddressServiceInterface {
     return this.addressRepository.create(createAddressDto);
   }
 
-  async findAll(filters?: AddressFilters): Promise<Address[]> {
+  async findAll(filters?: AddressFilters): Promise<PaginatedList<Address>> {
     this.logger.debug('AddressService.findAll: Called');
-    return this.addressRepository.findAll(filters);
+    const models = await this.addressRepository.findAll(filters);
+    return {
+      data: models,
+      meta: { total: models.length, currentPage: 1, lastPage: 1, perPage: models.length },
+    };
   }
 
   async findOne(id: string): Promise<Address | null> {

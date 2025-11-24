@@ -24,17 +24,19 @@ export class ApplicationService implements ApplicationServiceInterface {
 
   async findAll(filters?: ApplicationFilters): Promise<PaginatedList<Application>> {
     this.logger.debug('ApplicationService.findAll: Called');
-    const [items, totalCount] = await Promise.all([
+    const [items, _] = await Promise.all([
       this.repository.findAll(filters),
       this.repository.countByFilters(filters),
     ]);
 
     return {
-      items,
-      totalCount,
-      page: 1,
-      pageSize: items.length,
-      totalPages: 1,
+      data: items,
+      meta: {
+        currentPage: 1,
+        lastPage: 1,
+        perPage: items.length,
+        total: items.length,
+      },
     };
   }
 

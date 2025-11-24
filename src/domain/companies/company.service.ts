@@ -64,7 +64,7 @@ export class CompanyService implements CompanyServiceInterface {
     this.logger.debug('CompanyService.findAll: Called');
     const result = await this.repository.findAll(pagination, search);
     return {
-      data: result.data.map((company: any) => this.toResponse(company)),
+      data: result.data.map((company) => this.toResponse(company)),
       meta: result.meta,
     };
   }
