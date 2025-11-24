@@ -29,6 +29,7 @@ describe('AuthService', () => {
     id: 'c1a2b3c4-d5e6-7f8g-9h0i-j1k2l3m4n5o6',
     email: 'test@example.com',
     username: 'testuser',
+    name: 'Test User',
     password: '$2b$12$hashedpassword123',
     type: 'PERSON',
     status: 'ACTIVE',
@@ -205,6 +206,7 @@ describe('AuthService', () => {
         username: 'newuser',
         type: UserType.PERSON,
         name: 'New User',
+        phone: '1234567890',
       };
       const hashedPassword = 'hashed_password123';
 
@@ -248,6 +250,7 @@ describe('AuthService', () => {
         username: 'newcompany',
         type: UserType.COMPANY,
         name: 'New Company',
+        phone: '0987654321',
       };
       const hashedPassword = 'hashed_password123';
 
@@ -288,6 +291,7 @@ describe('AuthService', () => {
         type: UserType.PERSON,
         username: 'existinguser',
         name: 'Existing User',
+        phone: '1234567890',
       };
 
       usersService.findByEmail.mockResolvedValue(mockUser);
@@ -308,6 +312,7 @@ describe('AuthService', () => {
         username: 'newuser',
         type: UserType.PERSON,
         name: 'New User',
+        phone: '1234567890',
       };
 
       usersService.findByEmail.mockResolvedValue(null);

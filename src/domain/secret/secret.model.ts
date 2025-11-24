@@ -9,6 +9,7 @@ import {
 } from 'sequelize-typescript';
 import { User } from '../users/user.model';
 import { SecretType } from './interface/secret.interface';
+import { DateTime } from 'luxon';
 @Table({ tableName: 'secrets', underscored: true, paranoid: true })
 export class Secret extends Model<Secret> {
   @PrimaryKey
