@@ -2,6 +2,7 @@ import { StepType } from '../interfaces/step.interface';
 
 export class CreateStepDto {
   templateId: string;
+  companyId: string;
   name: string;
   description?: string;
   order: number;

@@ -18,7 +18,10 @@ export class StepSequelizeRepository implements StepRepository {
 
   async create(createStepDto: CreateStepDto): Promise<Step> {
     this.logger.debug('StepSequelizeRepository.create: Called');
-    return this.stepModel.create(createStepDto as Step);
+    return this.stepModel.create({
+      ...createStepDto,
+      company_id: createStepDto.companyId,
+    } as unknown as Step);
   }
 
   async findAll(filters?: StepFilters): Promise<Step[]> {

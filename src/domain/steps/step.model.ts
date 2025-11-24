@@ -28,10 +28,10 @@ export class Step extends Model<Step> {
   @BelongsTo(() => Company)
   company: Company;
 
-  @Column({ type: DataType.DATE, allowNull: false })
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   created_at: Date;
 
-  @Column({ type: DataType.DATE, allowNull: false })
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   updated_at: Date;
 
   @Column({ type: DataType.DATE, allowNull: true })

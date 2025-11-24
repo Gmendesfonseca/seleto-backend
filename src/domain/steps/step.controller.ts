@@ -10,9 +10,11 @@ import {
   Logger,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { StepService } from './interfaces/step.service.interface';
 import { CreateStepDto, UpdateStepDto, StepQueryDto } from './dto/step.dto';
+import { RequestWithCompany } from 'src/shared/middlewares/company-context.middleware';
 
 @Controller('steps')
 export class StepController {
@@ -33,9 +35,9 @@ export class StepController {
   }
 
   @Post()
-  async store(@Body() dto: CreateStepDto) {
+  async store(@Body() dto: Omit<CreateStepDto, 'companyId'>, @Req() req: RequestWithCompany) {
     this.logger.debug('Store: Called', { dto });
-    return this.service.create(dto);
+    return this.service.create({ ...dto, companyId: req.companyId ?? '' });
   }
 
   @Put(':id')
