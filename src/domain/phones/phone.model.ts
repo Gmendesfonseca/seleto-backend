@@ -8,6 +8,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { User } from '../users/user.model';
+import { DateTime } from 'luxon';
 
 export enum PhoneType {
   MOBILE = 'mobile',

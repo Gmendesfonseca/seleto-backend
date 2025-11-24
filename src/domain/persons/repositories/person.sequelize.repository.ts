@@ -9,6 +9,8 @@ import { PersonExperience } from '../person-experience.model';
 import { PersonCompetence } from '../person-competence.model';
 import { PersonFormation } from '../person-formation.model';
 import { User } from 'src/domain/users/user.model';
+import { Phone } from 'src/domain/phones';
+import { Address } from 'src/domain/addresses';
 
 @Injectable()
 export class PersonSequelizeRepository implements PersonRepository {
@@ -61,6 +63,15 @@ export class PersonSequelizeRepository implements PersonRepository {
       include: [
         {
           model: User,
+          as: 'user',
+          include: [
+            {
+              model: Phone,
+            },
+            {
+              model: Address,
+            },
+          ],
         },
         {
           model: PersonExperience,

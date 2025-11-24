@@ -1,5 +1,6 @@
 import { Column, DataType, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { UserInterface } from './interfaces';
+import { DateTime } from 'luxon';
 
 @Table({ tableName: 'users', underscored: true, paranoid: true })
 export class User extends Model<User> implements UserInterface {

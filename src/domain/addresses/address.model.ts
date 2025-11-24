@@ -7,8 +7,8 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import { Person } from '../persons/person.model';
-import { Company } from '../companies/company.model';
+import { DateTime } from 'luxon';
+import { User } from '../users/user.model';
 
 @Table({ tableName: 'addresses', underscored: true, paranoid: true })
 export class Address extends Model<Address> {
@@ -16,19 +16,12 @@ export class Address extends Model<Address> {
   @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
   id: string;
 
-  @ForeignKey(() => Person)
+  @ForeignKey(() => User)
   @Column({ type: DataType.UUID, allowNull: true })
-  personId: string | null;
+  userId: string;
 
-  @BelongsTo(() => Person)
-  person: Person | null;
-
-  @ForeignKey(() => Company)
-  @Column({ type: DataType.UUID, allowNull: true })
-  companyId: string | null;
-
-  @BelongsTo(() => Company)
-  company: Company | null;
+  @BelongsTo(() => User)
+  user: User;
 
   @Column({ type: DataType.STRING(255), allowNull: false })
   street: string;
