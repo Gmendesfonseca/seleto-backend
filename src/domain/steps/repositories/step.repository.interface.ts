@@ -1,5 +1,6 @@
-import { Step, StepFilters } from '../interfaces/step.interface';
+import { StepFilters } from '../interfaces/step.interface';
 import { CreateStepDto, UpdateStepDto } from '../dto/step.dto';
+import { Step } from '../step.model';
 
 export abstract class StepRepository {
   abstract create(createStepDto: CreateStepDto): Promise<Step>;

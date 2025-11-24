@@ -58,19 +58,4 @@ export class StepController {
     this.logger.debug('FindByTemplate: Called', { templateId });
     return this.service.findByTemplate(templateId);
   }
-
-  @Post('reorder')
-  async reorderSteps(@Body() payload: { templateId: string; stepIds: string[] }) {
-    this.logger.debug('ReorderSteps: Called', { payload });
-    return this.service.reorderSteps(payload.templateId, payload.stepIds);
-  }
-
-  @Put('template/:templateId/reorder')
-  async reorderStepsByTemplate(
-    @Param('templateId') templateId: string,
-    @Body('stepIds') stepIds: string[],
-  ) {
-    this.logger.debug('ReorderStepsByTemplate: Called', { templateId, stepIds });
-    return this.service.reorderSteps(templateId, stepIds);
-  }
 }

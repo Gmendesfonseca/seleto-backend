@@ -15,12 +15,12 @@ export class StepSequelizeRepository implements StepRepository {
 
   constructor(
     @InjectModel(Step)
-    private readonly stepModel: typeof Step,
+    private readonly model: typeof Step,
   ) {}
 
   async create(createStepDto: CreateStepDto): Promise<Step> {
     this.logger.debug('StepSequelizeRepository.create: Called');
-    return this.stepModel.create({
+    return this.model.create({
       ...createStepDto,
       company_id: createStepDto.companyId,
     } as unknown as Step);
@@ -40,7 +40,7 @@ export class StepSequelizeRepository implements StepRepository {
       where.type = filters.type;
     }
 
-    return this.stepModel.findAll({
+    return this.model.findAll({
       where,
       include: [
         {
@@ -62,7 +62,7 @@ export class StepSequelizeRepository implements StepRepository {
 
   async findOne(id: string): Promise<Step | null> {
     this.logger.debug('StepSequelizeRepository.findOne: Called');
-    return this.stepModel.findOne({
+    return this.model.findOne({
       where: { id },
       include: [
         {
@@ -84,7 +84,7 @@ export class StepSequelizeRepository implements StepRepository {
 
   async update(id: string, updateStepDto: UpdateStepDto): Promise<Step> {
     this.logger.debug('StepSequelizeRepository.update: Called');
-    const step = await this.stepModel.findByPk(id);
+    const step = await this.model.findByPk(id);
     if (!step) {
       throw new Error('Step not found');
     }
@@ -95,19 +95,19 @@ export class StepSequelizeRepository implements StepRepository {
 
   async delete(id: string): Promise<void> {
     this.logger.debug('StepSequelizeRepository.delete: Called');
-    await this.stepModel.destroy({ where: { id } });
+    await this.model.destroy({ where: { id } });
   }
 
   async findByTemplate(templateId: string): Promise<Step[]> {
     this.logger.debug('StepSequelizeRepository.findByTemplate: Called');
-    return this.stepModel.findAll({
+    return this.model.findAll({
       where: { template_id: templateId },
     });
   }
 
   async findByTemplateOrdered(templateId: string): Promise<Step[]> {
     this.logger.debug('StepSequelizeRepository.findByTemplateOrdered: Called');
-    return this.stepModel.findAll({
+    return this.model.findAll({
       where: { template_id: templateId },
       order: [['order', 'ASC']],
     });
@@ -126,10 +126,7 @@ export class StepSequelizeRepository implements StepRepository {
     if (filters?.type) {
       where.type = filters.type;
     }
-    if (filters?.isRequired !== undefined) {
-      where.is_required = filters.isRequired;
-    }
 
-    return this.stepModel.count({ where });
+    return this.model.count({ where });
   }
 }
