@@ -28,7 +28,7 @@ export class PersonCompetence extends Model<PersonCompetence> {
   person_id: string;
 
   @BelongsTo(() => Person)
-  person: Person;
+  person: () => Person;
 
   @ForeignKey(() => Competence)
   @Column({ type: DataType.UUID, allowNull: false })

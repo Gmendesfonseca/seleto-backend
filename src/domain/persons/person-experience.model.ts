@@ -21,7 +21,7 @@ export class PersonExperience extends Model<PersonExperience> {
   personId: string;
 
   @BelongsTo(() => Person)
-  person: Person;
+  person: () => Person;
 
   @Column({ type: DataType.STRING(255), allowNull: false })
   companyName: string;

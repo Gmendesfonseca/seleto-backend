@@ -34,7 +34,7 @@ export class PersonFormation extends Model<PersonFormation> {
   personId: string;
 
   @BelongsTo(() => Person)
-  person: Person;
+  person: () => Person;
 
   @Column({ type: DataType.STRING(255), allowNull: false })
   institutionName: string;
