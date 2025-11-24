@@ -113,12 +113,11 @@ export class Vacancy extends Model<Vacancy> {
   })
   status: VacancyStatus;
 
-  @Column({ type: DataType.DATE, allowNull: true })
-  publication_date: DateTime;
+  @Column({ type: DataType.DATE, allowNull: true, field: 'publication_date' })
+  publicationDate: DateTime;
 
-  @Column({ type: DataType.DATE, allowNull: true })
-  expiration_date: DateTime;
-
+  @Column({ type: DataType.DATE, allowNull: true, field: 'expiration_date' })
+  expirationDate: DateTime;
   @Column({ type: DataType.STRING(100), allowNull: true })
   area: string;
 
