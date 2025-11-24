@@ -6,6 +6,7 @@ import { CreateStepDto, UpdateStepDto } from '../dto/step.dto';
 import { StepFilters } from '../interfaces/step.interface';
 import { Company } from '../../companies/company.model';
 import { Op, WhereOptions } from 'sequelize';
+import { User } from 'src/domain/users/user.model';
 
 @Injectable()
 export class StepSequelizeRepository implements StepRepository {
@@ -46,7 +47,13 @@ export class StepSequelizeRepository implements StepRepository {
       include: [
         {
           model: Company,
-          attributes: ['id', 'name'],
+          attributes: ['id'],
+          include: [
+            {
+              model: User,
+              attributes: ['name'],
+            },
+          ],
         },
       ],
     });
