@@ -1,32 +1,27 @@
+import { DateTime } from 'luxon';
 import { StepType } from '../interfaces/step.interface';
 
 export class CreateStepDto {
-  templateId: string;
   companyId: string;
   name: string;
   description?: string;
-  order: number;
   type: StepType;
-  isRequired: boolean;
   estimatedDuration?: number;
-  config?: Record<string, any>;
+  templateId: string | null;
 }
 
 export class UpdateStepDto {
   name?: string;
   description?: string;
-  order?: number;
   type?: StepType;
-  isRequired?: boolean;
   estimatedDuration?: number;
-  config?: Record<string, any>;
+  templateId?: string | null;
 }
 
 export class StepQueryDto {
-  templateId?: string;
   name?: string;
   type?: StepType;
-  isRequired?: boolean;
+  templateId?: string;
 }
 
 export class StepResponseDto {
@@ -34,9 +29,7 @@ export class StepResponseDto {
   templateId: string;
   name: string;
   description?: string;
-  order: number;
   type: StepType;
-  isRequired: boolean;
   estimatedDuration?: number;
   config?: Record<string, any>;
   createdAt: DateTime;

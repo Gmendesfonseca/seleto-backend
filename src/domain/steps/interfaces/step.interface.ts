@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 export interface Step {
   id: string;
   templateId: string;
@@ -12,19 +14,20 @@ export interface Step {
   updatedAt: DateTime;
 }
 
-export enum StepType {
-  APPLICATION = 'application',
-  SCREENING = 'screening',
-  INTERVIEW = 'interview',
-  TECHNICAL_TEST = 'technical_test',
-  BACKGROUND_CHECK = 'background_check',
-  OFFER = 'offer',
-  ONBOARDING = 'onboarding',
-}
+export const StepType = {
+  APPLICATION: 'application',
+  SCREENING: 'screening',
+  INTERVIEW: 'interview',
+  TECHNICAL_TEST: 'technical_test',
+  BACKGROUND_CHECK: 'background_check',
+  OFFER: 'offer',
+  ONBOARDING: 'onboarding',
+  CUSTOM: 'custom',
+} as const;
+export type StepType = (typeof StepType)[keyof typeof StepType];
 
 export interface StepFilters {
   templateId?: string;
   name?: string;
   type?: StepType;
-  isRequired?: boolean;
 }

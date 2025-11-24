@@ -9,6 +9,19 @@ import {
 } from 'sequelize-typescript';
 import { Company } from '../companies/company.model';
 import { DateTime } from 'luxon';
+import { VacancyTemplate } from '../templates/vacancy-template.model';
+
+export const StepType = {
+  APPLICATION: 'application',
+  SCREENING: 'screening',
+  INTERVIEW: 'interview',
+  TECHNICAL_TEST: 'technical_test',
+  BACKGROUND_CHECK: 'background_check',
+  OFFER: 'offer',
+  ONBOARDING: 'onboarding',
+  CUSTOM: 'custom',
+} as const;
+export type StepType = (typeof StepType)[keyof typeof StepType];
 
 @Table({ tableName: 'steps', underscored: true, paranoid: true })
 export class Step extends Model<Step> {
@@ -20,7 +33,16 @@ export class Step extends Model<Step> {
   name: string;
 
   @Column({ type: DataType.TEXT, allowNull: true })
-  description: string;
+  description: string | null;
+
+  @Column({ type: DataType.ENUM(...Object.values(StepType)), allowNull: false })
+  type: StepType;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  estimatedDuration: string;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  template_id: string | null;
 
   @ForeignKey(() => Company)
   @Column({ type: DataType.UUID, allowNull: false })
@@ -28,6 +50,9 @@ export class Step extends Model<Step> {
 
   @BelongsTo(() => Company)
   company: Company;
+
+  @BelongsTo(() => VacancyTemplate)
+  template: VacancyTemplate;
 
   @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   createdAt: DateTime;

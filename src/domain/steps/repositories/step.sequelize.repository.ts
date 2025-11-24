@@ -7,6 +7,7 @@ import { StepFilters } from '../interfaces/step.interface';
 import { Company } from '../../companies/company.model';
 import { Op, WhereOptions } from 'sequelize';
 import { User } from 'src/domain/users/user.model';
+import { VacancyTemplate } from 'src/domain/templates/vacancy-template.model';
 
 @Injectable()
 export class StepSequelizeRepository implements StepRepository {
@@ -38,9 +39,6 @@ export class StepSequelizeRepository implements StepRepository {
     if (filters?.type) {
       where.type = filters.type;
     }
-    if (filters?.isRequired !== undefined) {
-      where.is_required = filters.isRequired;
-    }
 
     return this.stepModel.findAll({
       where,
@@ -55,6 +53,9 @@ export class StepSequelizeRepository implements StepRepository {
             },
           ],
         },
+        {
+          model: VacancyTemplate,
+        },
       ],
     });
   }
@@ -66,7 +67,16 @@ export class StepSequelizeRepository implements StepRepository {
       include: [
         {
           model: Company,
-          attributes: ['id', 'name'],
+          attributes: ['id'],
+          include: [
+            {
+              model: User,
+              attributes: ['name'],
+            },
+          ],
+        },
+        {
+          model: VacancyTemplate,
         },
       ],
     });

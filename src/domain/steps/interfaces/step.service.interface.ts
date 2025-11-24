@@ -9,5 +9,4 @@ export abstract class StepService {
   abstract update(id: string, updateStepDto: UpdateStepDto): Promise<Step>;
   abstract remove(id: string): Promise<void>;
   abstract findByTemplate(templateId: string): Promise<Step[]>;
-  abstract reorderSteps(templateId: string, stepIds: string[]): Promise<Step[]>;
 }
