@@ -51,6 +51,7 @@ export class Step extends Model<Step> {
   @BelongsTo(() => Company)
   company: Company;
 
+  @ForeignKey(() => VacancyTemplate)
   @BelongsTo(() => VacancyTemplate)
   template: VacancyTemplate;
 
