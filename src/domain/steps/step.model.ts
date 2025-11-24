@@ -41,6 +41,7 @@ export class Step extends Model<Step> {
   @Column({ type: DataType.STRING, allowNull: false })
   estimatedDuration: string;
 
+  @ForeignKey(() => VacancyTemplate)
   @Column({ type: DataType.STRING, allowNull: true })
   template_id: string | null;
 
@@ -51,7 +52,6 @@ export class Step extends Model<Step> {
   @BelongsTo(() => Company)
   company: Company;
 
-  @ForeignKey(() => VacancyTemplate)
   @BelongsTo(() => VacancyTemplate)
   template: VacancyTemplate;
 
