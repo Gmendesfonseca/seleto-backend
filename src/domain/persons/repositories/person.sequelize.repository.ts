@@ -11,6 +11,7 @@ import { PersonFormation } from '../person-formation.model';
 import { User } from 'src/domain/users/user.model';
 import { Phone } from 'src/domain/phones';
 import { Address } from 'src/domain/addresses';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class PersonSequelizeRepository implements PersonRepository {
@@ -83,7 +84,7 @@ export class PersonSequelizeRepository implements PersonRepository {
         },
         {
           model: PersonFormation,
-          as: 'educations',
+          as: 'formations',
         },
       ],
     });
@@ -131,8 +132,8 @@ export class PersonSequelizeRepository implements PersonRepository {
       competences: [],
       experiences: [],
       education: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     };
   }
 }
