@@ -27,7 +27,7 @@ export class Phone extends Model<Phone> {
   userId: string;
 
   @BelongsTo(() => User)
-  user: User;
+  user: () => User;
 
   @Column({ type: DataType.STRING(20), allowNull: false })
   number: string;

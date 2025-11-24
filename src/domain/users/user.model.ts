@@ -1,6 +1,8 @@
-import { Column, DataType, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { Column, DataType, HasOne, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { UserInterface } from './interfaces';
 import { DateTime } from 'luxon';
+import { Phone } from '../phones';
+import { Address } from '../addresses';
 
 @Table({ tableName: 'users', underscored: true, paranoid: true })
 export class User extends Model<User> implements UserInterface {
@@ -33,6 +35,12 @@ export class User extends Model<User> implements UserInterface {
     defaultValue: 'PERSON',
   })
   type: string;
+
+  @HasOne(() => Phone, { foreignKey: 'user_id' })
+  phone: Phone;
+
+  @HasOne(() => Address, { foreignKey: 'user_id' })
+  address: Address;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   isVerified: boolean;

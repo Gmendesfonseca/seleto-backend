@@ -21,7 +21,7 @@ export class Address extends Model<Address> {
   userId: string;
 
   @BelongsTo(() => User)
-  user: User;
+  user: () => User;
 
   @Column({ type: DataType.STRING(255), allowNull: false })
   street: string;
