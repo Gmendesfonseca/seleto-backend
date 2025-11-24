@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Person } from '../person.model';
-import { PersonRepository } from './person.repository.interface';
+import { PersonRepository } from '../interfaces/person.repository.interface';
 import { Person as PersonInterface, PersonFilters } from '../interfaces/person.interface';
 import { CreatePersonDto, UpdatePersonDto } from '../dto/person.dto';
 import { Op, WhereOptions } from 'sequelize';
