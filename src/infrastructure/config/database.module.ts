@@ -31,6 +31,7 @@ import { VacancyBenefit } from 'src/domain/vacancies/vacancy-benefit.model';
 import { VacancyRequirement } from 'src/domain/vacancies/vacancy-requirement.model';
 import { VacancyResponsibility } from 'src/domain/vacancies/vacancy-responsibility.model';
 import { CandidateVacancyMatch } from 'src/domain/matching/candidate-vacancy-match.model';
+import { PersonCompetence } from 'src/domain/persons/person-competence.model';
 
 const models = [
   User,
@@ -53,6 +54,7 @@ const models = [
   RolePermission,
   PersonExperience,
   PersonFormation,
+  PersonCompetence,
   VacancyStep,
   VacancyResponsible,
   StepCompetence,
