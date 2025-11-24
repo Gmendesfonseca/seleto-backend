@@ -17,7 +17,7 @@ export class AddressSequelizeRepository implements AddressRepository {
 
   async create(createAddressDto: CreateAddressDto): Promise<Address> {
     this.logger.debug('AddressSequelizeRepository.create: Called');
-    const address = await this.addressModel.create({
+    return this.addressModel.create({
       personId: createAddressDto.personId || null,
       companyId: createAddressDto.companyId || null,
       street: createAddressDto.street,
@@ -29,20 +29,14 @@ export class AddressSequelizeRepository implements AddressRepository {
       postalCode: createAddressDto.postalCode,
       isPrimary: createAddressDto.isPrimary || false,
     } as any);
-
-    return this.toInterface(address);
   }
 
   async findAll(filters?: AddressFilters): Promise<Address[]> {
     this.logger.debug('AddressSequelizeRepository.findAll: Called');
     const where: WhereOptions<Address> = {};
 
-    if (filters?.personId) {
-      where.personId = filters.personId;
-    }
-
-    if (filters?.companyId) {
-      where.companyId = filters.companyId;
+    if (filters?.userId) {
+      where.userId = filters.userId;
     }
 
     if (filters?.city) {
@@ -61,14 +55,12 @@ export class AddressSequelizeRepository implements AddressRepository {
       where.isPrimary = filters.isPrimary;
     }
 
-    const addresses = await this.addressModel.findAll({ where });
-    return addresses.map((address) => this.toInterface(address));
+    return this.addressModel.findAll({ where });
   }
 
   async findOne(id: string): Promise<Address | null> {
     this.logger.debug('AddressSequelizeRepository.findOne: Called');
-    const address = await this.addressModel.findByPk(id);
-    return address ? this.toInterface(address) : null;
+    return this.addressModel.findByPk(id);
   }
 
   async update(id: string, updateAddressDto: UpdateAddressDto): Promise<Address> {
@@ -78,8 +70,7 @@ export class AddressSequelizeRepository implements AddressRepository {
       throw new Error('Address not found');
     }
 
-    await address.update(updateAddressDto);
-    return this.toInterface(address);
+    return address.update(updateAddressDto);
   }
 
   async delete(id: string): Promise<void> {
@@ -87,49 +78,8 @@ export class AddressSequelizeRepository implements AddressRepository {
     await this.addressModel.destroy({ where: { id } });
   }
 
-  async findByPerson(personId: string): Promise<Address[]> {
-    this.logger.debug('AddressSequelizeRepository.findByPerson: Called');
-    const addresses = await this.addressModel.findAll({ where: { personId } });
-    return addresses.map((address) => this.toInterface(address));
-  }
-
-  async findByCompany(companyId: string): Promise<Address[]> {
-    this.logger.debug('AddressSequelizeRepository.findByCompany: Called');
-    const addresses = await this.addressModel.findAll({ where: { companyId } });
-    return addresses.map((address) => this.toInterface(address));
-  }
-
-  async findPrimaryByPerson(personId: string): Promise<Address | null> {
-    this.logger.debug('AddressSequelizeRepository.findPrimaryByPerson: Called');
-    const address = await this.addressModel.findOne({
-      where: { personId, isPrimary: true },
-    });
-    return address ? this.toInterface(address) : null;
-  }
-
-  async findPrimaryByCompany(companyId: string): Promise<Address | null> {
-    this.logger.debug('AddressSequelizeRepository.findPrimaryByCompany: Called');
-    const address = await this.addressModel.findOne({
-      where: { companyId, isPrimary: true },
-    });
-    return address ? this.toInterface(address) : null;
-  }
-
-  private toInterface(address: Address): Address {
-    return {
-      id: address.id,
-      personId: address.personId,
-      companyId: address.companyId,
-      street: address.street,
-      number: address.number,
-      complement: address.complement,
-      city: address.city,
-      state: address.state,
-      country: address.country,
-      postalCode: address.postalCode,
-      isPrimary: address.isPrimary,
-      createdAt: address.createdAt,
-      updatedAt: address.updatedAt,
-    };
+  async findByUser(userId: string): Promise<Address[]> {
+    this.logger.debug('AddressSequelizeRepository.findByUser: Called');
+    return this.addressModel.findAll({ where: { userId } });
   }
 }

@@ -1,7 +1,8 @@
+import { DateTime } from 'luxon';
+
 export interface Address {
   id: string;
-  personId?: string | null;
-  companyId?: string | null;
+  userId: string;
   street: string;
   number: string;
   complement?: string | null;
@@ -15,8 +16,7 @@ export interface Address {
 }
 
 export interface AddressFilters {
-  personId?: string;
-  companyId?: string;
+  userId?: string;
   city?: string;
   state?: string;
   country?: string;
