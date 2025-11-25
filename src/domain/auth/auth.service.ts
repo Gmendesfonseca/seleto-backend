@@ -15,15 +15,7 @@ import { CompanyServiceInterface } from '../companies/interfaces/company.service
 import { PersonServiceInterface } from '../persons/interfaces/person.service.interface';
 import { UserType } from 'src/shared/utils/constants';
 import { PhoneServiceInterface, PhoneType } from '../phones';
-
-type JwtPayload = {
-  sub: string;
-  username: string;
-  companyId: string | null;
-  profileId: string;
-  profile: any;
-  config: any;
-};
+import { Jwt } from 'src/shared/interfaces';
 
 @Injectable()
 export class AuthService implements AuthServiceInterface {
@@ -42,7 +34,7 @@ export class AuthService implements AuthServiceInterface {
   async signIn(email: string, password: string): Promise<SignInResponse> {
     this.logger.debug('AuthService.signIn: Called');
 
-    const payload = {} as JwtPayload;
+    const payload = {} as Jwt;
 
     const user = await this.usersService.findByEmail(email);
     if (!user) {
@@ -226,7 +218,7 @@ export class AuthService implements AuthServiceInterface {
       if (!user) {
         throw new UnauthorizedException('Invalid refresh token');
       }
-      const payload = {} as JwtPayload;
+      const payload = {} as Jwt;
       payload['sub'] = user.id;
       payload['username'] = user.username;
 
