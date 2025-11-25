@@ -36,10 +36,10 @@ export class VacancyTemplate extends Model<VacancyTemplate> {
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true, field: 'is_active' })
   isActive: boolean;
 
-  @Column({ type: DataType.DATE, allowNull: false })
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   created_at: Date;
 
-  @Column({ type: DataType.DATE, allowNull: false })
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   updated_at: Date;
 
   @Column({ type: DataType.DATE, allowNull: true })
