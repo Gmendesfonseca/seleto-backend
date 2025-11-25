@@ -83,7 +83,7 @@ export class AuthService implements AuthServiceInterface {
       master: false,
     };
 
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '1d' }); // TODO: remove expiration time
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
     const expiresIn = 3600;
 

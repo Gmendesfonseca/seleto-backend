@@ -87,7 +87,13 @@ export class UserSequelizeRepository implements UserRepositoryInterface {
 
   public async create(user: CreateUserDto): Promise<User> {
     this.logger.debug('UserSequelizeRepository.create: Called');
-    return this.model.create(user as User);
+    // TODO: remove when authentication is implemented
+    const newUser = {
+      ...user,
+      status: 'ACTIVE',
+      isVerified: true,
+    };
+    return this.model.create(newUser as User);
   }
 
   public async update(id: string, data: UpdateUserDto): Promise<User> {
