@@ -5,12 +5,16 @@ import {
   ProcessTemplateFilters,
 } from './interfaces/process-template.service.interface';
 import { ProcessTemplatesRepository } from './repositories/process-templates.repository.interface';
+import { StepRepository } from '../steps';
 
 @Injectable()
 export class ProcessTemplateService implements ProcessTemplateServiceInterface {
   private readonly logger = new Logger(ProcessTemplateService.name);
 
-  constructor(private readonly repository: ProcessTemplatesRepository) {}
+  constructor(
+    private readonly repository: ProcessTemplatesRepository,
+    private readonly stepRepository: StepRepository,
+  ) {}
 
   async findAll(filters?: ProcessTemplateFilters): Promise<{
     templates: ProcessTemplate[];
@@ -30,7 +34,20 @@ export class ProcessTemplateService implements ProcessTemplateServiceInterface {
 
   async create(template: any): Promise<ProcessTemplate> {
     this.logger.debug('ProcessTemplateServiceImpl.create: Called', { template });
-    return this.repository.create(template);
+    const model = await this.repository.create(template);
+    await Promise.all(
+      template.stages?.map((step) =>
+        this.stepRepository.create({
+          name: step.name,
+          description: step.description ?? undefined,
+          estimatedDuration: step.estimatedDuration,
+          type: step.type,
+          templateId: model.id,
+          companyId: template.companyId,
+        }),
+      ) || [],
+    );
+    return model;
   }
 
   async update(id: string, template: any): Promise<ProcessTemplate> {

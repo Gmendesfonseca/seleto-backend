@@ -11,9 +11,10 @@ import { VacancyTemplateServiceInterface } from './interfaces/vacancy-template.s
 import { ProcessTemplateServiceInterface } from './interfaces/process-template.service.interface';
 import { ProcessTemplatesRepository } from './repositories/process-templates.repository.interface';
 import { ProcessTemplateSequelizeRepository } from './repositories/process-template.sequelize.repository';
+import { StepModule } from '../steps/step.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([VacancyTemplate])],
+  imports: [SequelizeModule.forFeature([VacancyTemplate]), StepModule],
   controllers: [VacancyTemplateController, ProcessTemplateController],
   providers: [
     {

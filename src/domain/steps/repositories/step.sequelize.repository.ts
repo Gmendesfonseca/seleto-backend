@@ -22,6 +22,7 @@ export class StepSequelizeRepository implements StepRepository {
     this.logger.debug('StepSequelizeRepository.create: Called');
     return this.model.create({
       ...createStepDto,
+      template_id: createStepDto.templateId,
       company_id: createStepDto.companyId,
     } as unknown as Step);
   }

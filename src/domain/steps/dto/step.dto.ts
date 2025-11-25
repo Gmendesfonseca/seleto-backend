@@ -6,7 +6,7 @@ export class CreateStepDto {
   name: string;
   description?: string;
   type: StepType;
-  estimatedDuration?: number;
+  estimatedDuration?: string;
   templateId: string | null;
 }
 

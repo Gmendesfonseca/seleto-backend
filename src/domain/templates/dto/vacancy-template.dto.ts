@@ -1,10 +1,13 @@
+import { DateTime } from 'luxon';
+import { Step } from 'src/domain/steps/step.model';
+
 export class CreateVacancyTemplateDto {
   name: string;
   description?: string;
   companyId: string;
   isDefault?: boolean;
   isActive: boolean;
-  steps: string[];
+  steps: Step[];
   config?: Record<string, any>;
 }
 

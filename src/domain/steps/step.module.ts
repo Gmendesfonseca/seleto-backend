@@ -20,6 +20,12 @@ import { StepService } from './interfaces/step.service.interface';
       useClass: StepServiceImpl,
     },
   ],
-  exports: [StepService],
+  exports: [
+    StepService,
+    {
+      provide: StepRepository,
+      useClass: StepSequelizeRepository,
+    },
+  ],
 })
 export class StepModule {}

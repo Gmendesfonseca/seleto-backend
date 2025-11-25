@@ -1,17 +1,16 @@
-import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { VacancyTemplateServiceInterface } from './interfaces/vacancy-template.service.interface';
 import { VacancyTemplateRepository } from './repositories/vacancy-template.repository.interface';
 import { CreateVacancyTemplateDto, UpdateVacancyTemplateDto } from './dto/vacancy-template.dto';
-import { VacancyTemplate, VacancyTemplateFilters } from './interfaces/vacancy-template.interface';
+import { VacancyTemplateFilters } from './interfaces/vacancy-template.interface';
+import { StepRepository } from '../steps';
+import { VacancyTemplate } from './vacancy-template.model';
 
 @Injectable()
 export class VacancyTemplateService implements VacancyTemplateServiceInterface {
   private readonly logger = new Logger(VacancyTemplateService.name);
 
-  constructor(
-    @Inject(VacancyTemplateRepository)
-    private readonly repository: VacancyTemplateRepository,
-  ) {}
+  constructor(private readonly repository: VacancyTemplateRepository) {}
 
   async findAll(filters?: VacancyTemplateFilters): Promise<VacancyTemplate[]> {
     this.logger.debug('VacancyTemplateService.findAll: Called');
@@ -25,6 +24,7 @@ export class VacancyTemplateService implements VacancyTemplateServiceInterface {
 
   async create(dto: CreateVacancyTemplateDto): Promise<VacancyTemplate> {
     this.logger.debug('VacancyTemplateService.create: Called');
+
     return this.repository.create(dto);
   }
 
@@ -64,7 +64,7 @@ export class VacancyTemplateService implements VacancyTemplateServiceInterface {
     }
 
     // Unset other default templates for the same company
-    const companyTemplates = await this.repository.findByCompany(template.companyId);
+    const companyTemplates = await this.repository.findByCompany(template.company_id);
     for (const t of companyTemplates) {
       if (t.id !== id && t.isDefault) {
         await this.repository.update(t.id, { isDefault: false });
