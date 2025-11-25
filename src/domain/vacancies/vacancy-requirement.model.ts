@@ -8,6 +8,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { Vacancy } from './vacancy.model';
+import { DateTime } from 'luxon';
 
 @Table({ tableName: 'vacancy_requirements', underscored: true, paranoid: false })
 export class VacancyRequirement extends Model<VacancyRequirement> {
@@ -26,8 +27,8 @@ export class VacancyRequirement extends Model<VacancyRequirement> {
   requirement: string;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  created_at: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updated_at: Date;
+  updatedAt: DateTime;
 }
