@@ -83,15 +83,12 @@ export class VacancySequelizeRepository implements VacancyRepository {
         },
         {
           model: VacancyBenefit,
-          attributes: ['benefit'],
         },
         {
           model: VacancyRequirement,
-          attributes: ['requirement'],
         },
         {
           model: VacancyResponsibility,
-          attributes: ['responsibility'],
         },
         {
           model: VacancyStep,

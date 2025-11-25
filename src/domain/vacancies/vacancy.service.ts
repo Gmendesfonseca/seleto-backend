@@ -38,14 +38,7 @@ export class VacancyService implements VacancyServiceInterface {
     this.logger.debug('VacancyService.findAll: Called');
     const models = await this.repository.findAll(filters);
     return {
-      // TODO: remove this shitty type assertion
-      data: models.map(
-        (model) =>
-          ({
-            ...model,
-            requirements: model.requirements.map((r) => r.requirement),
-          }) as unknown as Vacancy,
-      ),
+      data: models,
       meta: { total: models.length, currentPage: 1, lastPage: 1, perPage: models.length },
     };
   }
@@ -130,14 +123,7 @@ export class VacancyService implements VacancyServiceInterface {
     this.logger.debug('VacancyService.findPublished: Called');
     const models = await this.repository.findAll({ status: VacancyStatus.PUBLISHED });
     return {
-      // TODO: remove this shitty type assertion
-      data: models.map(
-        (model) =>
-          ({
-            ...model,
-            requirements: model.requirements.map((r) => r.requirement),
-          }) as unknown as Vacancy,
-      ),
+      data: models,
       meta: { total: models.length, currentPage: 1, lastPage: 1, perPage: models.length },
     };
   }
