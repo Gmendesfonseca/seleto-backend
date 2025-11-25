@@ -4,7 +4,6 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op, WhereOptions } from 'sequelize';
 import { ProcessTemplatesRepository } from './process-templates.repository.interface';
 import { VacancyTemplate } from '../vacancy-template.model';
-import { ProcessTemplate } from '../interfaces/process-template.service.interface';
 import { Company } from 'src/domain/companies/company.model';
 
 @Injectable()
@@ -19,12 +18,17 @@ export class ProcessTemplateSequelizeRepository implements ProcessTemplatesRepos
   async create(createProcessTemplateDto: any): Promise<VacancyTemplate> {
     this.logger.debug('ProcessTemplateSequelizeRepository.create: Called');
     return this.model.create({
-      name: createProcessTemplateDto.name,
+      ...createProcessTemplateDto,
       company_id: createProcessTemplateDto.companyId,
-    } as ProcessTemplate);
+    });
   }
 
-  async findAll(filters?: any): Promise<ProcessTemplate[]> {
+  async findAll(filters?: any): Promise<{
+    templates: VacancyTemplate[];
+    total: number;
+    limit: number;
+    offset: number;
+  }> {
     this.logger.debug('ProcessTemplateSequelizeRepository.findAll: Called');
     const where: WhereOptions<VacancyTemplate> = {};
 
@@ -41,7 +45,7 @@ export class ProcessTemplateSequelizeRepository implements ProcessTemplatesRepos
       where.isActive = filters.isActive;
     }
 
-    return this.model.findAll({
+    const templates = await this.model.findAll({
       where,
       include: [
         {
@@ -50,6 +54,15 @@ export class ProcessTemplateSequelizeRepository implements ProcessTemplatesRepos
         },
       ],
     });
+
+    const total = await this.model.count({ where });
+
+    return {
+      templates,
+      total,
+      limit: filters?.limit || total,
+      offset: filters?.offset || 0,
+    };
   }
 
   async findOne(id: string): Promise<VacancyTemplate | null> {
@@ -72,7 +85,7 @@ export class ProcessTemplateSequelizeRepository implements ProcessTemplatesRepos
       throw new Error('Process template not found');
     }
 
-    await template.update(updateProcessTemplateDto as any);
+    await template.update(updateProcessTemplateDto);
     return template;
   }
 
@@ -81,21 +94,37 @@ export class ProcessTemplateSequelizeRepository implements ProcessTemplatesRepos
     await this.model.destroy({ where: { id } });
   }
 
-  async findByCompany(companyId: string): Promise<ProcessTemplate[]> {
+  async findByCompany(companyId: string): Promise<VacancyTemplate[]> {
     this.logger.debug('ProcessTemplateSequelizeRepository.findByCompany: Called');
     return this.model.findAll({
       where: { company_id: companyId },
     });
   }
 
-  async findDefault(companyId: string): Promise<ProcessTemplate | null> {
+  async findDefault(companyId: string): Promise<VacancyTemplate | null> {
     this.logger.debug('ProcessTemplateSequelizeRepository.findDefault: Called');
     return this.model.findOne({
       where: {
         company_id: companyId,
-        is_default: true,
+        isDefault: true,
       },
     });
+  }
+
+  async duplicate(id: string, name?: string): Promise<VacancyTemplate> {
+    this.logger.debug('ProcessTemplateSequelizeRepository.duplicate: Called');
+    const template = await this.model.findByPk(id);
+    if (!template) {
+      throw new Error('Process template not found');
+    }
+
+    const duplicatedTemplate = await this.model.create({
+      ...template.toJSON(),
+      name: name || `${template.name} (Copy)`,
+      isDefault: false,
+    } as any);
+
+    return duplicatedTemplate;
   }
 
   async countByFilters(filters?: any): Promise<number> {

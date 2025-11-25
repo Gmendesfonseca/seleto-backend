@@ -1,3 +1,5 @@
+import { VacancyTemplate } from '../vacancy-template.model';
+
 export abstract class ProcessTemplatesRepository {
   abstract findAll(filters?: {
     limit?: number;
@@ -5,14 +7,14 @@ export abstract class ProcessTemplatesRepository {
     search?: string;
     isDefault?: boolean;
   }): Promise<{
-    templates: any[];
+    templates: VacancyTemplate[];
     total: number;
     limit: number;
     offset: number;
   }>;
-  abstract findOne(id: string): Promise<any>;
-  abstract create(template: any): Promise<any>;
-  abstract update(id: string, template: any): Promise<any>;
+  abstract findOne(id: string): Promise<VacancyTemplate | null>;
+  abstract create(template: any): Promise<VacancyTemplate>;
+  abstract update(id: string, template: any): Promise<VacancyTemplate>;
   abstract delete(id: string): Promise<void>;
-  abstract duplicate(id: string, name?: string): Promise<any>;
+  abstract duplicate(id: string, name?: string): Promise<VacancyTemplate>;
 }

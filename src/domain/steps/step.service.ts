@@ -2,8 +2,9 @@ import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { StepService } from './interfaces/step.service.interface';
 import { StepRepository } from './repositories/step.repository.interface';
 import { CreateStepDto, UpdateStepDto } from './dto/step.dto';
-import { Step, StepFilters } from './interfaces/step.interface';
+import { StepFilters } from './interfaces/step.interface';
 import { PaginatedList } from 'src/shared/interfaces';
+import { Step } from './step.model';
 
 @Injectable()
 export class StepServiceImpl implements StepService {

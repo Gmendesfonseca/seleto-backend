@@ -1,6 +1,7 @@
-import { Step, StepFilters } from './step.interface';
+import { StepFilters } from './step.interface';
 import { CreateStepDto, UpdateStepDto } from '../dto/step.dto';
 import { PaginatedList } from 'src/shared/interfaces';
+import { Step } from '../step.model';
 
 export abstract class StepService {
   abstract create(createStepDto: CreateStepDto): Promise<Step>;

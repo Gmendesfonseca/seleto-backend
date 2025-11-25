@@ -31,10 +31,10 @@ export class VacancyTemplate extends Model<VacancyTemplate> {
   steps: Step[];
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false, field: 'is_default' })
-  is_default: boolean;
+  isDefault: boolean;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true, field: 'is_active' })
-  is_active: boolean;
+  isActive: boolean;
 
   @Column({ type: DataType.DATE, allowNull: false })
   created_at: Date;

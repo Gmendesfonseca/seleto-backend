@@ -1,5 +1,6 @@
-import { VacancyTemplate, VacancyTemplateFilters } from '../interfaces/vacancy-template.interface';
+import { VacancyTemplateFilters } from '../interfaces/vacancy-template.interface';
 import { CreateVacancyTemplateDto, UpdateVacancyTemplateDto } from '../dto/vacancy-template.dto';
+import { VacancyTemplate } from '../vacancy-template.model';
 
 export abstract class VacancyTemplateRepository {
   abstract create(createVacancyTemplateDto: CreateVacancyTemplateDto): Promise<VacancyTemplate>;
