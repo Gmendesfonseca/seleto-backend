@@ -12,9 +12,11 @@ import {
   HttpStatus,
   ParseIntPipe,
   DefaultValuePipe,
+  Req,
 } from '@nestjs/common';
 import { ProcessTemplateServiceInterface } from './interfaces/process-template.service.interface';
 import { Authorized } from 'src/shared/decorators/authorization.decorator';
+import { RequestWithCompany } from 'src/shared/middlewares/company-context.middleware';
 
 @Controller('process-templates')
 export class ProcessTemplateController {
@@ -31,6 +33,7 @@ export class ProcessTemplateController {
     @Query('search') search?: string,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset?: number,
+    @Req() request: RequestWithCompany,
   ) {
     this.logger.debug('Index: Called', {
       companyId,
@@ -41,7 +44,7 @@ export class ProcessTemplateController {
       offset,
     });
     return this.service.findAll({
-      companyId,
+      companyId: companyId ?? request.companyId,
       category,
       isDefault,
       search,
@@ -66,9 +69,9 @@ export class ProcessTemplateController {
 
   @Post()
   @Authorized()
-  async store(@Body() createTemplateDto: any) {
+  async store(@Body() createTemplateDto: any, @Req() request: RequestWithCompany) {
     this.logger.debug('Store: Called', { createTemplateDto });
-    return this.service.create(createTemplateDto);
+    return this.service.create({ ...createTemplateDto, companyId: request.companyId });
   }
 
   @Put(':id')
