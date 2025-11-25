@@ -29,9 +29,9 @@ export class PersonExperienceSequelizeRepository implements PersonExperienceRepo
     return this.model.create({
       personId: dto.personId,
       startDate: dto.startDate,
-      endDate: dto.endDate,
+      endDate: dto.endDate ? dto.endDate.toISO() : null,
       description: dto.description,
-      companyName: dto.companyName,
+      company_name: dto.company,
       position: dto.position,
       isCurrent: dto.isCurrent,
       location: dto.location,

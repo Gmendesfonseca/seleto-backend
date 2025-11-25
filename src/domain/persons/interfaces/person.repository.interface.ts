@@ -1,6 +1,6 @@
-import { Person, PersonFilters } from '../interfaces/person.interface';
+import { PersonFilters } from '../interfaces/person.interface';
 import { CreatePersonDto, UpdatePersonDto } from '../dto/person.dto';
-import { Person as Model } from '../person.model';
+import { Person as Model, Person } from '../person.model';
 
 export abstract class PersonRepository {
   abstract create(createPersonDto: CreatePersonDto): Promise<Person>;

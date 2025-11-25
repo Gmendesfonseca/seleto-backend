@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PersonServiceInterface } from './interfaces/person.service.interface';
 import { PersonRepository } from './interfaces/person.repository.interface';
-import { Person, PersonFilters } from './interfaces/person.interface';
+import { PersonFilters } from './interfaces/person.interface';
 import { CreatePersonDto, UpdatePersonDto } from './dto/person.dto';
 import { PersonExperienceRepository } from './interfaces/person-experience.repository.interface';
 import { PersonFormationRepository } from './interfaces/person-formation.repository.interface';
@@ -11,6 +11,7 @@ import { CandidateVacancyMatch } from '../matching/interfaces/candidate-vacancy-
 import { CreatePersonCompetenceDto } from './dto/person-competence.dto';
 import { CreatePersonExperienceDto } from './dto/person-experience.dto';
 import { CreatePersonFormationDto } from './dto/person-formation.dto';
+import { Person } from './person.model';
 
 @Injectable()
 export class PersonService implements PersonServiceInterface {

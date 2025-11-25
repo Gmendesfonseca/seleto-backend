@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 
 export class CreatePersonExperienceDto {
   personId: string;
-  companyName: string;
+  company: string;
   position: string;
   description?: string;
   startDate: DateTime;

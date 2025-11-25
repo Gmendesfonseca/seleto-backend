@@ -1,9 +1,10 @@
-import { Person, PersonFilters } from './person.interface';
+import { PersonFilters } from './person.interface';
 import { CreatePersonDto, UpdatePersonDto } from '../dto/person.dto';
 import { CandidateVacancyMatch } from '../../matching/interfaces/candidate-vacancy-match.interface';
 import { CreatePersonExperienceDto } from '../dto/person-experience.dto';
 import { CreatePersonCompetenceDto } from '../dto/person-competence.dto';
 import { CreatePersonFormationDto } from '../dto/person-formation.dto';
+import { Person } from '../person.model';
 
 export abstract class PersonServiceInterface {
   abstract findAll(filters?: PersonFilters): Promise<Person[]>;

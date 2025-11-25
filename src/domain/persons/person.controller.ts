@@ -10,12 +10,14 @@ import {
   Logger,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { PersonServiceInterface } from './interfaces/person.service.interface';
 import { PersonQueryDto, CreatePersonDto, UpdatePersonDto } from './dto/person.dto';
 import { CreatePersonFormationDto } from './dto/person-formation.dto';
 import { CreatePersonExperienceDto } from './dto/person-experience.dto';
 import { CreatePersonCompetenceDto } from './dto/person-competence.dto';
+import { Request } from 'express';
 
 @Controller('persons')
 export class PersonController {
@@ -59,9 +61,13 @@ export class PersonController {
   }
 
   @Post(':id/competences')
-  async addCompetence(@Param('id') id: string, @Body() dto: CreatePersonCompetenceDto) {
+  async addCompetence(
+    @Param('id') id: string,
+    @Body() dto: CreatePersonCompetenceDto,
+    @Req() req: Request,
+  ) {
     this.logger.debug('AddCompetence: Called');
-    return this.service.addCompetence(id, dto);
+    return this.service.addCompetence(id, { ...dto, personId: req.auth?.profileId ?? '' });
   }
 
   @Delete(':id/competences/:competenceId')
@@ -72,9 +78,16 @@ export class PersonController {
   }
 
   @Post(':id/work-experiences')
-  async addWorkExperience(@Param('id') id: string, @Body() dto: CreatePersonExperienceDto) {
+  async addWorkExperience(
+    @Param('id') id: string,
+    @Body() dto: CreatePersonExperienceDto,
+    @Req() req: Request,
+  ) {
     this.logger.debug('AddWorkExperience: Called');
-    return this.service.addWorkExperience(id, dto);
+    return this.service.addWorkExperience(id, {
+      ...dto,
+      personId: req.auth?.profileId ?? '',
+    });
   }
 
   @Delete(':id/work-experiences/:experienceId')
@@ -85,9 +98,13 @@ export class PersonController {
   }
 
   @Post(':id/education')
-  async addEducation(@Param('id') id: string, @Body() dto: CreatePersonFormationDto) {
+  async addEducation(
+    @Param('id') id: string,
+    @Body() dto: CreatePersonFormationDto,
+    @Req() req: Request,
+  ) {
     this.logger.debug('AddEducation: Called');
-    return this.service.addEducation(id, dto);
+    return this.service.addEducation(id, { ...dto, personId: req.auth?.profileId ?? '' });
   }
 
   @Delete(':id/education/:educationId')

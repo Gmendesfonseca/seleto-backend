@@ -23,8 +23,8 @@ export class PersonExperience extends Model<PersonExperience> {
   @BelongsTo(() => Person)
   person: () => Person;
 
-  @Column({ type: DataType.STRING(255), allowNull: false })
-  companyName: string;
+  @Column({ type: DataType.STRING(255), allowNull: false, field: 'company_name' })
+  company_name: string;
 
   @Column({ type: DataType.STRING(255), allowNull: false })
   position: string;
