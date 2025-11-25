@@ -71,12 +71,17 @@ export class CandidateVacancyMatch extends Model<CandidateVacancyMatch> {
   totalCompetencesCount: number;
 
   // Cache timestamp for re-calculation
-  @Column({ type: DataType.DATE, allowNull: false, field: 'calculated_at' })
+  @Column({
+    type: DataType.DATE,
+    allowNull: false,
+    field: 'calculated_at',
+    defaultValue: DataType.NOW,
+  })
   calculatedAt: DateTime;
 
-  @Column({ type: DataType.DATE, allowNull: false })
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   createdAt: DateTime;
 
-  @Column({ type: DataType.DATE, allowNull: false })
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   updatedAt: DateTime;
 }

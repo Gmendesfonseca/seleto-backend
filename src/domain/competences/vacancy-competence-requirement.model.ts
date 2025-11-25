@@ -28,7 +28,7 @@ export class VacancyCompetenceRequirement extends Model<VacancyCompetenceRequire
   vacancy_id: string;
 
   @BelongsTo(() => Vacancy)
-  vacancy: Vacancy;
+  vacancy: () => Vacancy;
 
   @ForeignKey(() => Competence)
   @Column({ type: DataType.UUID, allowNull: false })

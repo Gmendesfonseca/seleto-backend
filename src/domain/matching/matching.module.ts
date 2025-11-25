@@ -12,6 +12,7 @@ import { MatchingController } from './matching.controller';
 import { CandidateVacancyMatchSequelizeRepository } from './repositories/candidate-vacancy-match.sequelize.repository';
 import { CandidateVacancyMatchRepository } from './interfaces/candidate-vacancy-match.repository.interface';
 import { MatchingServiceInterface } from './interfaces/matching.service.interface';
+import { CompetenceModule } from '../competences/competence.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { MatchingServiceInterface } from './interfaces/matching.service.interfac
       PersonExperience,
       PersonFormation,
     ]),
+    CompetenceModule,
   ],
   controllers: [MatchingController],
   providers: [

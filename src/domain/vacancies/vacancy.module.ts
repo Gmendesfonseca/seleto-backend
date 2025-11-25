@@ -64,6 +64,7 @@ import { MatchingModule } from '../matching/matching.module';
       provide: VacancyServiceInterface,
       useClass: VacancyService,
     },
+    SequelizeModule,
   ],
 })
 export class VacancyModule implements NestModule {

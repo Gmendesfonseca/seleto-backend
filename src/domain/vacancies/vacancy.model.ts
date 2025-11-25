@@ -15,6 +15,7 @@ import { VacancyBenefit } from './vacancy-benefit.model';
 import { VacancyRequirement } from './vacancy-requirement.model';
 import { VacancyResponsibility } from './vacancy-responsibility.model';
 import { VacancyResponsible } from './vacancy-responsible.model';
+import { VacancyCompetenceRequirement } from '../competences/vacancy-competence-requirement.model';
 import { DateTime } from 'luxon';
 import { VacancyStep } from './vacancy-step.model';
 
@@ -148,6 +149,9 @@ export class Vacancy extends Model<Vacancy> {
 
   @HasMany(() => CandidateVacancyMatch, { foreignKey: 'vacancy_id' })
   candidateMatches: CandidateVacancyMatch[];
+
+  @HasMany(() => VacancyCompetenceRequirement, { foreignKey: 'vacancy_id' })
+  competence_requirements: VacancyCompetenceRequirement[];
 
   @Column({ type: DataType.DATE, allowNull: false, defaultValue: DateTime.now() })
   created_at: DateTime;

@@ -12,6 +12,7 @@ import {
 } from '../competences/vacancy-competence-requirement.model';
 import { PersonExperience } from '../persons/person-experience.model';
 import { PersonFormation } from '../persons/person-formation.model';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class MatchingService implements MatchingServiceInterface {
@@ -154,6 +155,14 @@ export class MatchingService implements MatchingServiceInterface {
 
   // Private helper methods for calculating individual match scores
 
+  private toDateTime(value: any): DateTime | null {
+    if (!value) return null;
+    if (DateTime.isDateTime(value)) return value;
+    const jsDate = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(jsDate.getTime())) return null;
+    return DateTime.fromJSDate(jsDate);
+  }
+
   private calculateCompetenceMatch(
     person: Person,
     vacancy: Vacancy,
@@ -163,8 +172,8 @@ export class MatchingService implements MatchingServiceInterface {
     requiredCount: number;
     totalCount: number;
   } {
-    const personCompetences = (person as any).competences || [];
-    const vacancyRequirements = (vacancy as any).competence_requirements || [];
+    const personCompetences = person.competences || [];
+    const vacancyRequirements = vacancy.competence_requirements || [];
 
     if (vacancyRequirements.length === 0) {
       return { score: 100, matchedCount: 0, requiredCount: 0, totalCount: 0 };
@@ -181,7 +190,7 @@ export class MatchingService implements MatchingServiceInterface {
     ).length;
 
     for (const requirement of vacancyRequirements) {
-      const priorityWeight = this.PRIORITY_WEIGHTS[requirement.priority as RequirementPriority];
+      const priorityWeight = this.PRIORITY_WEIGHTS[requirement.priority];
       totalPossibleScore += priorityWeight * 100;
 
       const personComp = personCompetences.find(
@@ -190,8 +199,7 @@ export class MatchingService implements MatchingServiceInterface {
 
       if (personComp) {
         matchedCount++;
-        const proficiencyScore =
-          this.PROFICIENCY_SCORES[personComp.proficiency_level as ProficiencyLevel];
+        const proficiencyScore = this.PROFICIENCY_SCORES[personComp.proficiency_level];
 
         // Check years of experience requirement
         let experienceMultiplier = 1;
@@ -217,19 +225,26 @@ export class MatchingService implements MatchingServiceInterface {
   }
 
   private calculateExperienceMatch(person: Person, vacancy: Vacancy): number {
-    const personExperiences = (person as any).experiences || [];
+    const personExperiences = person.experiences || [];
 
     if (personExperiences.length === 0) {
       return 50; // Neutral score if no experience data
     }
 
-    // Calculate total years of experience
+    // Calculate total years of experience (accept Date, string, or Luxon DateTime)
     let totalYears = 0;
     for (const exp of personExperiences) {
-      const startDate = new Date(exp.start_date);
-      const endDate = exp.end_date ? new Date(exp.end_date) : new Date();
-      const years = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 365);
-      totalYears += years;
+      // Normalize start and end to Luxon DateTime
+      const rawStart = (exp as any).startDate ?? (exp as any).start_date;
+      const rawEnd = (exp as any).endDate ?? (exp as any).end_date;
+
+      const start = this.toDateTime(rawStart);
+      const end = this.toDateTime(rawEnd) ?? DateTime.now();
+
+      if (!start || !end) continue;
+
+      const years = (end.toMillis() - start.toMillis()) / (1000 * 60 * 60 * 24 * 365);
+      if (!Number.isNaN(years) && years > 0) totalYears += years;
     }
 
     // Match against vacancy level requirements
@@ -239,22 +254,30 @@ export class MatchingService implements MatchingServiceInterface {
       mid: 3,
       senior: 5,
       lead: 8,
-    };
+    } as const;
 
-    const requiredYears = levelExperienceMap[vacancy.level as keyof typeof levelExperienceMap] || 0;
+    const requiredYears = (levelExperienceMap as any)[vacancy.level] ?? 0;
 
+    // If vacancy requires 0 years, treat candidate with any experience as good fit
+    if (requiredYears === 0) {
+      return totalYears > 0 ? 100 : 50;
+    }
+
+    let result: number;
     if (totalYears >= requiredYears) {
       // Over-qualified candidates get slightly lower scores
       const overQualificationPenalty = Math.min((totalYears - requiredYears) / requiredYears, 0.2);
-      return Math.max(70, 100 - overQualificationPenalty * 30);
+      result = Math.max(70, 100 - overQualificationPenalty * 30);
     } else {
       // Under-qualified
-      return Math.max(0, (totalYears / requiredYears) * 100);
+      result = Math.max(0, (totalYears / requiredYears) * 100);
     }
+
+    return Number.isNaN(result) ? 0 : result;
   }
 
   private calculateEducationMatch(person: Person, _vacancy: Vacancy): number {
-    const personFormations = (person as any).formations || [];
+    const personFormations = person.formations || [];
 
     if (personFormations.length === 0) {
       return 60; // Neutral-low score if no education data

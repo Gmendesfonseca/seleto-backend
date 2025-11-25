@@ -1,7 +1,5 @@
-import {
-  CandidateVacancyMatch,
-  CandidateVacancyMatchFilters,
-} from './candidate-vacancy-match.interface';
+import { CandidateVacancyMatch } from '../candidate-vacancy-match.model';
+import { CandidateVacancyMatchFilters } from './candidate-vacancy-match.interface';
 
 export abstract class CandidateVacancyMatchRepository {
   abstract create(data: Partial<CandidateVacancyMatch>): Promise<CandidateVacancyMatch>;
