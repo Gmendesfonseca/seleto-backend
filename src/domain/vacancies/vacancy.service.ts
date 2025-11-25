@@ -15,6 +15,7 @@ import { VacancyStepRepository } from './interfaces/vacancy-step.repository.inte
 import { MatchingService } from '../matching/matching.service';
 import { CandidateVacancyMatch } from '../matching/interfaces/candidate-vacancy-match.interface';
 import { VacancyStep } from './vacancy-step.model';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class VacancyService implements VacancyServiceInterface {
@@ -130,12 +131,12 @@ export class VacancyService implements VacancyServiceInterface {
 
   async publishVacancy(id: string): Promise<Vacancy> {
     this.logger.debug('VacancyService.publishVacancy: Called');
-    return this.update(id, { status: VacancyStatus.PUBLISHED });
+    return this.update(id, { status: VacancyStatus.PUBLISHED, publicationDate: DateTime.now() });
   }
 
   async closeVacancy(id: string): Promise<Vacancy> {
     this.logger.debug('VacancyService.closeVacancy: Called');
-    return this.update(id, { status: VacancyStatus.CLOSED });
+    return this.update(id, { status: VacancyStatus.CLOSED, expirationDate: DateTime.now() });
   }
 
   async findBestCandidates(

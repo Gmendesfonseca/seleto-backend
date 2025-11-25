@@ -85,7 +85,8 @@ export class UpdateVacancyDto {
   requirements?: string[];
   responsibilities?: string[];
   status?: VacancyStatus;
-  expirationDate?: Date;
+  expirationDate?: DateTime;
+  publicationDate?: DateTime;
 }
 
 export class VacancyQueryDto {
