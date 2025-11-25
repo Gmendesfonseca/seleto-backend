@@ -12,14 +12,10 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { PersonServiceInterface } from './interfaces/person.service.interface';
-import {
-  PersonQueryDto,
-  AddEducationDto,
-  CreatePersonDto,
-  UpdatePersonDto,
-  AddCompetenceDto,
-  AddWorkExperienceDto,
-} from './dto/person.dto';
+import { PersonQueryDto, CreatePersonDto, UpdatePersonDto } from './dto/person.dto';
+import { CreatePersonFormationDto } from './dto/person-formation.dto';
+import { CreatePersonExperienceDto } from './dto/person-experience.dto';
+import { CreatePersonCompetenceDto } from './dto/person-competence.dto';
 
 @Controller('persons')
 export class PersonController {
@@ -63,7 +59,7 @@ export class PersonController {
   }
 
   @Post(':id/competences')
-  async addCompetence(@Param('id') id: string, @Body() dto: AddCompetenceDto) {
+  async addCompetence(@Param('id') id: string, @Body() dto: CreatePersonCompetenceDto) {
     this.logger.debug('AddCompetence: Called');
     return this.service.addCompetence(id, dto);
   }
@@ -76,7 +72,7 @@ export class PersonController {
   }
 
   @Post(':id/work-experiences')
-  async addWorkExperience(@Param('id') id: string, @Body() dto: AddWorkExperienceDto) {
+  async addWorkExperience(@Param('id') id: string, @Body() dto: CreatePersonExperienceDto) {
     this.logger.debug('AddWorkExperience: Called');
     return this.service.addWorkExperience(id, dto);
   }
@@ -89,7 +85,7 @@ export class PersonController {
   }
 
   @Post(':id/education')
-  async addEducation(@Param('id') id: string, @Body() dto: AddEducationDto) {
+  async addEducation(@Param('id') id: string, @Body() dto: CreatePersonFormationDto) {
     this.logger.debug('AddEducation: Called');
     return this.service.addEducation(id, dto);
   }

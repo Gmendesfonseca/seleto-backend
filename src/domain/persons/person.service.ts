@@ -2,18 +2,15 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PersonServiceInterface } from './interfaces/person.service.interface';
 import { PersonRepository } from './interfaces/person.repository.interface';
 import { Person, PersonFilters } from './interfaces/person.interface';
-import {
-  CreatePersonDto,
-  UpdatePersonDto,
-  AddCompetenceDto,
-  AddWorkExperienceDto,
-  AddEducationDto,
-} from './dto/person.dto';
+import { CreatePersonDto, UpdatePersonDto } from './dto/person.dto';
 import { PersonExperienceRepository } from './interfaces/person-experience.repository.interface';
 import { PersonFormationRepository } from './interfaces/person-formation.repository.interface';
 import { PersonCompetenceRepository } from './interfaces/person-competence.repository.interface';
 import { MatchingService } from '../matching/matching.service';
 import { CandidateVacancyMatch } from '../matching/interfaces/candidate-vacancy-match.interface';
+import { CreatePersonCompetenceDto } from './dto/person-competence.dto';
+import { CreatePersonExperienceDto } from './dto/person-experience.dto';
+import { CreatePersonFormationDto } from './dto/person-formation.dto';
 
 @Injectable()
 export class PersonService implements PersonServiceInterface {
@@ -69,7 +66,7 @@ export class PersonService implements PersonServiceInterface {
     await this.repository.delete(id);
   }
 
-  async addCompetence(id: string, dto: AddCompetenceDto): Promise<Person> {
+  async addCompetence(id: string, dto: CreatePersonCompetenceDto): Promise<Person> {
     this.logger.debug('PersonService.addCompetence: Called');
     const person = await this.repository.findOne({ id });
     if (!person) {
@@ -89,7 +86,7 @@ export class PersonService implements PersonServiceInterface {
     return person;
   }
 
-  async addWorkExperience(id: string, dto: AddWorkExperienceDto): Promise<Person> {
+  async addWorkExperience(id: string, dto: CreatePersonExperienceDto): Promise<Person> {
     this.logger.debug('PersonService.addWorkExperience: Called');
     const person = await this.repository.findOne({ id });
     if (!person) {
@@ -109,7 +106,7 @@ export class PersonService implements PersonServiceInterface {
     return person;
   }
 
-  async addEducation(id: string, dto: AddEducationDto): Promise<Person> {
+  async addEducation(id: string, dto: CreatePersonFormationDto): Promise<Person> {
     this.logger.debug('PersonService.addEducation: Called');
     const person = await this.repository.findOne({ id });
     if (!person) {

@@ -52,28 +52,3 @@ export class PersonResponseDto {
   createdAt: DateTime;
   updatedAt: DateTime;
 }
-
-export class AddCompetenceDto {
-  competenceId: string;
-  level: string;
-  experience?: number;
-}
-
-export class AddWorkExperienceDto {
-  company: string;
-  position: string;
-  description?: string;
-  startDate: Date;
-  endDate?: Date;
-  isCurrent: boolean;
-}
-
-export class AddEducationDto {
-  institution: string;
-  degree: string;
-  fieldOfStudy: string;
-  startDate: Date;
-  endDate?: Date;
-  isCurrent: boolean;
-  gpa?: number;
-}
