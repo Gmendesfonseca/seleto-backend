@@ -27,13 +27,13 @@ export class ProcessTemplateController {
   @Get()
   @Authorized()
   async index(
+    @Req() request: RequestWithCompany,
     @Query('companyId') companyId?: string,
     @Query('category') category?: string,
     @Query('isDefault') isDefault?: boolean,
     @Query('search') search?: string,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset?: number,
-    @Req() request: RequestWithCompany,
   ) {
     this.logger.debug('Index: Called', {
       companyId,
