@@ -9,6 +9,8 @@ import { VacancyTemplateSequelizeRepository } from './repositories/vacancy-templ
 import { VacancyTemplateRepository } from './repositories/vacancy-template.repository.interface';
 import { VacancyTemplateServiceInterface } from './interfaces/vacancy-template.service.interface';
 import { ProcessTemplateServiceInterface } from './interfaces/process-template.service.interface';
+import { ProcessTemplatesRepository } from './repositories/process-templates.repository.interface';
+import { ProcessTemplateSequelizeRepository } from './repositories/process-template.sequelize.repository';
 
 @Module({
   imports: [SequelizeModule.forFeature([VacancyTemplate])],
@@ -25,6 +27,10 @@ import { ProcessTemplateServiceInterface } from './interfaces/process-template.s
     {
       provide: ProcessTemplateServiceInterface,
       useClass: ProcessTemplateService,
+    },
+    {
+      provide: ProcessTemplatesRepository,
+      useClass: ProcessTemplateSequelizeRepository,
     },
   ],
   exports: [VacancyTemplateServiceInterface, ProcessTemplateServiceInterface],

@@ -45,7 +45,7 @@ export class ApplicationService implements ApplicationServiceInterface {
     const application = await this.repository.create(createApplicationDto);
 
     // Calculate candidate-vacancy match asynchronously
-    this.matchingService
+    await this.matchingService
       .calculateMatch(createApplicationDto.applicantId, createApplicationDto.vacancyId)
       .catch((error) => {
         this.logger.error('Failed to calculate match for application', error);

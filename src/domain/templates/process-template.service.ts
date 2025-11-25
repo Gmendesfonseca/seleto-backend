@@ -4,10 +4,13 @@ import {
   ProcessTemplate,
   ProcessTemplateFilters,
 } from './interfaces/process-template.service.interface';
+import { ProcessTemplatesRepository } from './repositories/process-templates.repository.interface';
 
 @Injectable()
 export class ProcessTemplateService implements ProcessTemplateServiceInterface {
   private readonly logger = new Logger(ProcessTemplateService.name);
+
+  constructor(private readonly repository: ProcessTemplatesRepository) {}
 
   async findAll(filters?: ProcessTemplateFilters): Promise<{
     templates: ProcessTemplate[];
@@ -16,81 +19,38 @@ export class ProcessTemplateService implements ProcessTemplateServiceInterface {
     offset: number;
   }> {
     this.logger.debug('ProcessTemplateServiceImpl.findAll: Called', { filters });
-    // Implementation would fetch from database
-    return {
-      templates: [],
-      total: 0,
-      limit: filters?.limit || 10,
-      offset: filters?.offset || 0,
-    };
+    const models = await this.repository.findAll(filters);
+    return models;
   }
 
   async findOne(id: string): Promise<ProcessTemplate> {
     this.logger.debug('ProcessTemplateServiceImpl.findOne: Called', { id });
-    // Implementation would fetch from database
-    return {
-      id,
-      name: 'Sample Template',
-      isDefault: false,
-      steps: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    return this.repository.findOne(id);
   }
 
   async create(template: any): Promise<ProcessTemplate> {
     this.logger.debug('ProcessTemplateServiceImpl.create: Called', { template });
-    // Implementation would save to database
-    return {
-      id: 'new-id',
-      name: template.name,
-      description: template.description,
-      category: template.category,
-      isDefault: template.isDefault || false,
-      companyId: template.companyId,
-      steps: template.steps || [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    return this.repository.create(template);
   }
 
   async update(id: string, template: any): Promise<ProcessTemplate> {
     this.logger.debug('ProcessTemplateServiceImpl.update: Called', { id, template });
-    // Implementation would update in database
-    return {
-      id,
-      name: template.name,
-      description: template.description,
-      category: template.category,
-      isDefault: template.isDefault || false,
-      companyId: template.companyId,
-      steps: template.steps || [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    return this.repository.update(id, template);
   }
 
   async remove(id: string): Promise<void> {
     this.logger.debug('ProcessTemplateServiceImpl.remove: Called', { id });
-    // Implementation would delete from database
+    return this.repository.delete(id);
   }
 
   async duplicate(id: string, name?: string): Promise<ProcessTemplate> {
     this.logger.debug('ProcessTemplateServiceImpl.duplicate: Called', { id, name });
-    // Implementation would duplicate template in database
-    return {
-      id: 'duplicated-id',
-      name: name || 'Copy of Template',
-      isDefault: false,
-      steps: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    return this.repository.duplicate(id, name);
   }
 
   async getDefaults(): Promise<ProcessTemplate[]> {
     this.logger.debug('ProcessTemplateServiceImpl.getDefaults: Called');
-    // Implementation would fetch default templates
-    return [];
+    const { templates } = await this.repository.findAll({ isDefault: true });
+    return templates;
   }
 }

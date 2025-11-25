@@ -32,6 +32,7 @@ import { VacancyRequirement } from 'src/domain/vacancies/vacancy-requirement.mod
 import { VacancyResponsibility } from 'src/domain/vacancies/vacancy-responsibility.model';
 import { CandidateVacancyMatch } from 'src/domain/matching/candidate-vacancy-match.model';
 import { PersonCompetence } from 'src/domain/persons/person-competence.model';
+import { VacancyCompetenceRequirement } from 'src/domain/competences/vacancy-competence-requirement.model';
 
 const models = [
   User,
@@ -62,6 +63,7 @@ const models = [
   VacancyRequirement,
   VacancyResponsibility,
   CandidateVacancyMatch,
+  VacancyCompetenceRequirement,
 ];
 
 @Module({

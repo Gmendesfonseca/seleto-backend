@@ -3,11 +3,13 @@ import {
   Column,
   DataType,
   ForeignKey,
+  HasMany,
   Model,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
 import { Company } from '../companies/company.model';
+import { Step } from '../steps/step.model';
 
 @Table({ tableName: 'vacancy_templates', underscored: true, paranoid: true })
 export class VacancyTemplate extends Model<VacancyTemplate> {
@@ -24,6 +26,15 @@ export class VacancyTemplate extends Model<VacancyTemplate> {
 
   @BelongsTo(() => Company)
   company: Company;
+
+  @HasMany(() => Step, { foreignKey: 'template_id' })
+  steps: Step[];
+
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false, field: 'is_default' })
+  is_default: boolean;
+
+  @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true, field: 'is_active' })
+  is_active: boolean;
 
   @Column({ type: DataType.DATE, allowNull: false })
   created_at: Date;

@@ -79,7 +79,6 @@ export class VacancySequelizeRepository implements VacancyRepository {
         },
         {
           model: Application,
-          attributes: ['id'],
         },
         {
           model: VacancyBenefit,
@@ -89,6 +88,9 @@ export class VacancySequelizeRepository implements VacancyRepository {
         },
         {
           model: VacancyResponsibility,
+        },
+        {
+          model: CandidateVacancyMatch,
         },
         {
           model: VacancyStep,

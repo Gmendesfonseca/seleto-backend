@@ -288,7 +288,7 @@ export class MatchingService implements MatchingServiceInterface {
 
   private calculateSalaryMatch(person: Person, vacancy: Vacancy): number {
     // If no salary range specified, return perfect match
-    if (!vacancy.salary_min && !vacancy.salary_max) {
+    if (!vacancy.salaryMin && !vacancy.salaryMax) {
       return 100;
     }
 

@@ -4,7 +4,7 @@ import { VacancyTemplate } from '../vacancy-template.model';
 import { VacancyTemplateRepository } from './vacancy-template.repository.interface';
 import { CreateVacancyTemplateDto, UpdateVacancyTemplateDto } from '../dto/vacancy-template.dto';
 import { VacancyTemplateFilters } from '../interfaces/vacancy-template.interface';
-import { Company } from '../../users/user.model';
+import { Company } from 'src/domain/companies/company.model';
 import { Op, WhereOptions } from 'sequelize';
 
 @Injectable()
