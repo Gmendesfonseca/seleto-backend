@@ -14,6 +14,7 @@ import { Address } from 'src/domain/addresses';
 import { PersonCompetence } from 'src/domain/persons/person-competence.model';
 import { PersonExperience } from 'src/domain/persons/person-experience.model';
 import { PersonFormation } from 'src/domain/persons/person-formation.model';
+import { CandidateVacancyMatch } from 'src/domain/matching';
 
 @Injectable()
 export class ApplicationSequelizeRepository implements ApplicationRepository {
@@ -84,6 +85,11 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
         {
           model: Vacancy,
           attributes: ['id', 'title', 'status'],
+          include: [
+            {
+              model: CandidateVacancyMatch,
+            },
+          ],
         },
       ],
     });
