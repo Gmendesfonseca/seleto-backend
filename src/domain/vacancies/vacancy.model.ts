@@ -73,11 +73,11 @@ export class Vacancy extends Model<Vacancy> {
   @Column({ type: DataType.STRING(255), allowNull: true })
   location: string;
 
-  @Column({ type: DataType.DECIMAL(10, 2), allowNull: true })
-  salary_min: number;
+  @Column({ type: DataType.DECIMAL(10, 2), allowNull: true, field: 'salary_min' })
+  salaryMin: number;
 
-  @Column({ type: DataType.DECIMAL(10, 2), allowNull: true })
-  salary_max: number;
+  @Column({ type: DataType.DECIMAL(10, 2), allowNull: true, field: 'salary_max' })
+  salaryMax: number;
 
   @Column({ type: DataType.STRING(3), allowNull: true, defaultValue: 'BRL' })
   currency: string;

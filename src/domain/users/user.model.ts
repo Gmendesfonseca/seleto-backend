@@ -52,5 +52,5 @@ export class User extends Model<User> implements UserInterface {
   updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  deletedAt: Date | null;
+  deletedAt: DateTime | null;
 }

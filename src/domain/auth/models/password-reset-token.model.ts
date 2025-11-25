@@ -8,6 +8,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { User } from '../../users/user.model';
+import { DateTime } from 'luxon';
 
 @Table({ tableName: 'password_reset_tokens', underscored: true, paranoid: false })
 export class PasswordResetToken extends Model<PasswordResetToken> {
@@ -25,8 +26,8 @@ export class PasswordResetToken extends Model<PasswordResetToken> {
   @Column({ type: DataType.STRING(500), allowNull: false, unique: true })
   token: string;
 
-  @Column({ type: DataType.DATE, allowNull: false })
-  expires_at: Date;
+  @Column({ type: DataType.DATE, allowNull: false, field: 'expires_at' })
+  expiresAt: DateTime;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
   used: boolean;

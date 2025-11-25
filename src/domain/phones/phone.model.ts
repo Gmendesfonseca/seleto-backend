@@ -50,5 +50,5 @@ export class Phone extends Model<Phone> {
   updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  deletedAt: Date;
+  deletedAt: DateTime | null;
 }

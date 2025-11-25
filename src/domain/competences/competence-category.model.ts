@@ -1,5 +1,6 @@
 import { Column, DataType, HasMany, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { Competence } from './competence.model';
+import { DateTime } from 'luxon';
 
 export enum CompetenceCategoryType {
   TECHNICAL_SKILL = 'technical_skill',
@@ -34,8 +35,8 @@ export class CompetenceCategory extends Model<CompetenceCategory> {
   competences: Competence[];
 
   @Column({ type: DataType.DATE, allowNull: false })
-  created_at: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updated_at: Date;
+  updatedAt: DateTime;
 }

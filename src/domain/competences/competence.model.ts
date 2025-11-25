@@ -8,6 +8,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { Company } from '../companies/company.model';
+import { DateTime } from 'luxon';
 
 @Table({ tableName: 'competences', underscored: true, paranoid: true })
 export class Competence extends Model<Competence> {
@@ -29,11 +30,11 @@ export class Competence extends Model<Competence> {
   company: Company;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  created_at: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updated_at: Date;
+  updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  deleted_at: Date;
+  deletedAt: DateTime | null;
 }

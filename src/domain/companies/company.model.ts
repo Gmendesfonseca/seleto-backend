@@ -8,6 +8,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { User } from '../users/user.model';
+import { DateTime } from 'luxon';
 
 @Table({ tableName: 'companies', underscored: true, paranoid: true })
 export class Company extends Model<Company> {
@@ -29,7 +30,7 @@ export class Company extends Model<Company> {
   updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  deletedAt: Date | null;
+  deletedAt: DateTime | null;
 
   @BelongsTo(() => User)
   user: User;

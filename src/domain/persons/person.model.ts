@@ -35,7 +35,7 @@ export class Person extends Model<Person> {
   updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  deletedAt: Date | null;
+  deletedAt: DateTime | null;
 
   @BelongsTo(() => User)
   user: User;

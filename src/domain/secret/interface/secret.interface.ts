@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 export type SecretType = 'EMAIL' | 'PASSWORD';
 
 export interface SecretInterface {
@@ -6,5 +8,5 @@ export interface SecretInterface {
   type: SecretType;
   userId: string;
   createdAt: DateTime;
-  deletedAt: Date;
+  deletedAt: DateTime | null;
 }

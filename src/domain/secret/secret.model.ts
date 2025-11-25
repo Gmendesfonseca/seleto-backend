@@ -43,5 +43,5 @@ export class Secret extends Model<Secret> {
   updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  deletedAt: Date | null;
+  deletedAt: DateTime | null;
 }

@@ -29,7 +29,6 @@ export class RecentApplicationResponseDto {
   vacancyTitle: string;
   companyName: string;
   status: string;
-  appliedAt: Date;
 }
 
 export class TopVacancyResponseDto {

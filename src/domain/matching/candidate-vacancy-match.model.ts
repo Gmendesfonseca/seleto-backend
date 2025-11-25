@@ -9,6 +9,7 @@ import {
 } from 'sequelize-typescript';
 import { Person } from '../persons/person.model';
 import { Vacancy } from '../vacancies/vacancy.model';
+import { DateTime } from 'luxon';
 
 @Table({ tableName: 'candidate_vacancy_matches', underscored: true, paranoid: false })
 export class CandidateVacancyMatch extends Model<CandidateVacancyMatch> {
@@ -56,11 +57,11 @@ export class CandidateVacancyMatch extends Model<CandidateVacancyMatch> {
 
   // Cache timestamp for re-calculation
   @Column({ type: DataType.DATE, allowNull: false })
-  calculated_at: Date;
+  calculatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  created_at: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updated_at: Date;
+  updatedAt: DateTime;
 }

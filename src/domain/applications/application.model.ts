@@ -10,6 +10,7 @@ import {
 import { Person } from '../persons/person.model';
 import { Vacancy } from '../vacancies/vacancy.model';
 import { ApplicationStatus } from './interfaces/application.interface';
+import { DateTime } from 'luxon';
 
 @Table({ tableName: 'applications', underscored: true, paranoid: true })
 export class Application extends Model<Application> {
@@ -18,15 +19,15 @@ export class Application extends Model<Application> {
   id: string;
 
   @ForeignKey(() => Person)
-  @Column({ type: DataType.UUID, allowNull: false })
-  applicant_id: string;
+  @Column({ type: DataType.UUID, allowNull: false, field: 'applicant_id' })
+  applicantId: string;
 
   @BelongsTo(() => Person)
   applicant: () => Person;
 
   @ForeignKey(() => Vacancy)
-  @Column({ type: DataType.UUID, allowNull: false })
-  vacancy_id: string;
+  @Column({ type: DataType.UUID, allowNull: false, field: 'vacancy_id' })
+  vacancyId: string;
 
   @BelongsTo(() => Vacancy)
   vacancy: () => Vacancy;
@@ -49,11 +50,11 @@ export class Application extends Model<Application> {
   status: ApplicationStatus;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  created_at: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updated_at: Date;
+  updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  deleted_at: Date;
+  deletedAt: DateTime;
 }

@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 export interface Application {
   id: string;
   applicantId: string;
@@ -5,7 +7,6 @@ export interface Application {
   status: ApplicationStatus;
   resume?: string;
   coverLetter?: string;
-  appliedAt: Date;
   createdAt: DateTime;
   updatedAt: DateTime;
 }

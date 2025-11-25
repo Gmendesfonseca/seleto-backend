@@ -54,5 +54,5 @@ export class Address extends Model<Address> {
   updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  deletedAt: Date;
+  deletedAt: DateTime | null;
 }

@@ -8,6 +8,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { User } from '../../users/user.model';
+import { DateTime } from 'luxon';
 
 @Table({ tableName: 'refresh_tokens', underscored: true, paranoid: false })
 export class RefreshToken extends Model<RefreshToken> {
@@ -25,8 +26,8 @@ export class RefreshToken extends Model<RefreshToken> {
   @Column({ type: DataType.STRING(500), allowNull: false, unique: true })
   token: string;
 
-  @Column({ type: DataType.DATE, allowNull: false })
-  expires_at: Date;
+  @Column({ type: DataType.DATE, allowNull: false, field: 'expires_at' })
+  expiresAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt: DateTime;

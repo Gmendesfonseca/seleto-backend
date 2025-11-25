@@ -73,5 +73,5 @@ export class PersonFormation extends Model<PersonFormation> {
   updatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  deletedAt: Date | null;
+  deletedAt: DateTime | null;
 }

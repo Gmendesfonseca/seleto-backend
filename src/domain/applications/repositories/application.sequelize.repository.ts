@@ -8,6 +8,9 @@ import { ApplicationFilters } from '../interfaces/application.interface';
 import { Vacancy } from '../../vacancies/vacancy.model';
 import { Op, WhereOptions } from 'sequelize';
 import { Person } from 'src/domain/persons/person.model';
+import { User } from 'src/domain/users/user.model';
+import { Phone } from 'src/domain/phones';
+import { Address } from 'src/domain/addresses';
 
 @Injectable()
 export class ApplicationSequelizeRepository implements ApplicationRepository {
@@ -15,7 +18,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
 
   constructor(
     @InjectModel(Application)
-    private readonly applicationModel: typeof Application,
+    private readonly model: typeof Application,
   ) {}
 
   async findAll(filters?: ApplicationFilters): Promise<Application[]> {
@@ -23,18 +26,18 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
     const where: WhereOptions<Application> = {};
 
     if (filters?.applicantId) {
-      where.applicant_id = filters.applicantId;
+      where.applicantId = filters.applicantId;
     }
     if (filters?.vacancyId) {
-      where.vacancy_id = filters.vacancyId;
+      where.vacancyId = filters.vacancyId;
     }
     if (filters?.status) {
       where.status = filters.status;
     }
     if (filters?.dateFrom || filters?.dateTo) {
-      where.created_at = {};
+      where.createdAt = {};
       if (filters.dateFrom) {
-        where.created_at = {
+        where.createdAt = {
           [Op.gte]: new Date(filters.dateFrom),
         };
       }
@@ -45,12 +48,26 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
       }
     }
 
-    return this.applicationModel.findAll({
+    return this.model.findAll({
       where,
       include: [
         {
           model: Person,
           attributes: ['id', 'cpf'],
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'email', 'name'],
+              include: [
+                {
+                  model: Phone,
+                },
+                {
+                  model: Address,
+                },
+              ],
+            },
+          ],
         },
         {
           model: Vacancy,
@@ -62,7 +79,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
 
   async findOne(id: string): Promise<Application | null> {
     this.logger.debug('ApplicationSequelizeRepository.findOne: Called');
-    return this.applicationModel.findOne({
+    return this.model.findOne({
       where: { id },
       include: [
         {
@@ -79,7 +96,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
 
   async findByApplicant(applicantId: string): Promise<Application[]> {
     this.logger.debug('ApplicationSequelizeRepository.findByApplicant: Called');
-    return this.applicationModel.findAll({
+    return this.model.findAll({
       where: { applicant_id: applicantId },
       include: [
         {
@@ -92,7 +109,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
 
   async findByVacancy(vacancyId: string): Promise<Application[]> {
     this.logger.debug('ApplicationSequelizeRepository.findByVacancy: Called');
-    return this.applicationModel.findAll({
+    return this.model.findAll({
       where: { vacancy_id: vacancyId },
       include: [
         {
@@ -105,9 +122,9 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
 
   async create(createApplicationDto: CreateApplicationDto): Promise<Application> {
     this.logger.debug('ApplicationSequelizeRepository.create: Called');
-    return this.applicationModel.create({
-      applicant_id: createApplicationDto.applicantId,
-      vacancy_id: createApplicationDto.vacancyId,
+    return this.model.create({
+      applicantId: createApplicationDto.applicantId,
+      vacancyId: createApplicationDto.vacancyId,
       resume: createApplicationDto.resume,
       cover_letter: createApplicationDto.coverLetter,
     } as Application);
@@ -115,7 +132,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
 
   async update(id: string, updateApplicationDto: UpdateApplicationDto): Promise<Application> {
     this.logger.debug('ApplicationSequelizeRepository.update: Called');
-    const application = await this.applicationModel.findByPk(id);
+    const application = await this.model.findByPk(id);
     if (!application) {
       throw new Error('Application not found');
     }
@@ -137,7 +154,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
 
   async delete(id: string): Promise<void> {
     this.logger.debug('ApplicationSequelizeRepository.delete: Called');
-    await this.applicationModel.destroy({ where: { id } });
+    await this.model.destroy({ where: { id } });
   }
 
   async countByFilters(filters?: ApplicationFilters): Promise<number> {
@@ -145,24 +162,27 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
     const where: WhereOptions<Application> = {};
 
     if (filters?.applicantId) {
-      where.applicant_id = filters.applicantId;
+      where.applicantId = filters.applicantId;
     }
     if (filters?.vacancyId) {
-      where.vacancy_id = filters.vacancyId;
+      where.vacancyId = filters.vacancyId;
     }
     if (filters?.status) {
       where.status = filters.status;
     }
     if (filters?.dateFrom || filters?.dateTo) {
-      where.created_at = {};
+      where.createdAt = {};
       if (filters.dateFrom) {
-        where.created_at[Op.gte] = new Date(filters.dateFrom);
+        where.createdAt = { [Op.gte]: new Date(filters.dateFrom) };
       }
       if (filters.dateTo) {
-        where.created_at[Op.lte] = new Date(filters.dateTo);
+        where.createdAt = {
+          ...where.createdAt,
+          [Op.lte]: new Date(filters.dateTo),
+        };
       }
     }
 
-    return this.applicationModel.count({ where });
+    return this.model.count({ where });
   }
 }

@@ -9,6 +9,7 @@ import {
 } from 'sequelize-typescript';
 import { Vacancy } from '../vacancies/vacancy.model';
 import { Competence } from './competence.model';
+import { DateTime } from 'luxon';
 
 export enum RequirementPriority {
   REQUIRED = 'required',
@@ -53,8 +54,8 @@ export class VacancyCompetenceRequirement extends Model<VacancyCompetenceRequire
   weight: number; // For matching algorithm (0-100)
 
   @Column({ type: DataType.DATE, allowNull: false })
-  created_at: Date;
+  createdAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updated_at: Date;
+  updatedAt: DateTime;
 }
