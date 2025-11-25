@@ -36,8 +36,8 @@ export class PersonFormation extends Model<PersonFormation> {
   @BelongsTo(() => Person)
   person: () => Person;
 
-  @Column({ type: DataType.STRING(255), allowNull: false })
-  institutionName: string;
+  @Column({ type: DataType.STRING(255), allowNull: false, field: 'institution_name' })
+  institution: string;
 
   @Column({
     type: DataType.ENUM(...Object.values(DegreeType)),

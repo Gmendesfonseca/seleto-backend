@@ -2,7 +2,7 @@ import { DegreeType } from '../person-formation.model';
 
 export class CreatePersonFormationDto {
   personId: string;
-  institutionName: string;
+  institution: string;
   degree: DegreeType;
   fieldOfStudy: string;
   startDate: Date;
@@ -14,7 +14,7 @@ export class CreatePersonFormationDto {
 }
 
 export class UpdatePersonFormationDto {
-  institutionName?: string;
+  institution?: string;
   degree?: DegreeType;
   fieldOfStudy?: string;
   startDate?: Date;

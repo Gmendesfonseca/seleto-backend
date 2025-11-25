@@ -26,7 +26,7 @@ export class PersonFormationSequelizeRepository implements PersonFormationReposi
     this.logger.debug('PersonFormationSequelizeRepository.create: Called');
     return this.model.create({
       personId: dto.personId,
-      institutionName: dto.institutionName,
+      institution: dto.institution,
       degree: dto.degree,
       fieldOfStudy: dto.fieldOfStudy,
       startDate: dto.startDate,
