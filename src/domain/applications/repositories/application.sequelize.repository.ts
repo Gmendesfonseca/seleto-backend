@@ -11,6 +11,9 @@ import { Person } from 'src/domain/persons/person.model';
 import { User } from 'src/domain/users/user.model';
 import { Phone } from 'src/domain/phones';
 import { Address } from 'src/domain/addresses';
+import { PersonCompetence } from 'src/domain/persons/person-competence.model';
+import { PersonExperience } from 'src/domain/persons/person-experience.model';
+import { PersonFormation } from 'src/domain/persons/person-formation.model';
 
 @Injectable()
 export class ApplicationSequelizeRepository implements ApplicationRepository {
@@ -42,7 +45,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
         };
       }
       if (filters.dateTo) {
-        where.created_at = {
+        where.createdAt = {
           [Op.lte]: new Date(filters.dateTo),
         };
       }
@@ -66,6 +69,15 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
                   model: Address,
                 },
               ],
+            },
+            {
+              model: PersonCompetence,
+            },
+            {
+              model: PersonExperience,
+            },
+            {
+              model: PersonFormation,
             },
           ],
         },
@@ -97,7 +109,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
   async findByApplicant(applicantId: string): Promise<Application[]> {
     this.logger.debug('ApplicationSequelizeRepository.findByApplicant: Called');
     return this.model.findAll({
-      where: { applicant_id: applicantId },
+      where: { applicantId },
       include: [
         {
           model: Vacancy,
@@ -110,7 +122,7 @@ export class ApplicationSequelizeRepository implements ApplicationRepository {
   async findByVacancy(vacancyId: string): Promise<Application[]> {
     this.logger.debug('ApplicationSequelizeRepository.findByVacancy: Called');
     return this.model.findAll({
-      where: { vacancy_id: vacancyId },
+      where: { vacancyId },
       include: [
         {
           model: Person,

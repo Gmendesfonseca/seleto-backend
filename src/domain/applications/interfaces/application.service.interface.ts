@@ -10,6 +10,4 @@ export abstract class ApplicationServiceInterface {
   abstract update(id: string, updateApplicationDto: UpdateApplicationDto): Promise<Application>;
   abstract updateStatus(id: string, status: string): Promise<Application>;
   abstract remove(id: string): Promise<void>;
-  abstract findByApplicant(applicantId: string): Promise<Application[]>;
-  abstract findByVacancy(vacancyId: string): Promise<Application[]>;
 }

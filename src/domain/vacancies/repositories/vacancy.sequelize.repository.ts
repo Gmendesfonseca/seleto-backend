@@ -13,6 +13,7 @@ import { VacancyRequirement } from '../vacancy-requirement.model';
 import { VacancyStep } from '../vacancy-step.model';
 import { User } from 'src/domain/users/user.model';
 import { Step } from 'src/domain/steps/step.model';
+import { CandidateVacancyMatch } from 'src/domain/matching';
 
 @Injectable()
 export class VacancySequelizeRepository implements VacancyRepository {
@@ -110,10 +111,17 @@ export class VacancySequelizeRepository implements VacancyRepository {
     this.logger.debug('VacancySequelizeRepository.findOne: Called');
     return this.model.findOne({
       where: { id },
+      order: [['created_at', 'DESC']],
       include: [
         {
           model: Company,
-          attributes: ['id', 'cnpj'],
+          attributes: ['id'],
+          include: [
+            {
+              model: User,
+              attributes: ['name'],
+            },
+          ],
         },
         {
           model: Application,
@@ -133,7 +141,16 @@ export class VacancySequelizeRepository implements VacancyRepository {
         },
         {
           model: VacancyStep,
-          attributes: ['stepId', 'order'],
+          attributes: ['id', 'stepId', 'order'],
+          include: [
+            {
+              model: Step,
+              attributes: ['name', 'description'],
+            },
+          ],
+        },
+        {
+          model: CandidateVacancyMatch,
         },
       ],
     });

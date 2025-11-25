@@ -18,45 +18,60 @@ export class CandidateVacancyMatch extends Model<CandidateVacancyMatch> {
   id: string;
 
   @ForeignKey(() => Person)
-  @Column({ type: DataType.UUID, allowNull: false })
-  person_id: string;
+  @Column({ type: DataType.UUID, allowNull: false, field: 'person_id' })
+  personId: string;
 
   @BelongsTo(() => Person)
   person: () => Person;
 
   @ForeignKey(() => Vacancy)
-  @Column({ type: DataType.UUID, allowNull: false })
-  vacancy_id: string;
+  @Column({ type: DataType.UUID, allowNull: false, field: 'vacancy_id' })
+  vacancyId: string;
 
   @BelongsTo(() => Vacancy)
   vacancy: Vacancy;
 
   // Match score (0-100)
-  @Column({ type: DataType.DECIMAL(5, 2), allowNull: false })
-  match_score: number;
+  @Column({ type: DataType.DECIMAL(5, 2), allowNull: false, field: 'match_score' })
+  matchScore: number;
 
   // Detailed scoring breakdown (JSONB for flexibility)
-  @Column({ type: DataType.JSONB, allowNull: true })
-  score_breakdown: {
-    competence_match: number;
-    experience_match: number;
-    education_match: number;
-    location_match: number;
-    salary_match: number;
+  @Column({ type: DataType.JSONB, allowNull: true, field: 'score_breakdown' })
+  scoreBreakdown: {
+    competenceMatch: number;
+    experienceMatch: number;
+    educationMatch: number;
+    locationMatch: number;
+    salaryMatch: number;
   };
 
   // Matched competences count
-  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
-  matched_competences_count: number;
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    field: 'matched_competences_count',
+  })
+  matchedCompetencesCount: number;
 
-  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
-  required_competences_count: number;
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    field: 'required_competences_count',
+  })
+  requiredCompetencesCount: number;
 
-  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
-  total_competences_count: number;
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    field: 'total_competences_count',
+  })
+  totalCompetencesCount: number;
 
   // Cache timestamp for re-calculation
-  @Column({ type: DataType.DATE, allowNull: false })
+  @Column({ type: DataType.DATE, allowNull: false, field: 'calculated_at' })
   calculatedAt: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: false })

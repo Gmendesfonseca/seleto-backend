@@ -76,14 +76,4 @@ export class ApplicationService implements ApplicationServiceInterface {
     }
     await this.repository.delete(id);
   }
-
-  async findByApplicant(applicantId: string): Promise<Application[]> {
-    this.logger.debug('ApplicationService.findByApplicant: Called');
-    return this.repository.findByApplicant(applicantId);
-  }
-
-  async findByVacancy(vacancyId: string): Promise<Application[]> {
-    this.logger.debug('ApplicationService.findByVacancy: Called');
-    return this.repository.findByVacancy(vacancyId);
-  }
 }

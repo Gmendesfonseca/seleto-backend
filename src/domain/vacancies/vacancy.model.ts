@@ -147,7 +147,7 @@ export class Vacancy extends Model<Vacancy> {
   responsibles: VacancyResponsible[];
 
   @HasMany(() => CandidateVacancyMatch, { foreignKey: 'vacancy_id' })
-  candidate_matches: CandidateVacancyMatch[];
+  candidateMatches: CandidateVacancyMatch[];
 
   @Column({ type: DataType.DATE, allowNull: false, defaultValue: DateTime.now() })
   created_at: DateTime;
