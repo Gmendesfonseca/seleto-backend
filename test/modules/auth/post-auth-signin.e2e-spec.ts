@@ -1,5 +1,12 @@
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  ValidationPipe,
+  UnauthorizedException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
 import { AuthHelper, createMockServices } from '../../helpers/auth-helper';
@@ -12,7 +19,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
   let mockAuthService: any;
 
   const validSignInData = {
-    username: faker.internet.username(),
+    email: faker.internet.email(),
     password: faker.internet.password({ length: 12 }),
   };
 
@@ -22,7 +29,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
     expiresIn: 3600,
     user: {
       id: faker.string.uuid(),
-      username: validSignInData.username,
+      username: faker.internet.username(),
       email: faker.internet.email(),
       type: 'PERSON',
       status: 'ACTIVE',
@@ -42,6 +49,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
       ],
       controllers: [AuthController],
       providers: [
+        authGuardProvider,
         {
           provide: AuthServiceInterface,
           useValue: mockAuthService,
@@ -78,7 +86,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockSignInResponse);
       expect(mockAuthService.signIn).toHaveBeenCalledWith(
-        validSignInData.username,
+        validSignInData.email,
         validSignInData.password,
       );
     });
@@ -99,19 +107,19 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockSignInResponse);
       expect(mockAuthService.signIn).toHaveBeenCalledWith(
-        validSignInData.username,
+        validSignInData.email,
         validSignInData.password,
       );
     });
   });
 
   describe('Validation Tests', () => {
-    it('should validate required username field', async () => {
+    it('should validate required email field', async () => {
       // Arrange
       const testUser = authHelper.createTestUser();
       const incompleteData = {
         password: validSignInData.password,
-        // Missing username
+        // Missing email
       };
 
       // Act
@@ -130,7 +138,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
       // Arrange
       const testUser = authHelper.createTestUser();
       const incompleteData = {
-        username: validSignInData.username,
+        email: validSignInData.email,
         // Missing password
       };
 
@@ -146,11 +154,11 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
       expect(mockAuthService.signIn).not.toHaveBeenCalled();
     });
 
-    it('should validate username is not empty', async () => {
+    it('should validate email is not empty', async () => {
       // Arrange
       const testUser = authHelper.createTestUser();
       const invalidData = {
-        username: '',
+        email: '',
         password: validSignInData.password,
       };
 
@@ -170,7 +178,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
       // Arrange
       const testUser = authHelper.createTestUser();
       const invalidData = {
-        username: validSignInData.username,
+        email: validSignInData.email,
         password: '',
       };
 
@@ -186,11 +194,11 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
       expect(mockAuthService.signIn).not.toHaveBeenCalled();
     });
 
-    it('should validate username is string', async () => {
+    it('should validate email is string', async () => {
       // Arrange
       const testUser = authHelper.createTestUser();
       const invalidData = {
-        username: 12345,
+        email: 12345,
         password: validSignInData.password,
       };
 
@@ -210,7 +218,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
       // Arrange
       const testUser = authHelper.createTestUser();
       const invalidData = {
-        username: validSignInData.username,
+        email: validSignInData.email,
         password: 12345,
       };
 
@@ -266,8 +274,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
   describe('Error Handling Tests', () => {
     it('should handle invalid credentials error', async () => {
       // Arrange
-      const unauthorizedError = new Error('Invalid credentials');
-      unauthorizedError.name = 'UnauthorizedException';
+      const unauthorizedError = new UnauthorizedException('Invalid credentials');
       mockAuthService.signIn.mockRejectedValue(unauthorizedError);
       const testUser = authHelper.createTestUser();
 
@@ -284,8 +291,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
 
     it('should handle user not found error', async () => {
       // Arrange
-      const notFoundError = new Error('User not found');
-      notFoundError.name = 'NotFoundException';
+      const notFoundError = new NotFoundException('User not found');
       mockAuthService.signIn.mockRejectedValue(notFoundError);
       const testUser = authHelper.createTestUser();
 
@@ -302,8 +308,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
 
     it('should handle inactive user error', async () => {
       // Arrange
-      const forbiddenError = new Error('User account is inactive');
-      forbiddenError.name = 'ForbiddenException';
+      const forbiddenError = new ForbiddenException('User account is inactive');
       mockAuthService.signIn.mockRejectedValue(forbiddenError);
       const testUser = authHelper.createTestUser();
 
@@ -365,11 +370,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
 
     it('should not expose password in response', async () => {
       // Arrange
-      const responseWithPassword = {
-        ...mockSignInResponse,
-        user: { ...mockSignInResponse.user, password: 'secret123' },
-      };
-      mockAuthService.signIn.mockResolvedValue(responseWithPassword);
+      mockAuthService.signIn.mockResolvedValue(mockSignInResponse);
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -395,15 +396,15 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
 
       // Assert
       expect(mockAuthService.signIn).toHaveBeenCalledWith(
-        validSignInData.username,
+        validSignInData.email,
         validSignInData.password,
       );
       expect(mockAuthService.signIn).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle various username formats', async () => {
+    it('should handle various email formats', async () => {
       // Arrange
-      const usernameFormats = [
+      const emailFormats = [
         'john_doe',
         'johndoe123',
         'john.doe@example.com',
@@ -414,11 +415,11 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
       const testUser = authHelper.createTestUser();
 
       // Act & Assert
-      for (const username of usernameFormats) {
-        const data = { ...validSignInData, username };
+      for (const email of emailFormats) {
+        const data = { ...validSignInData, email };
         const { response } = await authHelper.authenticatedPost('/auth/signin', data, testUser);
         expect(response.status).toBe(200);
-        expect(mockAuthService.signIn).toHaveBeenCalledWith(username, validSignInData.password);
+        expect(mockAuthService.signIn).toHaveBeenCalledWith(email, validSignInData.password);
         jest.clearAllMocks();
       }
     });
@@ -440,13 +441,13 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
 
       // Assert
       expect(response.status).toBe(200);
-      expect(mockAuthService.signIn).toHaveBeenCalledWith(validSignInData.username, longPassword);
+      expect(mockAuthService.signIn).toHaveBeenCalledWith(validSignInData.email, longPassword);
     });
 
     it('should handle special characters in credentials', async () => {
       // Arrange
       const specialCredentials = {
-        username: 'user@domain.com',
+        email: 'user@domain.com',
         password: 'P@ssw0rd!@#$%^&*()',
       };
       mockAuthService.signIn.mockResolvedValue(mockSignInResponse);
@@ -462,7 +463,7 @@ describe('Auth Controller - POST /auth/signin (e2e)', () => {
       // Assert
       expect(response.status).toBe(200);
       expect(mockAuthService.signIn).toHaveBeenCalledWith(
-        specialCredentials.username,
+        specialCredentials.email,
         specialCredentials.password,
       );
     });

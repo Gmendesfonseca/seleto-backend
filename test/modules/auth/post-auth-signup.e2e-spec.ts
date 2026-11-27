@@ -1,5 +1,11 @@
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  ValidationPipe,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
 import { AuthHelper, createMockServices } from '../../helpers/auth-helper';
@@ -17,6 +23,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
     email: faker.internet.email(),
     password: faker.internet.password({ length: 12 }),
     type: 'PERSON' as const,
+    phone: faker.phone.number(),
   };
 
   beforeAll(async () => {
@@ -32,6 +39,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
       ],
       controllers: [AuthController],
       providers: [
+        authGuardProvider,
         {
           provide: AuthServiceInterface,
           useValue: mockAuthService,
@@ -72,6 +80,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
         email: validSignUpData.email,
         password: validSignUpData.password,
         type: validSignUpData.type,
+        phone: validSignUpData.phone,
       });
     });
 
@@ -95,6 +104,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
         email: validSignUpData.email,
         password: validSignUpData.password,
         type: validSignUpData.type,
+        phone: validSignUpData.phone,
       });
     });
   });
@@ -108,6 +118,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
         email: validSignUpData.email,
         password: validSignUpData.password,
         type: validSignUpData.type,
+        phone: validSignUpData.phone,
         // Missing username
       };
 
@@ -131,6 +142,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
         email: validSignUpData.email,
         password: validSignUpData.password,
         type: validSignUpData.type,
+        phone: validSignUpData.phone,
         // Missing name
       };
 
@@ -154,6 +166,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
         name: validSignUpData.name,
         password: validSignUpData.password,
         type: validSignUpData.type,
+        phone: validSignUpData.phone,
         // Missing email
       };
 
@@ -177,6 +190,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
         name: validSignUpData.name,
         email: validSignUpData.email,
         type: validSignUpData.type,
+        phone: validSignUpData.phone,
         // Missing password
       };
 
@@ -200,8 +214,26 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
         name: validSignUpData.name,
         email: validSignUpData.email,
         password: validSignUpData.password,
+        phone: validSignUpData.phone,
         // Missing type
       };
+
+      // Act
+      const { response } = await authHelper.authenticatedPost(
+        '/auth/signup',
+        incompleteData,
+        testUser,
+      );
+
+      // Assert
+      expect(response.status).toBe(400);
+      expect(mockAuthService.signUp).not.toHaveBeenCalled();
+    });
+
+    it('should validate required phone field', async () => {
+      // Arrange
+      const testUser = authHelper.createTestUser();
+      const { phone: _phone, ...incompleteData } = validSignUpData;
 
       // Act
       const { response } = await authHelper.authenticatedPost(
@@ -244,6 +276,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
         email: '',
         password: '',
         type: 'PERSON' as const,
+        phone: '',
       };
 
       // Act
@@ -336,8 +369,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
   describe('Error Handling Tests', () => {
     it('should handle duplicate username error', async () => {
       // Arrange
-      const conflictError = new Error('Username already exists');
-      conflictError.name = 'ConflictException';
+      const conflictError = new ConflictException('Username already exists');
       mockAuthService.signUp.mockRejectedValue(conflictError);
       const testUser = authHelper.createTestUser();
 
@@ -354,8 +386,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
 
     it('should handle duplicate email error', async () => {
       // Arrange
-      const conflictError = new Error('Email already exists');
-      conflictError.name = 'ConflictException';
+      const conflictError = new ConflictException('Email already exists');
       mockAuthService.signUp.mockRejectedValue(conflictError);
       const testUser = authHelper.createTestUser();
 
@@ -372,8 +403,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
 
     it('should handle validation errors', async () => {
       // Arrange
-      const validationError = new Error('Password too weak');
-      validationError.name = 'BadRequestException';
+      const validationError = new BadRequestException('Password too weak');
       mockAuthService.signUp.mockRejectedValue(validationError);
       const testUser = authHelper.createTestUser();
 
@@ -438,6 +468,7 @@ describe('Auth Controller - POST /auth/signup (e2e)', () => {
         email: validSignUpData.email,
         password: validSignUpData.password,
         type: validSignUpData.type,
+        phone: validSignUpData.phone,
       });
     });
   });
