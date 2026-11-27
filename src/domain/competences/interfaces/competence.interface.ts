@@ -27,6 +27,4 @@ export type CompetenceLevel = (typeof CompetenceLevel)[keyof typeof CompetenceLe
 
 export interface CompetenceFilters {
   name?: string;
-  category?: CompetenceCategory;
-  level?: CompetenceLevel;
 }

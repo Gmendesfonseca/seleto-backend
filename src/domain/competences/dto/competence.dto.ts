@@ -17,8 +17,6 @@ export class UpdateCompetenceDto {
 
 export class CompetenceQueryDto {
   name?: string;
-  category?: CompetenceCategory;
-  level?: CompetenceLevel;
 }
 
 export class CompetenceResponseDto {

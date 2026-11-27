@@ -32,12 +32,6 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
     if (filters?.name) {
       where.name = { [Op.iLike]: `%${filters.name}%` };
     }
-    if (filters?.category) {
-      where.category = filters.category;
-    }
-    if (filters?.level) {
-      where.level = filters.level;
-    }
 
     return toCompetences(
       await this.model.findAll({
@@ -82,12 +76,6 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
     await this.model.destroy({ where: { id } });
   }
 
-  async findByCategory(category: string): Promise<Competence[]> {
-    this.logger.debug('CompetenceSequelizeRepository.findByCategory: Called');
-    const where: WhereOptions = { category };
-    return toCompetences(await this.model.findAll({ where }));
-  }
-
   async searchByName(name: string): Promise<Competence[]> {
     this.logger.debug('CompetenceSequelizeRepository.searchByName: Called');
     return toCompetences(
@@ -105,12 +93,6 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
 
     if (filters?.name) {
       where.name = { [Op.iLike]: `%${filters.name}%` };
-    }
-    if (filters?.category) {
-      where.category = filters.category;
-    }
-    if (filters?.level) {
-      where.level = filters.level;
     }
 
     return this.model.count({ where });
