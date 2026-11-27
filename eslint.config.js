@@ -13,7 +13,7 @@ const compat = new FlatCompat({
 
 module.exports = [
   {
-    ignores: ['.config/cz-config.js', 'eslint.config.js', 'node_modules', 'dist/*'],
+    ignores: ['.config/cz-config.js', 'eslint.config.js', 'node_modules', 'dist/*', 'src/metadata.ts'],
   },
   ...compat.extends('plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'),
   {
