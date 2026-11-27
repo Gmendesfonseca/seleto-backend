@@ -308,7 +308,14 @@ describe('Applications Controller - GET /applications (e2e)', () => {
   describe('Status Filter Values Tests', () => {
     it('should handle valid status values', async () => {
       // Arrange
-      const validStatuses = ['pending', 'reviewing', 'interview', 'approved', 'rejected', 'withdrawn'];
+      const validStatuses = [
+        'pending',
+        'reviewing',
+        'interview',
+        'approved',
+        'rejected',
+        'withdrawn',
+      ];
       mockApplicationService.findAll.mockResolvedValue(mockApplicationsResponse);
       const testUser = authHelper.createTestUser();
 

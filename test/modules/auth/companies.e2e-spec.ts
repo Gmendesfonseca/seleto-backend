@@ -2,10 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, NotFoundException, ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
-import {
-  AuthHelper,
-  expectUnauthorizedResponse,
-} from '../../helpers/auth-helper';
+import { AuthHelper, expectUnauthorizedResponse } from '../../helpers/auth-helper';
 import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { CompanyController } from '../../../src/domain/companies/company.controller';
 import { CompanyServiceInterface as CompanyService } from '../../../src/domain/companies/interfaces/company.service.interface';
