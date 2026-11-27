@@ -44,16 +44,6 @@ describe('Companies Controller (e2e) - Authorized Routes', () => {
     },
   ];
 
-  const mockCompanyUsers = [
-    {
-      id: faker.string.uuid(),
-      username: faker.internet.username(),
-      email: faker.internet.email(),
-      type: 'COMPANY',
-      status: 'ACTIVE',
-    },
-  ];
-
   const mockCompanyStatistics = {
     totalVacancies: faker.number.int({ min: 1, max: 50 }),
     activeVacancies: faker.number.int({ min: 1, max: 30 }),

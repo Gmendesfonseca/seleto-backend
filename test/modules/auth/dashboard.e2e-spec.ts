@@ -25,12 +25,6 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
     completedProcesses: faker.number.int({ min: 1, max: 30 }),
   };
 
-  const mockCompanyStats = {
-    ...mockStats,
-    companyId: faker.string.uuid(),
-    companyName: faker.company.name(),
-  };
-
   const mockRecentApplications = [
     {
       id: faker.string.uuid(),
