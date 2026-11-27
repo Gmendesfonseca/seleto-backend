@@ -3,10 +3,12 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Role } from '../role.model';
 import { RoleRepository } from './role.repository.interface';
 import { CreateRoleDto, UpdateRoleDto } from '../dto/role.dto';
-import { RoleFilters } from '../interfaces/role.interface';
+import { Role as RoleEntity, RoleFilters } from '../interfaces/role.interface';
 import { Company } from '../../companies/company.model';
 import { Op, WhereOptions } from 'sequelize';
 
+// The persisted rows are returned as is: the model has no permissions/isActive/isDefault,
+// so the casts below only align the declared domain type.
 @Injectable()
 export class RoleSequelizeRepository implements RoleRepository {
   private readonly logger = new Logger(RoleSequelizeRepository.name);
@@ -16,12 +18,13 @@ export class RoleSequelizeRepository implements RoleRepository {
     private readonly roleModel: typeof Role,
   ) {}
 
-  async create(createRoleDto: CreateRoleDto): Promise<Role> {
+  async create(createRoleDto: CreateRoleDto): Promise<RoleEntity> {
     this.logger.debug('RoleSequelizeRepository.create: Called');
-    return this.roleModel.create(createRoleDto as Role);
+    const row = await this.roleModel.create(createRoleDto as unknown as Role);
+    return row as unknown as RoleEntity;
   }
 
-  async findAll(filters?: RoleFilters): Promise<Role[]> {
+  async findAll(filters?: RoleFilters): Promise<RoleEntity[]> {
     this.logger.debug('RoleSequelizeRepository.findAll: Called');
     const where: WhereOptions<Role> = {};
 
@@ -33,7 +36,7 @@ export class RoleSequelizeRepository implements RoleRepository {
       where.is_system = filters.isDefault;
     }
 
-    return this.roleModel.findAll({
+    const rows = await this.roleModel.findAll({
       where,
       include: [
         {
@@ -42,11 +45,12 @@ export class RoleSequelizeRepository implements RoleRepository {
         },
       ],
     });
+    return rows as unknown as RoleEntity[];
   }
 
-  async findOne(id: string): Promise<Role | null> {
+  async findOne(id: string): Promise<RoleEntity | null> {
     this.logger.debug('RoleSequelizeRepository.findOne: Called');
-    return this.roleModel.findOne({
+    const row = await this.roleModel.findOne({
       where: { id },
       include: [
         {
@@ -55,9 +59,10 @@ export class RoleSequelizeRepository implements RoleRepository {
         },
       ],
     });
+    return row as unknown as RoleEntity | null;
   }
 
-  async update(id: string, updateRoleDto: UpdateRoleDto): Promise<Role> {
+  async update(id: string, updateRoleDto: UpdateRoleDto): Promise<RoleEntity> {
     this.logger.debug('RoleSequelizeRepository.update: Called');
     const role = await this.roleModel.findByPk(id);
     if (!role) {
@@ -65,7 +70,7 @@ export class RoleSequelizeRepository implements RoleRepository {
     }
 
     await role.update(updateRoleDto as any);
-    return role;
+    return role as unknown as RoleEntity;
   }
 
   async delete(id: string): Promise<void> {
@@ -73,11 +78,12 @@ export class RoleSequelizeRepository implements RoleRepository {
     await this.roleModel.destroy({ where: { id } });
   }
 
-  async findByName(name: string): Promise<Role | null> {
+  async findByName(name: string): Promise<RoleEntity | null> {
     this.logger.debug('RoleSequelizeRepository.findByName: Called');
-    return this.roleModel.findOne({
+    const row = await this.roleModel.findOne({
       where: { name },
     });
+    return row as unknown as RoleEntity | null;
   }
 
   async countByFilters(filters?: RoleFilters): Promise<number> {

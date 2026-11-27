@@ -3,9 +3,11 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Permission } from '../../permissions/permission.model';
 import { PermissionRepository } from './role.repository.interface';
 import { CreatePermissionDto, UpdatePermissionDto } from '../dto/role.dto';
-import { PermissionFilters } from '../interfaces/role.interface';
+import { Permission as PermissionEntity, PermissionFilters } from '../interfaces/role.interface';
 import { Op, WhereOptions } from 'sequelize';
 
+// The persisted rows are returned as is: the model stores module instead of resource/action/isActive,
+// so the casts below only align the declared domain type.
 @Injectable()
 export class PermissionSequelizeRepository implements PermissionRepository {
   private readonly logger = new Logger(PermissionSequelizeRepository.name);
@@ -15,16 +17,17 @@ export class PermissionSequelizeRepository implements PermissionRepository {
     private readonly permissionModel: typeof Permission,
   ) {}
 
-  async create(createPermissionDto: CreatePermissionDto): Promise<Permission> {
+  async create(createPermissionDto: CreatePermissionDto): Promise<PermissionEntity> {
     this.logger.debug('PermissionSequelizeRepository.create: Called');
-    return this.permissionModel.create({
+    const row = await this.permissionModel.create({
       name: createPermissionDto.name,
       description: createPermissionDto.description,
       module: createPermissionDto.resource,
     } as Permission);
+    return row as unknown as PermissionEntity;
   }
 
-  async findAll(filters?: PermissionFilters): Promise<Permission[]> {
+  async findAll(filters?: PermissionFilters): Promise<PermissionEntity[]> {
     this.logger.debug('PermissionSequelizeRepository.findAll: Called');
     const where: WhereOptions<Permission> = {};
 
@@ -35,15 +38,17 @@ export class PermissionSequelizeRepository implements PermissionRepository {
       where.module = filters.resource;
     }
 
-    return this.permissionModel.findAll({ where });
+    const rows = await this.permissionModel.findAll({ where });
+    return rows as unknown as PermissionEntity[];
   }
 
-  async findOne(id: string): Promise<Permission | null> {
+  async findOne(id: string): Promise<PermissionEntity | null> {
     this.logger.debug('PermissionSequelizeRepository.findOne: Called');
-    return this.permissionModel.findOne({ where: { id } });
+    const row = await this.permissionModel.findOne({ where: { id } });
+    return row as unknown as PermissionEntity | null;
   }
 
-  async update(id: string, updatePermissionDto: UpdatePermissionDto): Promise<Permission> {
+  async update(id: string, updatePermissionDto: UpdatePermissionDto): Promise<PermissionEntity> {
     this.logger.debug('PermissionSequelizeRepository.update: Called');
     const permission = await this.permissionModel.findByPk(id);
     if (!permission) {
@@ -62,7 +67,7 @@ export class PermissionSequelizeRepository implements PermissionRepository {
     }
 
     await permission.update(updateData);
-    return permission;
+    return permission as unknown as PermissionEntity;
   }
 
   async delete(id: string): Promise<void> {
@@ -70,11 +75,12 @@ export class PermissionSequelizeRepository implements PermissionRepository {
     await this.permissionModel.destroy({ where: { id } });
   }
 
-  async findByResource(resource: string): Promise<Permission[]> {
+  async findByResource(resource: string): Promise<PermissionEntity[]> {
     this.logger.debug('PermissionSequelizeRepository.findByResource: Called');
-    return this.permissionModel.findAll({
+    const rows = await this.permissionModel.findAll({
       where: { module: resource },
     });
+    return rows as unknown as PermissionEntity[];
   }
 
   async countByFilters(filters?: PermissionFilters): Promise<number> {

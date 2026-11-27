@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 import { Jwt } from 'src/shared/interfaces/jwt.interface';
 import { SECURED_KEY } from 'src/shared/utils/constants';
 
@@ -32,7 +33,7 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
       this.logger.debug('AuthGuard.canActivate: no token found');
@@ -59,7 +60,7 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.get('authorization')?.split(' ') ?? [];
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
     this.logger.debug(`ExtractTokenFromHeader:`, {
       type,
       token: token ? '****' : undefined,

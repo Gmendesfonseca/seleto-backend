@@ -1,303 +1,212 @@
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
-import { AuthServiceInterface } from './interfaces';
+import { AuthServiceInterface, SignInResponse, SignUpDto } from './interfaces';
 import {
   SignInDto,
-  SignUpDto,
   ForgotPasswordDto,
   CheckSecretKeyDto,
   ResetPasswordDto,
   RefreshTokenDto,
 } from './dto';
+import { SECURED_KEY, UserType } from 'src/shared/utils/constants';
 
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: jest.Mocked<AuthServiceInterface>;
 
-  // Test data
-  const mockSignInResponse = {
-    token: 'jwt-token-123',
-    expiration: 1640995200000,
+  const signInResponse: SignInResponse = {
+    accessToken: 'access-token',
+    refreshToken: 'refresh-token',
+    expiresIn: 3600,
+    user: {
+      id: 'user-1',
+      username: 'jane',
+      email: 'jane@example.com',
+      type: 'PERSON',
+      profileId: 'person-1',
+      status: 'ACTIVE',
+    },
   };
 
-  const mockSignInDto: SignInDto = {
-    username: 'test@example.com',
-    password: 'password123',
+  const signInDto: SignInDto = { email: 'jane@example.com', password: 'test-password' };
+
+  const signUpDto: SignUpDto = {
+    username: 'jane',
+    name: 'Jane Doe',
+    email: 'jane@example.com',
+    password: 'test-password',
+    type: UserType.PERSON,
+    cpf: '12345678901',
+    phone: '+5511999999999',
   };
 
-  const mockSignUpDto: SignUpDto = {
-    username: 'newuser@example.com',
-    password: 'password123',
-  };
-
-  const mockForgotPasswordDto: ForgotPasswordDto = {
-    email: 'test@example.com',
-  };
-
-  const mockCheckSecretKeyDto: CheckSecretKeyDto = {
+  const forgotPasswordDto: ForgotPasswordDto = { email: 'jane@example.com' };
+  const checkSecretKeyDto: CheckSecretKeyDto = { secretKey: 'secret-123' };
+  const resetPasswordDto: ResetPasswordDto = {
     secretKey: 'secret-123',
+    newPassword: 'new-test-password',
   };
-
-  const mockResetPasswordDto: ResetPasswordDto = {
-    secretKey: 'secret-123',
-    newPassword: 'newpassword123',
-  };
-
-  const mockRefreshTokenDto: RefreshTokenDto = {
-    refreshToken: 'refresh-token-123',
-  };
+  const refreshTokenDto: RefreshTokenDto = { refreshToken: 'refresh-token' };
 
   beforeEach(async () => {
-    // Create mock AuthService
-    const mockAuthService = {
-      signIn: jest.fn(),
-      signUp: jest.fn(),
-      forgotPassword: jest.fn(),
-      checkSecretKey: jest.fn(),
-      resetPassword: jest.fn(),
-      refreshToken: jest.fn(),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
         {
           provide: AuthServiceInterface,
-          useValue: mockAuthService,
+          useValue: {
+            signIn: jest.fn(),
+            signUp: jest.fn(),
+            forgotPassword: jest.fn(),
+            checkSecretKey: jest.fn(),
+            resetPassword: jest.fn(),
+            refreshToken: jest.fn(),
+            logout: jest.fn(),
+          },
         },
       ],
     }).compile();
 
-    controller = module.get<AuthController>(AuthController);
+    controller = module.get(AuthController);
     authService = module.get(AuthServiceInterface);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-    expect(controller).toBeInstanceOf(AuthController);
-  });
-
   describe('signIn', () => {
-    it('should successfully sign in a user', async () => {
-      // Arrange
-      authService.signIn.mockResolvedValue(mockSignInResponse);
+    it('authenticates with the email and password and returns the tokens', async () => {
+      authService.signIn.mockResolvedValue(signInResponse);
 
-      // Act
-      const result = await controller.signIn(mockSignInDto);
+      await expect(controller.signIn(signInDto)).resolves.toEqual(signInResponse);
 
-      // Assert
-      expect(authService.signIn).toHaveBeenCalledWith(
-        mockSignInDto.username,
-        mockSignInDto.password,
-      );
-      expect(authService.signIn).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockSignInResponse);
+      expect(authService.signIn).toHaveBeenCalledWith('jane@example.com', 'test-password');
     });
 
-    it('should handle signIn service errors', async () => {
-      // Arrange
-      const error = new Error('Invalid credentials');
-      authService.signIn.mockRejectedValue(error);
+    it('propagates authentication failures', async () => {
+      authService.signIn.mockRejectedValue(new Error('Invalid credentials'));
 
-      // Act & Assert
-      await expect(controller.signIn(mockSignInDto)).rejects.toThrow('Invalid credentials');
-      expect(authService.signIn).toHaveBeenCalledWith(
-        mockSignInDto.username,
-        mockSignInDto.password,
-      );
+      await expect(controller.signIn(signInDto)).rejects.toThrow('Invalid credentials');
     });
   });
 
   describe('signUp', () => {
-    it('should successfully create a new user', async () => {
-      // Arrange
+    it('forwards the whole sign-up payload and returns nothing', async () => {
       authService.signUp.mockResolvedValue(undefined);
 
-      // Act
-      const result = await controller.signUp(mockSignUpDto);
+      await expect(controller.signUp(signUpDto)).resolves.toBeUndefined();
 
-      // Assert
-      expect(authService.signUp).toHaveBeenCalledWith(
-        mockSignUpDto.username,
-        mockSignUpDto.password,
-      );
-      expect(authService.signUp).toHaveBeenCalledTimes(1);
-      expect(result).toBeUndefined();
+      expect(authService.signUp).toHaveBeenCalledWith(signUpDto);
     });
 
-    it('should handle signUp service errors', async () => {
-      // Arrange
-      const error = new Error('User already exists');
-      authService.signUp.mockRejectedValue(error);
+    it('propagates conflicts', async () => {
+      authService.signUp.mockRejectedValue(new Error('User already exists'));
 
-      // Act & Assert
-      await expect(controller.signUp(mockSignUpDto)).rejects.toThrow('User already exists');
-      expect(authService.signUp).toHaveBeenCalledWith(
-        mockSignUpDto.username,
-        mockSignUpDto.password,
-      );
+      await expect(controller.signUp(signUpDto)).rejects.toThrow('User already exists');
     });
   });
 
   describe('forgotPassword', () => {
-    it('should successfully initiate password reset', async () => {
-      // Arrange
+    it('requests a reset for the email', async () => {
       authService.forgotPassword.mockResolvedValue(undefined);
 
-      // Act
-      const result = await controller.forgotPassword(mockForgotPasswordDto);
+      await expect(controller.forgotPassword(forgotPasswordDto)).resolves.toBeUndefined();
 
-      // Assert
-      expect(authService.forgotPassword).toHaveBeenCalledWith(mockForgotPasswordDto.email);
-      expect(authService.forgotPassword).toHaveBeenCalledTimes(1);
-      expect(result).toBeUndefined();
+      expect(authService.forgotPassword).toHaveBeenCalledWith('jane@example.com');
     });
 
-    it('should handle forgotPassword service errors', async () => {
-      // Arrange
-      const error = new Error('User not found');
-      authService.forgotPassword.mockRejectedValue(error);
+    it('propagates unknown users', async () => {
+      authService.forgotPassword.mockRejectedValue(new Error('User not found'));
 
-      // Act & Assert
-      await expect(controller.forgotPassword(mockForgotPasswordDto)).rejects.toThrow(
-        'User not found',
-      );
-      expect(authService.forgotPassword).toHaveBeenCalledWith(mockForgotPasswordDto.email);
+      await expect(controller.forgotPassword(forgotPasswordDto)).rejects.toThrow('User not found');
     });
   });
 
   describe('checkSecretKey', () => {
-    it('should successfully validate secret key', async () => {
-      // Arrange
+    it('validates the secret key and returns nothing', async () => {
       authService.checkSecretKey.mockResolvedValue(true);
 
-      // Act
-      const result = await controller.checkSecretKey(mockCheckSecretKeyDto);
+      await expect(controller.checkSecretKey(checkSecretKeyDto)).resolves.toBeUndefined();
 
-      // Assert
-      expect(authService.checkSecretKey).toHaveBeenCalledWith(mockCheckSecretKeyDto.secretKey);
-      expect(authService.checkSecretKey).toHaveBeenCalledTimes(1);
-      expect(result).toBeUndefined();
+      expect(authService.checkSecretKey).toHaveBeenCalledWith('secret-123');
     });
 
-    it('should handle checkSecretKey service errors', async () => {
-      // Arrange
-      const error = new Error('Invalid secret key');
-      authService.checkSecretKey.mockRejectedValue(error);
+    it('propagates invalid keys', async () => {
+      authService.checkSecretKey.mockRejectedValue(new Error('Invalid secret key'));
 
-      // Act & Assert
-      await expect(controller.checkSecretKey(mockCheckSecretKeyDto)).rejects.toThrow(
+      await expect(controller.checkSecretKey(checkSecretKeyDto)).rejects.toThrow(
         'Invalid secret key',
       );
-      expect(authService.checkSecretKey).toHaveBeenCalledWith(mockCheckSecretKeyDto.secretKey);
     });
   });
 
   describe('resetPassword', () => {
-    it('should successfully reset password', async () => {
-      // Arrange
+    it('resets the password with the secret key and the new password', async () => {
       authService.resetPassword.mockResolvedValue(undefined);
 
-      // Act
-      const result = await controller.resetPassword(mockResetPasswordDto);
+      await expect(controller.resetPassword(resetPasswordDto)).resolves.toBeUndefined();
 
-      // Assert
-      expect(authService.resetPassword).toHaveBeenCalledWith(
-        mockResetPasswordDto.secretKey,
-        mockResetPasswordDto.newPassword,
-      );
-      expect(authService.resetPassword).toHaveBeenCalledTimes(1);
-      expect(result).toBeUndefined();
+      expect(authService.resetPassword).toHaveBeenCalledWith('secret-123', 'new-test-password');
     });
 
-    it('should handle resetPassword service errors', async () => {
-      // Arrange
-      const error = new Error('Invalid secret key');
-      authService.resetPassword.mockRejectedValue(error);
+    it('propagates invalid keys', async () => {
+      authService.resetPassword.mockRejectedValue(new Error('Invalid secret key'));
 
-      // Act & Assert
-      await expect(controller.resetPassword(mockResetPasswordDto)).rejects.toThrow(
+      await expect(controller.resetPassword(resetPasswordDto)).rejects.toThrow(
         'Invalid secret key',
-      );
-      expect(authService.resetPassword).toHaveBeenCalledWith(
-        mockResetPasswordDto.secretKey,
-        mockResetPasswordDto.newPassword,
       );
     });
   });
 
   describe('refreshToken', () => {
-    it('should successfully refresh token', async () => {
-      // Arrange
-      const mockRefreshResponse = {
-        token: 'new-jwt-token-456',
-        expiration: 1640998800000,
-      };
-      authService.refreshToken.mockResolvedValue(mockRefreshResponse);
+    it('exchanges the refresh token for a new session', async () => {
+      authService.refreshToken.mockResolvedValue(signInResponse);
 
-      // Act
-      const result = await controller.refreshToken(mockRefreshTokenDto);
+      await expect(controller.refreshToken(refreshTokenDto)).resolves.toEqual(signInResponse);
 
-      // Assert
-      expect(authService.refreshToken).toHaveBeenCalledWith(mockRefreshTokenDto.refreshToken);
-      expect(authService.refreshToken).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockRefreshResponse);
+      expect(authService.refreshToken).toHaveBeenCalledWith('refresh-token');
     });
 
-    it('should handle refreshToken service errors', async () => {
-      // Arrange
-      const error = new Error('Invalid refresh token');
-      authService.refreshToken.mockRejectedValue(error);
+    it('propagates invalid refresh tokens', async () => {
+      authService.refreshToken.mockRejectedValue(new Error('Invalid refresh token'));
 
-      // Act & Assert
-      await expect(controller.refreshToken(mockRefreshTokenDto)).rejects.toThrow(
+      await expect(controller.refreshToken(refreshTokenDto)).rejects.toThrow(
         'Invalid refresh token',
       );
-      expect(authService.refreshToken).toHaveBeenCalledWith(mockRefreshTokenDto.refreshToken);
     });
   });
 
-  describe('DTO Validation', () => {
-    it('should properly pass DTOs to service methods', async () => {
-      // Arrange
-      authService.signIn.mockResolvedValue(mockSignInResponse);
-      authService.signUp.mockResolvedValue(undefined);
-      authService.forgotPassword.mockResolvedValue(undefined);
-      authService.checkSecretKey.mockResolvedValue(true);
-      authService.resetPassword.mockResolvedValue(undefined);
-      authService.refreshToken.mockResolvedValue(mockSignInResponse);
+  describe('logout', () => {
+    it('logs out the user stored on the authenticated request', async () => {
+      authService.logout.mockResolvedValue(undefined);
 
-      // Act & Assert - Test that DTOs are properly destructured
-      await controller.signIn(mockSignInDto);
-      expect(authService.signIn).toHaveBeenCalledWith(
-        mockSignInDto.username,
-        mockSignInDto.password,
-      );
+      await controller.logout({ auth: { sub: 'user-1' } });
 
-      await controller.signUp(mockSignUpDto);
-      expect(authService.signUp).toHaveBeenCalledWith(
-        mockSignUpDto.username,
-        mockSignUpDto.password,
-      );
+      expect(authService.logout).toHaveBeenCalledWith('user-1');
+    });
 
-      await controller.forgotPassword(mockForgotPasswordDto);
-      expect(authService.forgotPassword).toHaveBeenCalledWith(mockForgotPasswordDto.email);
+    it('does nothing when the request carries no authenticated user', async () => {
+      await controller.logout({});
 
-      await controller.checkSecretKey(mockCheckSecretKeyDto);
-      expect(authService.checkSecretKey).toHaveBeenCalledWith(mockCheckSecretKeyDto.secretKey);
+      expect(authService.logout).not.toHaveBeenCalled();
+    });
+  });
 
-      await controller.resetPassword(mockResetPasswordDto);
-      expect(authService.resetPassword).toHaveBeenCalledWith(
-        mockResetPasswordDto.secretKey,
-        mockResetPasswordDto.newPassword,
-      );
+  describe('route access', () => {
+    const isPublic = (handler: keyof AuthController) =>
+      Reflect.getMetadata(SECURED_KEY, AuthController.prototype[handler]);
 
-      await controller.refreshToken(mockRefreshTokenDto);
-      expect(authService.refreshToken).toHaveBeenCalledWith(mockRefreshTokenDto.refreshToken);
+    it.each([
+      'signIn',
+      'signUp',
+      'checkSecretKey',
+      'forgotPassword',
+      'resetPassword',
+      'refreshToken',
+    ] as const)('keeps %s reachable without a token', (handler) => {
+      expect(isPublic(handler)).toBe(true);
+    });
+
+    it('requires a token to log out', () => {
+      expect(isPublic('logout')).toBeUndefined();
     });
   });
 });

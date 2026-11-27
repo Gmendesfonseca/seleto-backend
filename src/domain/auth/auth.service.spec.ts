@@ -1,536 +1,414 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService } from '@nestjs/jwt';
 import { ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';
 
 import { AuthService } from './auth.service';
+import { SignUpDto } from './interfaces';
 import { UsersServiceInterface } from '../users/interfaces';
 import { SecretServiceInterface } from '../secret/interface/secret.service.interface';
 import { CompanyServiceInterface } from '../companies/interfaces/company.service.interface';
 import { PersonServiceInterface } from '../persons/interfaces/person.service.interface';
+import { PhoneServiceInterface, PhoneType } from '../phones';
 import { UserType } from 'src/shared/utils/constants';
 
-// Mock bcrypt module
 jest.mock('bcrypt');
-const mockedBcrypt = jest.mocked(bcrypt);
 
 describe('AuthService', () => {
-  let service: AuthService;
-  let usersService: jest.Mocked<UsersServiceInterface>;
-  let secretService: jest.Mocked<SecretServiceInterface>;
-  let jwtService: jest.Mocked<JwtService>;
-  let mailerService: jest.Mocked<MailerService>;
-  let companyService: jest.Mocked<CompanyServiceInterface>;
-  let personService: jest.Mocked<PersonServiceInterface>;
+  const usersService = {
+    findByEmail: jest.fn(),
+    findById: jest.fn(),
+    create: jest.fn(),
+    updatePasswordBySecret: jest.fn(),
+  };
+  const secretService = {
+    generateSecret: jest.fn(),
+    validateSecret: jest.fn(),
+    createSecret: jest.fn(),
+    deleteSecret: jest.fn(),
+  };
+  const jwtService = { sign: jest.fn(), verify: jest.fn() };
+  const mailerService = { sendMail: jest.fn() };
+  const companyService = { findByUserId: jest.fn(), create: jest.fn() };
+  const personService = { findByUserId: jest.fn(), create: jest.fn() };
+  const phoneService = { create: jest.fn() };
 
-  // Test data
-  const mockUser = {
-    id: 'c1a2b3c4-d5e6-7f8g-9h0i-j1k2l3m4n5o6',
-    email: 'test@example.com',
-    username: 'testuser',
-    name: 'Test User',
-    password: '$2b$12$hashedpassword123',
-    type: 'PERSON',
+  let service: AuthService;
+
+  const personUser = {
+    id: 'user-1',
+    email: 'jane@example.com',
+    username: 'jane',
+    password: 'hashed:test-password',
+    type: UserType.PERSON,
     status: 'ACTIVE',
   };
+  const companyUser = { ...personUser, id: 'user-2', type: UserType.COMPANY };
+  const person = { id: 'person-1', cpf: '12345678901' };
+  const company = { id: 'company-1', cnpj: '12345678000199' };
 
-  beforeEach(async () => {
-    // Create mocked services
-    const mockUsersService = {
-      findOneByEmail: jest.fn(),
-      findOne: jest.fn(),
-      createUser: jest.fn(),
-      updatePasswordBySecret: jest.fn(),
-    };
+  const expectedConfig = {
+    auth2f: false,
+    default_interface: 'LIGHT',
+    default_language: 'pt',
+    default_timezone: 'UTC',
+    master: false,
+  };
 
-    const mockSecretService = {
-      generateSecret: jest.fn(),
-      validateSecret: jest.fn(),
-      createSecret: jest.fn(),
-      deleteSecret: jest.fn(),
-    };
-
-    const mockJwtService = {
-      sign: jest.fn(),
-      verify: jest.fn(),
-    };
-
-    const mockMailerService = {
-      sendMail: jest.fn(),
-    };
-
-    const mockCompanyService = {
-      create: jest.fn(),
-    };
-
-    const mockPersonService = {
-      create: jest.fn(),
-    };
-
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthService,
-        {
-          provide: UsersServiceInterface,
-          useValue: mockUsersService,
-        },
-        {
-          provide: SecretServiceInterface,
-          useValue: mockSecretService,
-        },
-        {
-          provide: JwtService,
-          useValue: mockJwtService,
-        },
-        {
-          provide: MailerService,
-          useValue: mockMailerService,
-        },
-        {
-          provide: CompanyServiceInterface,
-          useValue: mockCompanyService,
-        },
-        {
-          provide: PersonServiceInterface,
-          useValue: mockPersonService,
-        },
-      ],
-    }).compile();
-
-    service = module.get<AuthService>(AuthService);
-    usersService = module.get(UsersServiceInterface);
-    secretService = module.get(SecretServiceInterface);
-    jwtService = module.get(JwtService);
-    mailerService = module.get(MailerService);
-    companyService = module.get(CompanyServiceInterface);
-    personService = module.get(PersonServiceInterface);
-
-    // Setup bcrypt mocks
-    (mockedBcrypt.hash as jest.Mock).mockImplementation(
-      async (password: string) => `hashed_${password}`,
+  beforeEach(() => {
+    jest.resetAllMocks();
+    (bcrypt.hash as jest.Mock).mockImplementation(async (value: string) => `hashed:${value}`);
+    (bcrypt.compare as jest.Mock).mockImplementation(
+      async (value: string, hash: string) => hash === `hashed:${value}`,
     );
-    (mockedBcrypt.compare as jest.Mock).mockImplementation(
-      async (password: string, hash: string) => {
-        return hash === `hashed_${password}`;
-      },
+    jwtService.sign.mockImplementation(
+      (_payload: unknown, options: { expiresIn: string }) => `token-${options.expiresIn}`,
     );
-  });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-    expect(service).toBeInstanceOf(AuthService);
+    service = new AuthService(
+      jwtService as unknown as JwtService,
+      usersService as unknown as UsersServiceInterface,
+      secretService as unknown as SecretServiceInterface,
+      mailerService as unknown as MailerService,
+      companyService as unknown as CompanyServiceInterface,
+      personService as unknown as PersonServiceInterface,
+      phoneService as unknown as PhoneServiceInterface,
+    );
   });
 
   describe('signIn', () => {
-    it('should successfully sign in with valid credentials', async () => {
-      // Setup
-      const email = 'test@example.com';
-      const password = 'password123';
-      const expectedToken = 'jwt-token-123';
+    it('signs a person session with the person profile in the token payload', async () => {
+      usersService.findByEmail.mockResolvedValue(personUser);
+      personService.findByUserId.mockResolvedValue(person);
 
-      usersService.findByEmail.mockResolvedValue(mockUser);
-      (mockedBcrypt.compare as jest.Mock).mockResolvedValue(true);
-      jwtService.sign.mockReturnValue(expectedToken);
+      const result = await service.signIn('jane@example.com', 'test-password');
 
-      // Mock Date.now() to get consistent expiration
-      const mockNow = 1234567890;
-      jest.spyOn(Date, 'now').mockReturnValue(mockNow);
-
-      // Act
-      const result = await service.signIn(email, password);
-
-      // Assert
-      expect(usersService.findByEmail).toHaveBeenCalledWith(email);
-      expect(mockedBcrypt.compare).toHaveBeenCalledWith(password, mockUser.password);
-      expect(jwtService.sign).toHaveBeenCalledWith({
-        sub: mockUser.id,
-        username: mockUser.username,
-      });
+      expect(bcrypt.compare).toHaveBeenCalledWith('test-password', personUser.password);
+      const expectedPayload = {
+        sub: 'user-1',
+        username: 'jane',
+        companyId: null,
+        profileId: 'person-1',
+        profile: person,
+        config: expectedConfig,
+      };
+      expect(jwtService.sign).toHaveBeenNthCalledWith(1, expectedPayload, { expiresIn: '1d' });
+      expect(jwtService.sign).toHaveBeenNthCalledWith(2, expectedPayload, { expiresIn: '7d' });
       expect(result).toEqual({
-        accessToken: expectedToken,
-        refreshToken: expectedToken, // JwtService.sign is mocked to return the same token
+        accessToken: 'token-1d',
+        refreshToken: 'token-7d',
         expiresIn: 3600,
         user: {
-          id: mockUser.id,
-          username: mockUser.username,
-          email: mockUser.email,
-          type: mockUser.type,
-          status: mockUser.status,
+          id: 'user-1',
+          username: 'jane',
+          profileId: 'person-1',
+          email: 'jane@example.com',
+          type: 'PERSON',
+          status: 'ACTIVE',
         },
       });
     });
 
-    it('should throw UnauthorizedException when user is not found', async () => {
-      // Setup
-      const email = 'nonexistent@example.com';
-      const password = 'password123';
+    it('signs a company session scoped to the company id', async () => {
+      usersService.findByEmail.mockResolvedValue(companyUser);
+      companyService.findByUserId.mockResolvedValue(company);
 
-      usersService.findByEmail.mockResolvedValue(null);
+      const result = await service.signIn('jane@example.com', 'test-password');
 
-      // Act & Assert
-      await expect(service.signIn(email, password)).rejects.toThrow(
-        new UnauthorizedException('Invalid credentials'),
+      expect(companyService.findByUserId).toHaveBeenCalledWith('user-2');
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        expect.objectContaining({
+          companyId: 'company-1',
+          profileId: 'company-1',
+          profile: company,
+        }),
+        { expiresIn: '1d' },
       );
-      expect(usersService.findByEmail).toHaveBeenCalledWith(email);
-      expect(mockedBcrypt.compare).not.toHaveBeenCalled();
+      expect(result.user.profileId).toBe('company-1');
     });
 
-    it('should throw UnauthorizedException when password is invalid', async () => {
-      // Setup
-      const email = 'test@example.com';
-      const password = 'wrongpassword';
+    it('defaults the status to ACTIVE when the user has none', async () => {
+      usersService.findByEmail.mockResolvedValue({ ...personUser, status: undefined });
+      personService.findByUserId.mockResolvedValue(person);
 
-      usersService.findByEmail.mockResolvedValue(mockUser);
-      (mockedBcrypt.compare as jest.Mock).mockResolvedValue(false);
+      const result = await service.signIn('jane@example.com', 'test-password');
 
-      // Act & Assert
-      await expect(service.signIn(email, password)).rejects.toThrow(
+      expect(result.user.status).toBe('ACTIVE');
+    });
+
+    it('rejects an unknown email without checking any password', async () => {
+      usersService.findByEmail.mockResolvedValue(null);
+
+      await expect(service.signIn('nobody@example.com', 'test-password')).rejects.toThrow(
         new UnauthorizedException('Invalid credentials'),
       );
-      expect(usersService.findByEmail).toHaveBeenCalledWith(email);
-      expect(mockedBcrypt.compare).toHaveBeenCalledWith(password, mockUser.password);
+
+      expect(bcrypt.compare).not.toHaveBeenCalled();
+      expect(jwtService.sign).not.toHaveBeenCalled();
+    });
+
+    it('rejects a wrong password with the same error as an unknown email', async () => {
+      usersService.findByEmail.mockResolvedValue(personUser);
+
+      await expect(service.signIn('jane@example.com', 'wrong-password')).rejects.toThrow(
+        new UnauthorizedException('Invalid credentials'),
+      );
+
+      expect(jwtService.sign).not.toHaveBeenCalled();
+    });
+
+    it('fails when a person user has no person profile', async () => {
+      usersService.findByEmail.mockResolvedValue(personUser);
+      personService.findByUserId.mockResolvedValue(null);
+
+      await expect(service.signIn('jane@example.com', 'test-password')).rejects.toThrow(
+        new NotFoundException('Person not found'),
+      );
+    });
+
+    it('fails when a company user has no company profile', async () => {
+      usersService.findByEmail.mockResolvedValue(companyUser);
+      companyService.findByUserId.mockResolvedValue(null);
+
+      await expect(service.signIn('jane@example.com', 'test-password')).rejects.toThrow(
+        new NotFoundException('Company not found'),
+      );
     });
   });
 
   describe('signUp', () => {
-    it('should successfully create a new user PERSON', async () => {
-      // Setup
-      const payload = {
-        email: 'newuser@example.com',
-        password: 'password123',
-        username: 'newuser',
-        type: UserType.PERSON,
-        name: 'New User',
-        phone: '1234567890',
-      };
-      const hashedPassword = 'hashed_password123';
+    const personInput: SignUpDto = {
+      name: 'Jane Doe',
+      username: 'jane',
+      password: 'test-password',
+      email: 'jane@example.com',
+      type: UserType.PERSON,
+      cpf: '12345678901',
+      phone: '+5511999999999',
+    };
 
+    beforeEach(() => {
       usersService.findByEmail.mockResolvedValue(null);
-      (mockedBcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
-      usersService.create.mockResolvedValue(mockUser);
-      personService.create.mockResolvedValue({} as any);
-      mailerService.sendMail.mockResolvedValue(undefined);
+      usersService.create.mockResolvedValue({ id: 'user-1' });
+    });
 
-      // Act
-      await service.signUp(payload);
+    it('creates the user with a hashed password, the person profile, the phone and a welcome email', async () => {
+      await service.signUp(personInput);
 
-      // Assert
-      expect(usersService.findByEmail).toHaveBeenCalledWith(payload.email);
-      expect(mockedBcrypt.hash).toHaveBeenCalledWith(payload.password, 12);
+      expect(bcrypt.hash).toHaveBeenCalledWith('test-password', 12);
       expect(usersService.create).toHaveBeenCalledWith({
-        email: payload.email,
-        username: payload.username,
-        password: hashedPassword,
         type: 'PERSON',
+        name: 'Jane Doe',
+        email: 'jane@example.com',
+        username: 'jane',
+        password: 'hashed:test-password',
       });
-      expect(personService.create).toHaveBeenCalledWith({
-        userId: mockUser.id,
-        firstName: 'New',
-        lastName: 'User',
-        email: payload.email,
+      expect(personService.create).toHaveBeenCalledWith({ cpf: '12345678901', userId: 'user-1' });
+      expect(companyService.create).not.toHaveBeenCalled();
+      expect(phoneService.create).toHaveBeenCalledWith({
+        number: '+5511999999999',
+        userId: 'user-1',
+        type: PhoneType.WORK,
+        isPrimary: true,
       });
       expect(mailerService.sendMail).toHaveBeenCalledWith({
-        to: payload.email,
+        to: 'jane@example.com',
         subject: 'Bem vindo ao Seleto!',
         template: 'welcome',
-        context: { username: payload.username },
+        context: { username: 'jane' },
       });
     });
 
-    it('should successfully create a new user COMPANY', async () => {
-      // Setup
-      const payload = {
-        email: 'newcompany@example.com',
-        password: 'password123',
-        username: 'newcompany',
+    it('creates the company profile for company accounts', async () => {
+      await service.signUp({
+        ...personInput,
         type: UserType.COMPANY,
-        name: 'New Company',
-        phone: '0987654321',
-      };
-      const hashedPassword = 'hashed_password123';
-
-      usersService.findByEmail.mockResolvedValue(null);
-      (mockedBcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
-      usersService.create.mockResolvedValue(mockUser);
-      companyService.create.mockResolvedValue({} as any);
-      mailerService.sendMail.mockResolvedValue(undefined);
-
-      // Act
-      await service.signUp(payload);
-
-      // Assert
-      expect(usersService.findByEmail).toHaveBeenCalledWith(payload.email);
-      expect(mockedBcrypt.hash).toHaveBeenCalledWith(payload.password, 12);
-      expect(usersService.create).toHaveBeenCalledWith({
-        email: payload.email,
-        username: payload.username,
-        password: hashedPassword,
-        type: 'COMPANY',
+        cpf: undefined,
+        cnpj: '12345678000199',
       });
+
       expect(companyService.create).toHaveBeenCalledWith({
-        name: payload.name,
+        cnpj: '12345678000199',
+        userId: 'user-1',
       });
-      expect(mailerService.sendMail).toHaveBeenCalledWith({
-        to: payload.email,
-        subject: 'Bem vindo ao Seleto!',
-        template: 'welcome',
-        context: { username: payload.username },
-      });
+      expect(personService.create).not.toHaveBeenCalled();
     });
 
-    it('should throw ConflictException when user already exists', async () => {
-      // Setup
-      const payload = {
-        email: 'existing@example.com',
-        password: 'password123',
-        type: UserType.PERSON,
-        username: 'existinguser',
-        name: 'Existing User',
-        phone: '1234567890',
-      };
+    it('does not create a phone when none is provided', async () => {
+      await service.signUp({ ...personInput, phone: '' });
 
-      usersService.findByEmail.mockResolvedValue(mockUser);
+      expect(phoneService.create).not.toHaveBeenCalled();
+    });
 
-      // Act & Assert
-      await expect(service.signUp(payload)).rejects.toThrow(
+    it('rejects an email that is already registered and creates nothing', async () => {
+      usersService.findByEmail.mockResolvedValue(personUser);
+
+      await expect(service.signUp(personInput)).rejects.toThrow(
         new ConflictException('User already exists'),
       );
-      expect(usersService.findByEmail).toHaveBeenCalledWith(payload.email);
+
       expect(usersService.create).not.toHaveBeenCalled();
+      expect(personService.create).not.toHaveBeenCalled();
     });
 
-    it('should continue when email sending fails', async () => {
-      // Setup
-      const payload = {
-        email: 'newuser@example.com',
-        password: 'password123',
-        username: 'newuser',
-        type: UserType.PERSON,
-        name: 'New User',
-        phone: '1234567890',
-      };
+    it('still succeeds when the welcome email cannot be sent', async () => {
+      mailerService.sendMail.mockRejectedValue(new Error('smtp down'));
 
-      usersService.findByEmail.mockResolvedValue(null);
-      usersService.create.mockResolvedValue(mockUser);
-      mailerService.sendMail.mockRejectedValue(new Error('Email service down'));
+      await expect(service.signUp(personInput)).resolves.toBeUndefined();
 
-      // Act & Assert
-      await expect(service.signUp(payload)).resolves.not.toThrow();
-      expect(usersService.create).toHaveBeenCalled();
+      expect(personService.create).toHaveBeenCalled();
     });
   });
 
   describe('forgotPassword', () => {
-    it('should successfully initiate password reset', async () => {
-      // Setup
-      const email = 'test@example.com';
-      const secretKey = 'secret-123';
+    it('stores a password secret for the user and emails it', async () => {
+      usersService.findByEmail.mockResolvedValue(personUser);
+      secretService.generateSecret.mockReturnValue('generated-secret');
 
-      usersService.findByEmail.mockResolvedValue(mockUser);
-      secretService.generateSecret.mockReturnValue(secretKey);
-      secretService.createSecret.mockResolvedValue(undefined);
-      mailerService.sendMail.mockResolvedValue(undefined);
+      await service.forgotPassword('jane@example.com');
 
-      // Act
-      await service.forgotPassword(email);
-
-      // Assert
-      expect(usersService.findByEmail).toHaveBeenCalledWith(email);
-      expect(secretService.generateSecret).toHaveBeenCalled();
       expect(secretService.createSecret).toHaveBeenCalledWith({
-        secret: secretKey,
+        secret: 'generated-secret',
         type: 'PASSWORD',
-        userId: mockUser.id,
+        userId: 'user-1',
       });
       expect(mailerService.sendMail).toHaveBeenCalledWith({
-        to: email,
+        to: 'jane@example.com',
         subject: 'Solicitação de Redefinição de Senha',
         template: 'password-reset',
-        context: { secretKey, username: mockUser.username },
+        context: { secretKey: 'generated-secret', username: 'jane' },
       });
     });
 
-    it('should throw NotFoundException when user is not found', async () => {
-      // Setup
-      const email = 'nonexistent@example.com';
-
+    it('fails for an unknown email without creating a secret', async () => {
       usersService.findByEmail.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.forgotPassword(email)).rejects.toThrow(
+      await expect(service.forgotPassword('nobody@example.com')).rejects.toThrow(
         new NotFoundException('User not found'),
       );
-      expect(usersService.findByEmail).toHaveBeenCalledWith(email);
-      expect(secretService.generateSecret).not.toHaveBeenCalled();
+
+      expect(secretService.createSecret).not.toHaveBeenCalled();
+      expect(mailerService.sendMail).not.toHaveBeenCalled();
     });
   });
 
   describe('checkSecretKey', () => {
-    it('should return true for valid secret key', async () => {
-      // Setup
-      const secretKey = 'valid-secret-123';
-
+    it('validates the key as a PASSWORD secret', async () => {
       secretService.validateSecret.mockResolvedValue(true);
 
-      // Act
-      const result = await service.checkSecretKey(secretKey);
+      await expect(service.checkSecretKey('secret-123')).resolves.toBe(true);
 
-      // Assert
       expect(secretService.validateSecret).toHaveBeenCalledWith({
-        secret: secretKey,
+        secret: 'secret-123',
         type: 'PASSWORD',
       });
-      expect(result).toBe(true);
     });
 
-    it('should throw UnauthorizedException for invalid secret key', async () => {
-      // Setup
-      const secretKey = 'invalid-secret-123';
-
+    it('rejects an invalid key', async () => {
       secretService.validateSecret.mockResolvedValue(false);
 
-      // Act
-      await expect(service.checkSecretKey(secretKey)).rejects.toThrow(
+      await expect(service.checkSecretKey('bad')).rejects.toThrow(
         new UnauthorizedException('Invalid secret key'),
       );
-
-      // Assert
-      expect(secretService.validateSecret).toHaveBeenCalledWith({
-        secret: secretKey,
-        type: 'PASSWORD',
-      });
     });
   });
 
   describe('resetPassword', () => {
-    it('should successfully reset password', async () => {
-      // Setup
-      const secretKey = 'valid-secret-123';
-      const newPassword = 'newpassword123';
-      const hashedPassword = 'hashed_newpassword123';
-
+    it('stores the hashed password and consumes the secret', async () => {
       secretService.validateSecret.mockResolvedValue(true);
-      (mockedBcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
-      usersService.updatePasswordBySecret.mockResolvedValue(undefined);
-      secretService.deleteSecret.mockResolvedValue(undefined);
 
-      // Act
-      await service.resetPassword(secretKey, newPassword);
+      await service.resetPassword('secret-123', 'new-test-password');
 
-      // Assert
-      expect(secretService.validateSecret).toHaveBeenCalledWith({
-        secret: secretKey,
-        type: 'PASSWORD',
-      });
-      expect(mockedBcrypt.hash).toHaveBeenCalledWith(newPassword, 12);
-      expect(usersService.updatePasswordBySecret).toHaveBeenCalledWith(secretKey, hashedPassword);
-      expect(secretService.deleteSecret).toHaveBeenCalledWith(secretKey);
+      expect(usersService.updatePasswordBySecret).toHaveBeenCalledWith(
+        'secret-123',
+        'hashed:new-test-password',
+      );
+      expect(secretService.deleteSecret).toHaveBeenCalledWith('secret-123');
     });
 
-    it('should throw UnauthorizedException for invalid secret key', async () => {
-      // Setup
-      const secretKey = 'invalid-secret-123';
-      const newPassword = 'newpassword123';
-
+    it('rejects an invalid key without touching the password', async () => {
       secretService.validateSecret.mockResolvedValue(false);
 
-      // Act & Assert
-      await expect(service.resetPassword(secretKey, newPassword)).rejects.toThrow(
+      await expect(service.resetPassword('bad', 'new-test-password')).rejects.toThrow(
         new UnauthorizedException('Invalid secret key'),
       );
-      expect(secretService.validateSecret).toHaveBeenCalledWith({
-        secret: secretKey,
-        type: 'PASSWORD',
-      });
+
+      expect(bcrypt.hash).not.toHaveBeenCalled();
       expect(usersService.updatePasswordBySecret).not.toHaveBeenCalled();
       expect(secretService.deleteSecret).not.toHaveBeenCalled();
     });
   });
 
   describe('refreshToken', () => {
-    it('should successfully refresh token', async () => {
-      // Setup
-      const refreshToken = 'valid-refresh-token';
-      const decodedToken = { sub: mockUser.id };
-      const newToken = 'new-jwt-token';
+    it('issues a new session for the user in the refresh token', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'user-1' });
+      usersService.findById.mockResolvedValue(personUser);
+      personService.findByUserId.mockResolvedValue(person);
 
-      jwtService.verify.mockReturnValue(decodedToken);
-      usersService.findById.mockResolvedValue(mockUser);
-      jwtService.sign.mockReturnValue(newToken);
+      const result = await service.refreshToken('old-refresh-token');
 
-      // Mock Date.now()
-      const mockNow = 1234567890;
-      jest.spyOn(Date, 'now').mockReturnValue(mockNow);
-
-      // Act
-      const result = await service.refreshToken(refreshToken);
-
-      // Assert
-      expect(jwtService.verify).toHaveBeenCalledWith(refreshToken);
-      expect(usersService.findById).toHaveBeenCalledWith(decodedToken.sub);
-      expect(jwtService.sign).toHaveBeenCalledWith({
-        sub: mockUser.id,
-        username: mockUser.username,
-      });
+      expect(jwtService.verify).toHaveBeenCalledWith('old-refresh-token');
+      expect(usersService.findById).toHaveBeenCalledWith('user-1');
+      expect(jwtService.sign).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ sub: 'user-1', profileId: 'person-1', companyId: null }),
+        { expiresIn: '1h' },
+      );
+      expect(jwtService.sign).toHaveBeenNthCalledWith(2, expect.anything(), { expiresIn: '7d' });
       expect(result).toEqual({
-        accessToken: newToken,
-        refreshToken: newToken, // JwtService.sign is mocked to return the same token
+        accessToken: 'token-1h',
+        refreshToken: 'token-7d',
         expiresIn: 3600,
         user: {
-          id: mockUser.id,
-          username: mockUser.username,
-          email: mockUser.email,
-          type: mockUser.type || 'PERSON',
+          id: 'user-1',
+          username: 'jane',
+          profileId: 'person-1',
+          email: 'jane@example.com',
+          type: 'PERSON',
           status: 'ACTIVE',
         },
       });
     });
 
-    it('should throw UnauthorizedException when token verification fails', async () => {
-      // Setup
-      const refreshToken = 'invalid-refresh-token';
-
+    it('rejects a token that fails verification', async () => {
       jwtService.verify.mockImplementation(() => {
-        throw new Error('Invalid token');
+        throw new Error('jwt expired');
       });
 
-      // Act & Assert
-      await expect(service.refreshToken(refreshToken)).rejects.toThrow(
+      await expect(service.refreshToken('expired')).rejects.toThrow(
         new UnauthorizedException('Invalid refresh token'),
       );
-      expect(jwtService.verify).toHaveBeenCalledWith(refreshToken);
+
       expect(usersService.findById).not.toHaveBeenCalled();
     });
 
-    it('should throw UnauthorizedException when user is not found', async () => {
-      // Setup
-      const refreshToken = 'valid-refresh-token';
-      const decodedToken = { sub: 'nonexistent-user-id' };
-
-      jwtService.verify.mockReturnValue(decodedToken);
+    it('rejects a token whose user no longer exists', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'ghost' });
       usersService.findById.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.refreshToken(refreshToken)).rejects.toThrow(
+      await expect(service.refreshToken('orphan')).rejects.toThrow(
         new UnauthorizedException('Invalid refresh token'),
       );
-      expect(jwtService.verify).toHaveBeenCalledWith(refreshToken);
-      expect(usersService.findById).toHaveBeenCalledWith(decodedToken.sub);
+
+      expect(jwtService.sign).not.toHaveBeenCalled();
+    });
+
+    it('reports a missing profile as an invalid refresh token', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'user-2' });
+      usersService.findById.mockResolvedValue(companyUser);
+      companyService.findByUserId.mockResolvedValue(null);
+
+      await expect(service.refreshToken('token')).rejects.toThrow(
+        new UnauthorizedException('Invalid refresh token'),
+      );
     });
   });
 
-  describe('private methods', () => {
-    it('should hash password correctly', async () => {
-      expect(mockedBcrypt.hash).toBeDefined();
-    });
+  describe('logout', () => {
+    it('completes without side effects for a stateless session', async () => {
+      await expect(service.logout('user-1')).resolves.toBeUndefined();
 
-    it('should verify password correctly', async () => {
-      expect(mockedBcrypt.compare).toBeDefined();
+      expect(jwtService.sign).not.toHaveBeenCalled();
     });
   });
 });

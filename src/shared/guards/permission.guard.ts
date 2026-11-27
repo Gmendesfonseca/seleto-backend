@@ -8,6 +8,18 @@ import {
 import { Reflector } from '@nestjs/core';
 import { PERMISSION_KEY } from '../utils/constants';
 
+export interface PermissionCheckResult {
+  status: number;
+  message?: string;
+}
+
+export interface PermissionServiceInterface {
+  check(input: {
+    permission: string | string[];
+    user: unknown;
+  }): Promise<PermissionCheckResult | null | undefined>;
+}
+
 @Injectable()
 export class PermissionGuard implements CanActivate {
   constructor(
@@ -30,14 +42,11 @@ export class PermissionGuard implements CanActivate {
     });
 
     if (!permissionInfo || permissionInfo.status !== HttpStatus.OK) {
-      throw new UnauthorizedException(
-        {
-          message: permissionInfo.message,
-          data: null,
-          errors: null,
-        },
-        permissionInfo.status,
-      );
+      throw new UnauthorizedException({
+        message: permissionInfo?.message,
+        data: null,
+        errors: null,
+      });
     }
 
     return true;
