@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  ParseBoolPipe,
   DefaultValuePipe,
   Req,
 } from '@nestjs/common';
@@ -30,7 +31,7 @@ export class ProcessTemplateController {
     @Req() request: RequestWithCompany,
     @Query('companyId') companyId?: string,
     @Query('category') category?: string,
-    @Query('isDefault') isDefault?: boolean,
+    @Query('isDefault', new ParseBoolPipe({ optional: true })) isDefault?: boolean,
     @Query('search') search?: string,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset?: number,

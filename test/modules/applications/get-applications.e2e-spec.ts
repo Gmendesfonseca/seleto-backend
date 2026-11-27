@@ -7,6 +7,7 @@ import {
   expectUnauthorizedResponse,
   createMockServices,
 } from '../../helpers/auth-helper';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { ApplicationController } from '../../../src/domain/applications/application.controller';
 import { ApplicationServiceInterface } from '../../../src/domain/applications/interfaces/application.service.interface';
 
@@ -29,7 +30,7 @@ describe('Applications Controller - GET /applications (e2e)', () => {
         id: faker.string.uuid(),
         applicantId: faker.string.uuid(),
         vacancyId: faker.string.uuid(),
-        status: 'APPROVED',
+        status: 'approved',
         appliedAt: faker.date.past().toISOString(),
         updatedAt: faker.date.recent().toISOString(),
       },
@@ -55,6 +56,7 @@ describe('Applications Controller - GET /applications (e2e)', () => {
       ],
       controllers: [ApplicationController],
       providers: [
+        authGuardProvider,
         {
           provide: ApplicationServiceInterface,
           useValue: mockApplicationService,
@@ -158,12 +160,12 @@ describe('Applications Controller - GET /applications (e2e)', () => {
       const testUser = authHelper.createTestUser();
 
       // Act
-      await authHelper.authenticatedGet('/applications?status=PENDING', testUser);
+      await authHelper.authenticatedGet('/applications?status=pending', testUser);
 
       // Assert
       expect(mockApplicationService.findAll).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: 'PENDING',
+          status: 'pending',
         }),
       );
     });
@@ -199,7 +201,7 @@ describe('Applications Controller - GET /applications (e2e)', () => {
 
       // Act
       await authHelper.authenticatedGet(
-        `/applications?applicantId=${applicantId}&vacancyId=${vacancyId}&status=APPROVED&dateFrom=2024-01-01`,
+        `/applications?applicantId=${applicantId}&vacancyId=${vacancyId}&status=approved&dateFrom=2024-01-01`,
         testUser,
       );
 
@@ -207,7 +209,7 @@ describe('Applications Controller - GET /applications (e2e)', () => {
       expect(mockApplicationService.findAll).toHaveBeenCalledWith({
         applicantId,
         vacancyId,
-        status: 'APPROVED',
+        status: 'approved',
         dateFrom: '2024-01-01',
         dateTo: undefined,
       });
@@ -306,7 +308,14 @@ describe('Applications Controller - GET /applications (e2e)', () => {
   describe('Status Filter Values Tests', () => {
     it('should handle valid status values', async () => {
       // Arrange
-      const validStatuses = ['PENDING', 'APPROVED', 'REJECTED', 'WITHDRAWN'];
+      const validStatuses = [
+        'pending',
+        'reviewing',
+        'interview',
+        'approved',
+        'rejected',
+        'withdrawn',
+      ];
       mockApplicationService.findAll.mockResolvedValue(mockApplicationsResponse);
       const testUser = authHelper.createTestUser();
 

@@ -7,6 +7,7 @@ import {
   expectUnauthorizedResponse,
   createMockServices,
 } from '../../helpers/auth-helper';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { CompanyController } from '../../../src/domain/companies/company.controller';
 import { CompanyServiceInterface as CompanyService } from '../../../src/domain/companies/interfaces/company.service.interface';
 
@@ -63,6 +64,7 @@ describe('Companies Controller - GET /companies (e2e)', () => {
       ],
       controllers: [CompanyController],
       providers: [
+        authGuardProvider,
         {
           provide: CompanyService,
           useValue: mockCompanyService,
@@ -72,7 +74,7 @@ describe('Companies Controller - GET /companies (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
-    await app.init();
+    await app.listen(0);
 
     authHelper = new AuthHelper(app);
   });
@@ -129,13 +131,8 @@ describe('Companies Controller - GET /companies (e2e)', () => {
       await authHelper.authenticatedGet('/companies?page=2&limit=5', testUser);
 
       // Assert
-      expect(mockCompanyService.findAll).toHaveBeenCalledWith(
-        expect.objectContaining({
-          page: '2',
-          limit: '5',
-        }),
-        undefined,
-      );
+      const query = { page: '2', limit: '5' };
+      expect(mockCompanyService.findAll).toHaveBeenCalledWith(query, query);
     });
 
     it('should handle default pagination when not specified', async () => {
@@ -147,7 +144,7 @@ describe('Companies Controller - GET /companies (e2e)', () => {
       await authHelper.authenticatedGet('/companies', testUser);
 
       // Assert
-      expect(mockCompanyService.findAll).toHaveBeenCalledWith({}, undefined);
+      expect(mockCompanyService.findAll).toHaveBeenCalledWith({}, {});
     });
   });
 
@@ -161,10 +158,8 @@ describe('Companies Controller - GET /companies (e2e)', () => {
       await authHelper.authenticatedGet('/companies?search=tech+company', testUser);
 
       // Assert
-      expect(mockCompanyService.findAll).toHaveBeenCalledWith(
-        { search: 'tech company' },
-        undefined,
-      );
+      const query = { search: 'tech company' };
+      expect(mockCompanyService.findAll).toHaveBeenCalledWith(query, query);
     });
 
     it('should handle multiple query parameters', async () => {
@@ -179,15 +174,8 @@ describe('Companies Controller - GET /companies (e2e)', () => {
       );
 
       // Assert
-      expect(mockCompanyService.findAll).toHaveBeenCalledWith(
-        {
-          page: '1',
-          limit: '20',
-          search: 'startup',
-          sort: 'name',
-        },
-        undefined,
-      );
+      const query = { page: '1', limit: '20', search: 'startup', sort: 'name' };
+      expect(mockCompanyService.findAll).toHaveBeenCalledWith(query, query);
     });
   });
 
@@ -330,14 +318,8 @@ describe('Companies Controller - GET /companies (e2e)', () => {
       await authHelper.authenticatedGet('/companies?page=3&limit=15&search=technology', testUser);
 
       // Assert
-      expect(mockCompanyService.findAll).toHaveBeenCalledWith(
-        {
-          page: '3',
-          limit: '15',
-          search: 'technology',
-        },
-        undefined,
-      );
+      const query = { page: '3', limit: '15', search: 'technology' };
+      expect(mockCompanyService.findAll).toHaveBeenCalledWith(query, query);
       expect(mockCompanyService.findAll).toHaveBeenCalledTimes(1);
     });
 
