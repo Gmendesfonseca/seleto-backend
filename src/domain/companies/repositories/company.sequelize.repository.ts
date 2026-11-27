@@ -65,29 +65,28 @@ export class CompanySequelizeRepository implements CompanyRepository {
     this.logger.debug('FindAll: Called');
     const where: WhereOptions<Company> = {};
 
-    if (search?.query) {
-      where.name = { [Op.like]: `%${search.query}%` };
+    if (search?.search) {
+      where.cnpj = { [Op.like]: `${search.search}%` };
     }
 
-    const { rows: items, count: totalCount } = await this.model.findAndCountAll({
+    const page = Number(pagination?.page) || 1;
+    const perPage = Number(pagination?.perPage) || 10;
+
+    const { rows, count } = await this.model.findAndCountAll({
       where,
-      limit: pagination.perPage,
-      offset: ((pagination?.page ?? 1) - 1) * (pagination?.perPage || 10),
+      limit: perPage,
+      offset: (page - 1) * perPage,
     });
 
     return {
-      items,
-      totalCount,
-      page: pagination.page,
-      pageSize: pagination.pageSize,
-      totalPages: Math.ceil(totalCount / pagination.pageSize),
+      data: rows,
+      meta: {
+        total: count,
+        currentPage: page,
+        perPage,
+        lastPage: Math.ceil(count / perPage),
+      },
     };
-  }
-
-  async existsByName(name: string): Promise<boolean> {
-    this.logger.debug('ExistsByName: Called');
-    const count = await this.model.count({ where: { name } });
-    return count > 0;
   }
 
   async count(): Promise<number> {
