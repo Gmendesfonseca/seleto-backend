@@ -26,9 +26,9 @@ import { ProcessTemplateController } from '../../../src/domain/templates/process
 import { UsersServiceInterface } from '../../../src/domain/users/interfaces/user.service.interface';
 import { ApplicationServiceInterface } from '../../../src/domain/applications/interfaces/application.service.interface';
 import { DashboardServiceInterface } from '../../../src/domain/dashboard/interfaces/dashboard.service.interface';
-import { CompanyService } from '../../../src/domain/companies/interfaces/company.service.interface';
+import { CompanyServiceInterface as CompanyService } from '../../../src/domain/companies/interfaces/company.service.interface';
 import { RecruitmentServiceInterface } from '../../../src/domain/recruitment/interfaces/recruitment.service.interface';
-import { ProcessTemplateService } from '../../../src/domain/templates/interfaces/process-template.service.interface';
+import { ProcessTemplateServiceInterface as ProcessTemplateService } from '../../../src/domain/templates/interfaces/process-template.service.interface';
 
 describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
   let app: INestApplication;

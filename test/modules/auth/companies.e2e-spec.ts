@@ -8,7 +8,7 @@ import {
   createMockServices,
 } from '../../helpers/auth-helper';
 import { CompanyController } from '../../../src/domain/companies/company.controller';
-import { CompanyService } from '../../../src/domain/companies/interfaces/company.service.interface';
+import { CompanyServiceInterface as CompanyService } from '../../../src/domain/companies/interfaces/company.service.interface';
 
 describe('Companies Controller (e2e) - Authorized Routes', () => {
   let app: INestApplication;

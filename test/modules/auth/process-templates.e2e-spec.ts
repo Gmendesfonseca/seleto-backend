@@ -8,7 +8,7 @@ import {
   createMockServices,
 } from '../../helpers/auth-helper';
 import { ProcessTemplateController } from '../../../src/domain/templates/process-template.controller';
-import { ProcessTemplateService } from '../../../src/domain/templates/interfaces/process-template.service.interface';
+import { ProcessTemplateServiceInterface as ProcessTemplateService } from '../../../src/domain/templates/interfaces/process-template.service.interface';
 
 describe('Process Templates Controller (e2e) - Authorized Routes', () => {
   let app: INestApplication;
