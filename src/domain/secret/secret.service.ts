@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   CreateSecretInput,
@@ -15,13 +16,13 @@ export class SecretService implements SecretServiceInterface {
   constructor(@InjectModel(Secret) private secretModel: typeof Secret) {}
 
   public generateSecret(): string {
-    return Math.random().toString(36).substring(2, 15);
+    return randomBytes(16).toString('hex');
   }
 
   public async validateSecret(input: ValidateSecretInput): Promise<boolean> {
     this.logger.debug('SecretService.validateSecret: Called');
     const secret = await this.secretModel.findOne({
-      where: { secret: input.secret },
+      where: { secret: input.secret, type: input.type },
     });
     return Boolean(secret);
   }
