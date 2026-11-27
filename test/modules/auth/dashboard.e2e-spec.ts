@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication, NotFoundException, ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
 import {
@@ -8,6 +8,7 @@ import {
   createMockServices,
 } from '../../helpers/auth-helper';
 import { authGuardProvider } from '../../helpers/auth-guard.provider';
+import { CompanyContextMiddleware } from '../../../src/shared/middlewares/company-context.middleware';
 import { DashboardController } from '../../../src/domain/dashboard/dashboard.controller';
 import { DashboardServiceInterface } from '../../../src/domain/dashboard/interfaces/dashboard.service.interface';
 
@@ -85,6 +86,8 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
+    const companyContext = new CompanyContextMiddleware();
+    app.use(companyContext.use.bind(companyContext));
     await app.init();
 
     authHelper = new AuthHelper(app);
@@ -110,7 +113,21 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
       // Assert
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockStats);
-      expect(mockDashboardService.getStats).toHaveBeenCalledWith(undefined);
+      expect(mockDashboardService.getStats).toHaveBeenCalledWith({ companyId: undefined });
+    });
+
+    it('should scope stats to the companyid header', async () => {
+      // Arrange
+      mockDashboardService.getStats.mockResolvedValue(mockStats);
+      const companyId = faker.string.uuid();
+
+      // Act
+      const { request: req } = authHelper.authenticatedRequest('get', '/dashboard/stats');
+      const response = await req.set('companyid', companyId);
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(mockDashboardService.getStats).toHaveBeenCalledWith({ companyId });
     });
 
     it('should pass filters when provided', async () => {
@@ -160,46 +177,32 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
     });
   });
 
-  describe('GET /dashboard/company/:companyId/stats (Company Stats)', () => {
+  describe('GET /dashboard/company/:companyId/stats (removed route)', () => {
     const companyId = faker.string.uuid();
 
-    it('should return company stats when authenticated', async () => {
-      // Arrange
-      mockDashboardService.getCompanyStats.mockResolvedValue(mockCompanyStats);
-      const testUser = authHelper.createCompanyUser(companyId);
-
+    it('should not expose the route to authenticated users', async () => {
       // Act
       const { response } = await authHelper.authenticatedGet(
         `/dashboard/company/${companyId}/stats`,
-        testUser,
+        authHelper.createCompanyUser(companyId),
       );
 
       // Assert
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockCompanyStats);
-      expect(mockDashboardService.getCompanyStats).toHaveBeenCalledWith(companyId, undefined);
+      expect(response.status).toBe(404);
     });
 
-    it('should pass filters when provided', async () => {
-      // Arrange
-      mockDashboardService.getCompanyStats.mockResolvedValue(mockCompanyStats);
-      const testUser = authHelper.createCompanyUser(companyId);
-
+    it('should not expose the route with filters', async () => {
       // Act
       const { response } = await authHelper.authenticatedGet(
         `/dashboard/company/${companyId}/stats?year=2025&quarter=1`,
-        testUser,
+        authHelper.createCompanyUser(companyId),
       );
 
       // Assert
-      expect(response.status).toBe(200);
-      expect(mockDashboardService.getCompanyStats).toHaveBeenCalledWith(companyId, {
-        year: '2025',
-        quarter: '1',
-      });
+      expect(response.status).toBe(404);
     });
 
-    it('should return 401 when not authenticated', async () => {
+    it('should not expose the route to unauthenticated requests', async () => {
       // Act
       const response = await authHelper.unauthenticatedRequest(
         'get',
@@ -207,20 +210,7 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
       );
 
       // Assert
-      expectUnauthorizedResponse(response);
-      expect(mockDashboardService.getCompanyStats).not.toHaveBeenCalled();
-    });
-
-    it('should return 401 with invalid token', async () => {
-      // Act
-      const response = await authHelper.invalidTokenRequest(
-        'get',
-        `/dashboard/company/${companyId}/stats`,
-      );
-
-      // Assert
-      expectUnauthorizedResponse(response);
-      expect(mockDashboardService.getCompanyStats).not.toHaveBeenCalled();
+      expect(response.status).toBe(404);
     });
   });
 
@@ -242,17 +232,19 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
       expect(mockDashboardService.getRecentApplications).toHaveBeenCalledWith(10, undefined);
     });
 
-    it('should handle limit and companyId parameters', async () => {
+    it('should handle limit parameter and companyid header', async () => {
       // Arrange
       mockDashboardService.getRecentApplications.mockResolvedValue(mockRecentApplications);
       const testUser = authHelper.createTestUser();
       const companyId = faker.string.uuid();
 
       // Act
-      const { response } = await authHelper.authenticatedGet(
-        `/dashboard/recent-applications?limit=5&companyId=${companyId}`,
+      const { request: req } = authHelper.authenticatedRequest(
+        'get',
+        '/dashboard/recent-applications?limit=5',
         testUser,
       );
+      const response = await req.set('companyid', companyId);
 
       // Assert
       expect(response.status).toBe(200);
@@ -299,17 +291,19 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
       expect(mockDashboardService.getTopVacancies).toHaveBeenCalledWith(10, undefined);
     });
 
-    it('should handle limit and companyId parameters', async () => {
+    it('should handle limit parameter and companyid header', async () => {
       // Arrange
       mockDashboardService.getTopVacancies.mockResolvedValue(mockTopVacancies);
       const testUser = authHelper.createTestUser();
       const companyId = faker.string.uuid();
 
       // Act
-      const { response } = await authHelper.authenticatedGet(
-        `/dashboard/top-vacancies?limit=20&companyId=${companyId}`,
+      const { request: req } = authHelper.authenticatedRequest(
+        'get',
+        '/dashboard/top-vacancies?limit=20',
         testUser,
       );
+      const response = await req.set('companyid', companyId);
 
       // Assert
       expect(response.status).toBe(200);
@@ -344,17 +338,19 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
       expect(mockDashboardService.getApplicationsByStatus).toHaveBeenCalledWith(undefined);
     });
 
-    it('should handle companyId parameter', async () => {
+    it('should handle companyid header', async () => {
       // Arrange
       mockDashboardService.getApplicationsByStatus.mockResolvedValue(mockApplicationsByStatus);
       const testUser = authHelper.createTestUser();
       const companyId = faker.string.uuid();
 
       // Act
-      const { response } = await authHelper.authenticatedGet(
-        `/dashboard/applications-by-status?companyId=${companyId}`,
+      const { request: req } = authHelper.authenticatedRequest(
+        'get',
+        '/dashboard/applications-by-status',
         testUser,
       );
+      const response = await req.set('companyid', companyId);
 
       // Assert
       expect(response.status).toBe(200);
@@ -392,17 +388,19 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
       expect(mockDashboardService.getMonthlyApplications).toHaveBeenCalledWith(6, undefined);
     });
 
-    it('should handle months and companyId parameters', async () => {
+    it('should handle months parameter and companyid header', async () => {
       // Arrange
       mockDashboardService.getMonthlyApplications.mockResolvedValue(mockMonthlyApplications);
       const testUser = authHelper.createTestUser();
       const companyId = faker.string.uuid();
 
       // Act
-      const { response } = await authHelper.authenticatedGet(
-        `/dashboard/monthly-applications?months=12&companyId=${companyId}`,
+      const { request: req } = authHelper.authenticatedRequest(
+        'get',
+        '/dashboard/monthly-applications?months=12',
         testUser,
       );
+      const response = await req.set('companyid', companyId);
 
       // Assert
       expect(response.status).toBe(200);
@@ -445,22 +443,16 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
 
       // Assert
       expect(response.status).toBe(500);
-      expect(response.body.error).toBeDefined();
+      expect(response.body.message).toBe('Internal server error');
     });
 
-    it('should handle NotFound errors for company stats', async () => {
+    it('should handle NotFound errors for stats', async () => {
       // Arrange
-      const notFoundError = new Error('Company not found');
-      notFoundError.name = 'NotFoundException';
-      mockDashboardService.getCompanyStats.mockRejectedValue(notFoundError);
+      mockDashboardService.getStats.mockRejectedValue(new NotFoundException('Company not found'));
       const testUser = authHelper.createTestUser();
-      const companyId = faker.string.uuid();
 
       // Act
-      const { response } = await authHelper.authenticatedGet(
-        `/dashboard/company/${companyId}/stats`,
-        testUser,
-      );
+      const { response } = await authHelper.authenticatedGet('/dashboard/stats', testUser);
 
       // Assert
       expect(response.status).toBe(404);
@@ -468,20 +460,22 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
   });
 
   describe('Validation Tests', () => {
-    it('should validate UUID format for company ID parameter', async () => {
+    it('should ignore a companyId query parameter', async () => {
       // Arrange
+      mockDashboardService.getStats.mockResolvedValue(mockStats);
       const testUser = authHelper.createTestUser();
-      const invalidId = 'invalid-uuid';
 
       // Act
       const { response } = await authHelper.authenticatedGet(
-        `/dashboard/company/${invalidId}/stats`,
+        '/dashboard/stats?companyId=invalid-uuid',
         testUser,
       );
 
       // Assert
-      expect(response.status).toBe(400);
-      expect(response.body.message).toContain('Validation failed');
+      expect(response.status).toBe(200);
+      expect(mockDashboardService.getStats).toHaveBeenCalledWith({
+        companyId: undefined,
+      });
     });
 
     it('should validate limit parameter ranges', async () => {
