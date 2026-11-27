@@ -29,6 +29,8 @@ jobs:
         run: npx tsc --noEmit -p tsconfig.json
       - name: Build
         run: npm run build
+      - name: Compiled app loads
+        run: node -e "require('./dist/app.module')"
       - name: Unit tests
         run: npm test
       - name: E2E tests
