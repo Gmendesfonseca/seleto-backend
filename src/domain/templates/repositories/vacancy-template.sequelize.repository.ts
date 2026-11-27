@@ -96,7 +96,7 @@ export class VacancyTemplateSequelizeRepository implements VacancyTemplateReposi
     return this.vacancyTemplateModel.findOne({
       where: {
         company_id: companyId,
-        is_default: true,
+        isDefault: true,
       },
     });
   }
@@ -112,10 +112,10 @@ export class VacancyTemplateSequelizeRepository implements VacancyTemplateReposi
       where.company_id = filters.companyId;
     }
     if (filters?.isDefault !== undefined) {
-      where.is_default = filters.isDefault;
+      where.isDefault = filters.isDefault;
     }
     if (filters?.isActive !== undefined) {
-      where.is_active = filters.isActive;
+      where.isActive = filters.isActive;
     }
 
     return this.vacancyTemplateModel.count({ where });
