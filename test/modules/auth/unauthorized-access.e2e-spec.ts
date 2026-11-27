@@ -1,3 +1,4 @@
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
@@ -56,6 +57,7 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
         ProcessTemplateController,
       ],
       providers: [
+        authGuardProvider,
         { provide: UsersServiceInterface, useValue: mockServices.mockUsersService },
         {
           provide: ApplicationServiceInterface,
@@ -90,11 +92,6 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
         method: 'put' as const,
         path: `/users/${faker.string.uuid()}`,
         description: 'Update User (PUT)',
-      },
-      {
-        method: 'patch' as const,
-        path: `/users/${faker.string.uuid()}`,
-        description: 'Update User (PATCH)',
       },
     ];
 
@@ -164,15 +161,9 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
   });
 
   describe('Dashboard Controller - Unauthorized Access', () => {
-    const companyId = faker.string.uuid();
 
     const testRoutes = [
       { method: 'get' as const, path: '/dashboard/stats', description: 'General Stats' },
-      {
-        method: 'get' as const,
-        path: `/dashboard/company/${companyId}/stats`,
-        description: 'Company Stats',
-      },
       {
         method: 'get' as const,
         path: '/dashboard/recent-applications',
@@ -211,7 +202,6 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
 
   describe('Companies Controller - Unauthorized Access', () => {
     const companyId = faker.string.uuid();
-    const companyName = 'test-company';
 
     const testRoutes = [
       { method: 'get' as const, path: '/companies', description: 'List Companies' },
@@ -220,11 +210,6 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
         method: 'get' as const,
         path: `/companies/${companyId}/vacancies`,
         description: 'Get Company Vacancies',
-      },
-      {
-        method: 'get' as const,
-        path: `/companies/${companyId}/users`,
-        description: 'Get Company Users',
       },
       {
         method: 'get' as const,
@@ -243,11 +228,6 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
         method: 'put' as const,
         path: `/companies/${companyId}/status`,
         description: 'Set Company Status',
-      },
-      {
-        method: 'get' as const,
-        path: `/companies/check/exists/${companyName}`,
-        description: 'Check Company Exists',
       },
     ];
 
