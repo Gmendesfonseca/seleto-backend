@@ -3,7 +3,6 @@ import { VacancyTemplateServiceInterface } from './interfaces/vacancy-template.s
 import { VacancyTemplateRepository } from './repositories/vacancy-template.repository.interface';
 import { CreateVacancyTemplateDto, UpdateVacancyTemplateDto } from './dto/vacancy-template.dto';
 import { VacancyTemplateFilters } from './interfaces/vacancy-template.interface';
-import { StepRepository } from '../steps';
 import { VacancyTemplate } from './vacancy-template.model';
 
 @Injectable()
