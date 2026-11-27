@@ -1,303 +1,276 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from './users.service';
-import {
-  UsersRepositoryInterface,
-  UserInterface,
-  UpdateUsernameInput,
-  ActivateInput,
-  ChangeEmailInput,
-  RequestChangeEmailInput,
-} from './interfaces';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
+import { UsersService } from './users.service';
+import { UserRepositoryInterface } from './interfaces';
+import { User } from './user.model';
 import { SecretServiceInterface } from '../secret/interface/secret.service.interface';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let usersRepository: jest.Mocked<UsersRepositoryInterface>;
-  let configService: jest.Mocked<ConfigService>;
-  let mailerService: jest.Mocked<MailerService>;
+  let repository: jest.Mocked<UserRepositoryInterface>;
+  let configService: { get: jest.Mock };
+  let mailerService: { sendMail: jest.Mock };
   let secretService: jest.Mocked<SecretServiceInterface>;
 
-  const mockUser: UserInterface = {
+  const mockUser = {
     id: '550e8400-e29b-41d4-a716-446655440000',
+    name: 'John Doe',
     username: 'johndoe',
     email: 'john.doe@example.com',
     password: 'hashedPassword123',
     status: 'ACTIVE',
     type: 'PERSON',
-  };
+  } as User;
 
   beforeEach(async () => {
-    const mockUsersRepository = {
-      findOne: jest.fn(),
-      findAll: jest.fn(),
-      findOneByEmail: jest.fn(),
-      findOneByCredentials: jest.fn(),
-      activate: jest.fn(),
-      createUser: jest.fn(),
-      createPerson: jest.fn(),
-      createCompany: jest.fn(),
-      updateUsername: jest.fn(),
-      updatePassword: jest.fn(),
-      updateEmail: jest.fn(),
-      update: jest.fn(),
-      validateEmail: jest.fn(),
-      delete: jest.fn(),
-    };
-
-    const mockConfigService = {
-      get: jest.fn(),
-    };
-
-    const mockMailerService = {
-      sendMail: jest.fn(),
-    };
-
-    const mockSecretService = {
-      generateSecret: jest.fn(),
-      createSecret: jest.fn(),
-      validateSecret: jest.fn(),
-      deleteSecret: jest.fn(),
-      getUserIdBySecret: jest.fn(),
-    };
+    configService = { get: jest.fn() };
+    mailerService = { sendMail: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
         {
-          provide: UsersRepositoryInterface,
-          useValue: mockUsersRepository,
+          provide: UserRepositoryInterface,
+          useValue: {
+            findOne: jest.fn(),
+            findAll: jest.fn(),
+            create: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
+          },
         },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
-        {
-          provide: MailerService,
-          useValue: mockMailerService,
-        },
+        { provide: ConfigService, useValue: configService },
+        { provide: MailerService, useValue: mailerService },
         {
           provide: SecretServiceInterface,
-          useValue: mockSecretService,
+          useValue: {
+            generateSecret: jest.fn(),
+            createSecret: jest.fn(),
+            validateSecret: jest.fn(),
+            deleteSecret: jest.fn(),
+            getUserIdBySecret: jest.fn(),
+          },
         },
       ],
     }).compile();
 
-    service = module.get<UsersService>(UsersService);
-    usersRepository = module.get(UsersRepositoryInterface);
-    configService = module.get(ConfigService);
-    mailerService = module.get(MailerService);
+    service = module.get(UsersService);
+    repository = module.get(UserRepositoryInterface);
     secretService = module.get(SecretServiceInterface);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  describe('lookups', () => {
+    it('findById queries the repository by id', async () => {
+      repository.findOne.mockResolvedValue(mockUser);
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-    expect(service).toBeInstanceOf(UsersService);
-  });
-
-  describe('findOne', () => {
-    it('should return user when found', async () => {
-      // Arrange
-      const userId = mockUser.id;
-      usersRepository.findOne.mockResolvedValue(mockUser as any);
-
-      // Act
-      const result = await service.findOne(userId);
-
-      // Assert
-      expect(usersRepository.findOne).toHaveBeenCalledWith(userId);
-      expect(result).toEqual(mockUser);
+      await expect(service.findById(mockUser.id)).resolves.toBe(mockUser);
+      expect(repository.findOne).toHaveBeenCalledWith({ id: mockUser.id });
     });
 
-    it('should return null when user not found', async () => {
-      // Arrange
-      const userId = 'non-existent-id';
-      usersRepository.findOne.mockResolvedValue(null);
+    it('findById returns null for an unknown id', async () => {
+      repository.findOne.mockResolvedValue(null);
 
-      // Act
-      const result = await service.findOne(userId);
-
-      // Assert
-      expect(usersRepository.findOne).toHaveBeenCalledWith(userId);
-      expect(result).toBeNull();
-    });
-  });
-  describe('findAll', () => {
-    it('should return all users with pagination', async () => {
-      // Arrange
-      const mockResult = { users: [mockUser as any], total: 1 };
-      usersRepository.findAll.mockResolvedValue(mockResult);
-
-      // Act
-      const result = await service.findAll();
-
-      // Assert
-      expect(usersRepository.findAll).toHaveBeenCalledWith(undefined);
-      expect(result).toEqual(mockResult);
+      await expect(service.findById('missing')).resolves.toBeNull();
     });
 
-    it('should return filtered users', async () => {
-      // Arrange
-      const filters = { status: 'ACTIVE' };
-      const mockResult = { users: [mockUser as any], total: 1 };
-      usersRepository.findAll.mockResolvedValue(mockResult);
+    it('findByEmail queries the repository by email', async () => {
+      repository.findOne.mockResolvedValue(mockUser);
 
-      // Act
-      const result = await service.findAll(filters);
+      await expect(service.findByEmail(mockUser.email)).resolves.toBe(mockUser);
+      expect(repository.findOne).toHaveBeenCalledWith({ email: mockUser.email });
+    });
 
-      // Assert
-      expect(usersRepository.findAll).toHaveBeenCalledWith(filters);
-      expect(result).toEqual(mockResult);
+    it('findByCredentials queries by email and password together', async () => {
+      repository.findOne.mockResolvedValue(mockUser);
+
+      await service.findByCredentials({ email: mockUser.email, password: 'hashed' });
+
+      expect(repository.findOne).toHaveBeenCalledWith({
+        email: mockUser.email,
+        password: 'hashed',
+      });
+    });
+
+    it('findAll forwards the filters and returns users with total', async () => {
+      const page = { users: [mockUser], total: 1 };
+      repository.findAll.mockResolvedValue(page);
+
+      await expect(service.findAll({ status: 'ACTIVE', page: 2, limit: 5 })).resolves.toBe(page);
+      expect(repository.findAll).toHaveBeenCalledWith({ status: 'ACTIVE', page: 2, limit: 5 });
     });
   });
 
-  describe('findOneByEmail', () => {
-    it('should return user when found by email', async () => {
-      // Arrange
-      const email = mockUser.email;
-      usersRepository.findOneByEmail.mockResolvedValue(mockUser as any);
+  describe('activate', () => {
+    it('sets the user status to ACTIVE', async () => {
+      await service.activate({ id: mockUser.id, secret: 's' });
 
-      // Act
-      const result = await service.findOneByEmail(email);
-
-      // Assert
-      expect(usersRepository.findOneByEmail).toHaveBeenCalledWith(email);
-      expect(result).toEqual(mockUser);
-    });
-
-    it('should return null when user not found by email', async () => {
-      // Arrange
-      const email = 'nonexistent@example.com';
-      usersRepository.findOneByEmail.mockResolvedValue(null);
-
-      // Act
-      const result = await service.findOneByEmail(email);
-
-      // Assert
-      expect(usersRepository.findOneByEmail).toHaveBeenCalledWith(email);
-      expect(result).toBeNull();
+      expect(repository.update).toHaveBeenCalledWith(mockUser.id, { status: 'ACTIVE' });
     });
   });
 
   describe('updateUsername', () => {
-    it('should update username successfully', async () => {
-      // Arrange
-      const updateInput: UpdateUsernameInput = { id: mockUser.id, username: 'newusername' };
-      usersRepository.findOne.mockResolvedValue(mockUser as any);
-      usersRepository.updateUsername.mockResolvedValue(mockUser as any);
+    it('updates the username of an existing user', async () => {
+      repository.findOne.mockResolvedValue(mockUser);
 
-      // Act
-      await service.updateUsername(updateInput);
+      await service.updateUsername({ id: mockUser.id, username: 'newname' });
 
-      // Assert
-      expect(usersRepository.findOne).toHaveBeenCalledWith(mockUser.id);
-      expect(usersRepository.updateUsername).toHaveBeenCalledWith(updateInput);
+      expect(repository.update).toHaveBeenCalledWith(mockUser.id, { username: 'newname' });
     });
 
-    it('should throw NotFoundException when user not found', async () => {
-      // Arrange
-      const updateInput: UpdateUsernameInput = { id: 'non-existent-id', username: 'newusername' };
-      usersRepository.findOne.mockResolvedValue(null);
+    it('throws NotFoundException and does not update when the user is missing', async () => {
+      repository.findOne.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.updateUsername(updateInput)).rejects.toThrow(
-        new NotFoundException('User not found'),
+      await expect(service.updateUsername({ id: 'missing', username: 'x' })).rejects.toThrow(
+        NotFoundException,
       );
-      expect(usersRepository.findOne).toHaveBeenCalledWith('non-existent-id');
-      expect(usersRepository.updateUsername).not.toHaveBeenCalled();
+      expect(repository.update).not.toHaveBeenCalled();
     });
   });
 
-  describe('createUser', () => {
-    it('should create user successfully', async () => {
-      // Arrange
-      const createInput = {
-        email: 'test@example.com',
-        username: 'testuser',
-        password: 'hashedpassword',
+  describe('updatePasswordBySecret', () => {
+    it('resolves the user from the PASSWORD secret and stores the hashed password', async () => {
+      secretService.getUserIdBySecret.mockResolvedValue(mockUser.id);
+
+      await service.updatePasswordBySecret('secret-key', 'new-hash');
+
+      expect(secretService.getUserIdBySecret).toHaveBeenCalledWith('secret-key', 'PASSWORD');
+      expect(repository.update).toHaveBeenCalledWith(mockUser.id, { password: 'new-hash' });
+    });
+
+    it('throws UnauthorizedException and changes nothing when the secret is unknown', async () => {
+      secretService.getUserIdBySecret.mockResolvedValue(null);
+
+      await expect(service.updatePasswordBySecret('bad', 'new-hash')).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('update', () => {
+    it('drops undefined fields before updating', async () => {
+      const updated = { ...mockUser, username: 'renamed' } as User;
+      repository.findOne.mockResolvedValue(mockUser);
+      repository.update.mockResolvedValue(updated);
+
+      const result = await service.update(mockUser.id, { username: 'renamed', email: undefined });
+
+      expect(repository.update).toHaveBeenCalledWith(mockUser.id, { username: 'renamed' });
+      expect(result).toBe(updated);
+    });
+
+    it('returns the user unchanged when there is nothing to update', async () => {
+      repository.findOne.mockResolvedValue(mockUser);
+
+      await expect(service.update(mockUser.id, { username: undefined })).resolves.toBe(mockUser);
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when the user is missing', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await expect(service.update('missing', { username: 'x' })).rejects.toThrow(NotFoundException);
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('requestChangeEmail', () => {
+    it('stores an EMAIL secret and mails a confirmation link to the new address', async () => {
+      repository.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(mockUser);
+      secretService.generateSecret.mockReturnValue('generated-secret');
+      configService.get.mockReturnValue('https://front.test');
+
+      await service.requestChangeEmail({ id: mockUser.id, email: 'new@example.com' });
+
+      expect(repository.findOne).toHaveBeenNthCalledWith(1, { email: 'new@example.com' });
+      expect(repository.findOne).toHaveBeenNthCalledWith(2, { id: mockUser.id });
+      expect(secretService.createSecret).toHaveBeenCalledWith({
+        secret: 'generated-secret',
+        type: 'EMAIL',
+        userId: mockUser.id,
+      });
+      expect(configService.get).toHaveBeenCalledWith('FRONT_URL');
+      expect(mailerService.sendMail).toHaveBeenCalledWith({
+        to: 'new@example.com',
+        subject: 'Change your email',
+        template: './change-email',
+        context: { link: 'https://front.test/change-email/generated-secret' },
+      });
+    });
+
+    it('rejects an email that is already in use without creating a secret', async () => {
+      repository.findOne.mockResolvedValueOnce(mockUser);
+
+      await expect(
+        service.requestChangeEmail({ id: mockUser.id, email: mockUser.email }),
+      ).rejects.toThrow('Email already in use');
+      expect(secretService.createSecret).not.toHaveBeenCalled();
+      expect(mailerService.sendMail).not.toHaveBeenCalled();
+    });
+
+    it('rejects an unknown user without creating a secret', async () => {
+      repository.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+
+      await expect(
+        service.requestChangeEmail({ id: 'missing', email: 'new@example.com' }),
+      ).rejects.toThrow('User not found');
+      expect(secretService.createSecret).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('changeEmail', () => {
+    it('updates the email and consumes the secret when it is valid', async () => {
+      secretService.validateSecret.mockResolvedValue(true);
+
+      await service.changeEmail({ id: mockUser.id, secret: 's', email: 'new@example.com' });
+
+      expect(secretService.validateSecret).toHaveBeenCalledWith({ secret: 's', type: 'EMAIL' });
+      expect(repository.update).toHaveBeenCalledWith(mockUser.id, { email: 'new@example.com' });
+      expect(secretService.deleteSecret).toHaveBeenCalledWith('s');
+    });
+
+    it('throws UnauthorizedException and changes nothing when the secret is invalid', async () => {
+      secretService.validateSecret.mockResolvedValue(false);
+
+      await expect(
+        service.changeEmail({ id: mockUser.id, secret: 'bad', email: 'new@example.com' }),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(repository.update).not.toHaveBeenCalled();
+      expect(secretService.deleteSecret).not.toHaveBeenCalled();
+    });
+
+    it('keeps the secret and reports a generic failure when the update fails', async () => {
+      secretService.validateSecret.mockResolvedValue(true);
+      repository.update.mockRejectedValue(new Error('unique violation'));
+
+      await expect(
+        service.changeEmail({ id: mockUser.id, secret: 's', email: 'new@example.com' }),
+      ).rejects.toThrow('Failed to update email');
+      expect(secretService.deleteSecret).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('create and delete', () => {
+    it('create forwards the input to the repository', async () => {
+      const input = {
+        email: 'a@b.com',
+        password: 'hash',
+        username: 'ab',
+        name: 'A B',
         type: 'PERSON',
-        company: null,
-        person: null,
       };
+      repository.create.mockResolvedValue(mockUser);
 
-      usersRepository.createUser.mockResolvedValue(mockUser as any);
-
-      // Act
-      const result = await service.createUser(createInput);
-
-      // Assert
-      expect(usersRepository.createUser).toHaveBeenCalledWith(createInput);
-      expect(result).toEqual(mockUser);
-    });
-  });
-
-  describe('delete', () => {
-    it('should delete user successfully', async () => {
-      // Arrange
-      const userId = mockUser.id;
-      usersRepository.delete.mockResolvedValue(undefined);
-
-      // Act
-      await service.delete(userId);
-
-      // Assert
-      expect(usersRepository.delete).toHaveBeenCalledWith(userId);
-    });
-  });
-
-  describe('updateUser', () => {
-    it('should update user successfully', async () => {
-      // Arrange
-      const userId = mockUser.id;
-      const updateData = { username: 'newusername' };
-      const updatedUser = { ...mockUser, username: 'newusername' };
-
-      usersRepository.findOne.mockResolvedValue(mockUser as any);
-      usersRepository.update.mockResolvedValue(updatedUser as any);
-
-      // Act
-      const result = await service.updateUser(userId, updateData);
-
-      // Assert
-      expect(usersRepository.findOne).toHaveBeenCalledWith(userId);
-      expect(usersRepository.update).toHaveBeenCalledWith(userId, updateData);
-      expect(result).toEqual(updatedUser);
+      await expect(service.create(input)).resolves.toBe(mockUser);
+      expect(repository.create).toHaveBeenCalledWith(input);
     });
 
-    it('should throw NotFoundException when user not found', async () => {
-      // Arrange
-      const userId = 'non-existent-id';
-      const updateData = { username: 'newusername' };
+    it('delete removes the user by id', async () => {
+      await service.delete(mockUser.id);
 
-      usersRepository.findOne.mockResolvedValue(null);
-
-      // Act & Assert
-      await expect(service.updateUser(userId, updateData)).rejects.toThrow(
-        new NotFoundException('User not found'),
-      );
-      expect(usersRepository.findOne).toHaveBeenCalledWith(userId);
-    });
-
-    it('should return user unchanged when no update data provided', async () => {
-      // Arrange
-      const userId = mockUser.id;
-      const updateData = { username: undefined };
-
-      usersRepository.findOne.mockResolvedValue(mockUser as any);
-
-      // Act
-      const result = await service.updateUser(userId, updateData);
-
-      // Assert
-      expect(usersRepository.findOne).toHaveBeenCalledWith(userId);
-      expect(usersRepository.update).not.toHaveBeenCalled();
-      expect(result).toEqual(mockUser);
+      expect(repository.delete).toHaveBeenCalledWith(mockUser.id);
     });
   });
 });
