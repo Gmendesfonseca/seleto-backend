@@ -12,8 +12,8 @@ export class JwtI18nResolver implements I18nResolver {
     const request = context.switchToHttp().getRequest<Request>();
     const payload = request.auth;
 
-    if (payload?.user?.config?.default_language) {
-      const { default_language } = payload.user.config;
+    if (payload?.config?.default_language) {
+      const { default_language } = payload.config;
       this.logger.debug(`JwtI18nResolver.resolve: set default language ${default_language}`);
       return default_language;
     }
