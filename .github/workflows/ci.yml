@@ -24,7 +24,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Lint
-        run: npx eslint "{src,apps,libs,test}/**/*.ts"
+        run: npx eslint "{src,apps,libs,test,scripts}/**/*.ts"
       - name: Typecheck
         run: npx tsc --noEmit -p tsconfig.json
       - name: Build
@@ -33,6 +33,8 @@ jobs:
         run: npm test
       - name: E2E tests
         run: npm run test:e2e
+      - name: OpenAPI spec is up to date
+        run: npm run openapi:check
 
   secrets:
     runs-on: ubuntu-latest
