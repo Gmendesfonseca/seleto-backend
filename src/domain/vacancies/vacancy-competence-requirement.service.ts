@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { VacancyCompetenceRequirement } from '../competences/vacancy-competence-requirement.model';
 import {
   CompetenceRequirementResponseDto,
@@ -7,6 +7,7 @@ import {
 import { VacancyCompetenceRequirementRepository } from './interfaces/vacancy-competence-requirement.repository.interface';
 import { VacancyCompetenceRequirementServiceInterface } from './interfaces/vacancy-competence-requirement.service.interface';
 import { VacancyRepository } from './interfaces/vacancy.repository.interface';
+import { assertVacancyBelongsTo } from './vacancy-ownership';
 
 @Injectable()
 export class VacancyCompetenceRequirementService
@@ -21,7 +22,7 @@ export class VacancyCompetenceRequirementService
     vacancyId: string,
     companyId: string | null,
   ): Promise<CompetenceRequirementResponseDto[]> {
-    await this.assertVacancyBelongsTo(vacancyId, companyId);
+    await assertVacancyBelongsTo(this.vacancies, vacancyId, companyId);
     const rows = await this.requirements.findByVacancy(vacancyId);
     return rows.map(toResponse);
   }
@@ -31,7 +32,7 @@ export class VacancyCompetenceRequirementService
     companyId: string | null,
     dto: ReplaceCompetenceRequirementsDto,
   ): Promise<CompetenceRequirementResponseDto[]> {
-    await this.assertVacancyBelongsTo(vacancyId, companyId);
+    await assertVacancyBelongsTo(this.vacancies, vacancyId, companyId);
 
     const competenceIds = dto.requirements.map((requirement) => requirement.competenceId);
     if (new Set(competenceIds).size !== competenceIds.length) {
@@ -44,14 +45,6 @@ export class VacancyCompetenceRequirementService
 
     const rows = await this.requirements.replaceForVacancy(vacancyId, dto.requirements);
     return rows.map(toResponse);
-  }
-
-  // A vacancy of another company answers 404 so its existence is not disclosed.
-  private async assertVacancyBelongsTo(vacancyId: string, companyId: string | null): Promise<void> {
-    const vacancy = await this.vacancies.findOne(vacancyId);
-    if (!vacancy || !companyId || vacancy.company_id !== companyId) {
-      throw new NotFoundException('Vacancy not found');
-    }
   }
 }
 

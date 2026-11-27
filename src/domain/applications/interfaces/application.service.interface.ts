@@ -6,6 +6,7 @@ import { PaginatedList } from '../../../shared/interfaces/entities/pagination.in
 export abstract class ApplicationServiceInterface {
   abstract findOne(id: string): Promise<Application | null>;
   abstract findAll(filters?: ApplicationFilters): Promise<PaginatedList<Application>>;
+  abstract count(filters?: ApplicationFilters): Promise<number>;
   abstract create(createApplicationDto: CreateApplicationDto): Promise<Application>;
   abstract update(id: string, updateApplicationDto: UpdateApplicationDto): Promise<Application>;
   abstract updateStatus(id: string, status: string): Promise<Application>;

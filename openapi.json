@@ -2439,6 +2439,59 @@
         ]
       }
     },
+    "/api/v1/vacancies/{vacancyId}/applications": {
+      "get": {
+        "operationId": "VacancyApplicationController_applications",
+        "parameters": [
+          {
+            "name": "vacancyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "VacancyApplication"
+        ]
+      }
+    },
+    "/api/v1/vacancies/{vacancyId}/stats": {
+      "get": {
+        "operationId": "VacancyApplicationController_stats",
+        "parameters": [
+          {
+            "name": "vacancyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VacancyStatsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "VacancyApplication"
+        ]
+      }
+    },
     "/api/v1/applications": {
       "get": {
         "operationId": "ApplicationController_index",
@@ -4559,6 +4612,17 @@
         },
         "required": [
           "requirements"
+        ]
+      },
+      "VacancyStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "totalApplications": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "totalApplications"
         ]
       },
       "CreateApplicationDto": {

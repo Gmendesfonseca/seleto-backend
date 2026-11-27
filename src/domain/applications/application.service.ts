@@ -40,6 +40,11 @@ export class ApplicationService implements ApplicationServiceInterface {
     };
   }
 
+  async count(filters?: ApplicationFilters): Promise<number> {
+    this.logger.debug('ApplicationService.count: Called');
+    return this.repository.countByFilters(filters);
+  }
+
   async create(createApplicationDto: CreateApplicationDto): Promise<Application> {
     this.logger.debug('ApplicationService.create: Called');
     const application = await this.repository.create(createApplicationDto);

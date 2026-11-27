@@ -26,6 +26,10 @@ import { VacancyCompetenceRequirementController } from './vacancy-competence-req
 import { VacancyCompetenceRequirementService } from './vacancy-competence-requirement.service';
 import { VacancyCompetenceRequirementRepository } from './interfaces/vacancy-competence-requirement.repository.interface';
 import { VacancyCompetenceRequirementServiceInterface } from './interfaces/vacancy-competence-requirement.service.interface';
+import { VacancyApplicationController } from './vacancy-application.controller';
+import { VacancyApplicationService } from './vacancy-application.service';
+import { VacancyApplicationServiceInterface } from './interfaces/vacancy-application.service.interface';
+import { ApplicationModule } from '../applications/application.module';
 import { VacancyCompetenceRequirementSequelizeRepository } from './repositories/vacancy-competence-requirement.sequelize.repository';
 
 @Module({
@@ -40,8 +44,13 @@ import { VacancyCompetenceRequirementSequelizeRepository } from './repositories/
       Competence,
     ]),
     MatchingModule,
+    ApplicationModule,
   ],
-  controllers: [VacancyController, VacancyCompetenceRequirementController],
+  controllers: [
+    VacancyController,
+    VacancyCompetenceRequirementController,
+    VacancyApplicationController,
+  ],
   providers: [
     {
       provide: VacancyRepository,
@@ -74,6 +83,10 @@ import { VacancyCompetenceRequirementSequelizeRepository } from './repositories/
     {
       provide: VacancyCompetenceRequirementServiceInterface,
       useClass: VacancyCompetenceRequirementService,
+    },
+    {
+      provide: VacancyApplicationServiceInterface,
+      useClass: VacancyApplicationService,
     },
   ],
   exports: [
