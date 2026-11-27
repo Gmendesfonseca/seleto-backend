@@ -1,7 +1,7 @@
 import { Injectable, Inject, CanActivate, ExecutionContext, HttpException } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { Reflector } from '@nestjs/core';
-import { ClientProxy } from '@nestjs/microservices';
+import { MessageClient } from './message-client.interface';
 import { SECURED_KEY } from '../../utils/constants';
 import { UserInterface } from 'src/domain/users/interfaces';
 
@@ -23,8 +23,8 @@ interface UserServiceResponse {
 export class AuthorizationGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
-    @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
+    @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: MessageClient,
+    @Inject('USER_SERVICE') private readonly userServiceClient: MessageClient,
   ) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
