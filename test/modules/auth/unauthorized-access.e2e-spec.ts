@@ -161,7 +161,6 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
   });
 
   describe('Dashboard Controller - Unauthorized Access', () => {
-
     const testRoutes = [
       { method: 'get' as const, path: '/dashboard/stats', description: 'General Stats' },
       {
