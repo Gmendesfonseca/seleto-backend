@@ -2,11 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CompetenceServiceInterface } from './interfaces/competence.service.interface';
 import { CompetenceRepository } from './repositories/competence.repository.interface';
 import { CreateCompetenceDto, UpdateCompetenceDto } from './dto/competence.dto';
-import {
-  Competence,
-  CompetenceCategory,
-  CompetenceFilters,
-} from './interfaces/competence.interface';
+import { Competence, CompetenceFilters } from './interfaces/competence.interface';
 
 @Injectable()
 export class CompetenceService implements CompetenceServiceInterface {
@@ -45,11 +41,6 @@ export class CompetenceService implements CompetenceServiceInterface {
       throw new NotFoundException(`Competence with id ${id} not found`);
     }
     await this.repository.delete(id);
-  }
-
-  async findByCategory(category: CompetenceCategory): Promise<Competence[]> {
-    this.logger.debug('FindByCategory: Called');
-    return this.repository.findByCategory(category);
   }
 
   async searchByName(name: string): Promise<Competence[]> {

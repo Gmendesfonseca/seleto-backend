@@ -9,7 +9,6 @@ import {
 } from 'sequelize-typescript';
 import { Person } from '../persons/person.model';
 import { Vacancy } from '../vacancies/vacancy.model';
-import { DateTime } from 'luxon';
 
 @Table({ tableName: 'candidate_vacancy_matches', underscored: true, paranoid: false })
 export class CandidateVacancyMatch extends Model<CandidateVacancyMatch> {
@@ -38,11 +37,11 @@ export class CandidateVacancyMatch extends Model<CandidateVacancyMatch> {
   // Detailed scoring breakdown (JSONB for flexibility)
   @Column({ type: DataType.JSONB, allowNull: true, field: 'score_breakdown' })
   scoreBreakdown: {
-    competenceMatch: number;
-    experienceMatch: number;
-    educationMatch: number;
-    locationMatch: number;
-    salaryMatch: number;
+    competence_match: number;
+    experience_match: number;
+    education_match: number;
+    location_match: number;
+    salary_match: number;
   };
 
   // Matched competences count
@@ -77,11 +76,11 @@ export class CandidateVacancyMatch extends Model<CandidateVacancyMatch> {
     field: 'calculated_at',
     defaultValue: DataType.NOW,
   })
-  calculatedAt: DateTime;
+  calculatedAt: Date;
 
   @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
-  createdAt: DateTime;
+  createdAt: Date;
 
   @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
-  updatedAt: DateTime;
+  updatedAt: Date;
 }

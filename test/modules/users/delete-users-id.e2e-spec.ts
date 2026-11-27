@@ -2,9 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
-import { AuthHelper, createMockServices } from '../../helpers/auth-helper';
+import { AuthHelper, expectUnauthorizedResponse } from '../../helpers/auth-helper';
 import { UsersController } from '../../../src/domain/users/users.controller';
 import { UsersServiceInterface } from '../../../src/domain/users/interfaces/user.service.interface';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
+import { createUsersServiceMock, signedRequest } from '../../helpers/e2e-users-mocks';
 
 describe('Users Controller - DELETE /users/:id (e2e)', () => {
   let app: INestApplication;
@@ -14,8 +16,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
   const userId = faker.string.uuid();
 
   beforeAll(async () => {
-    const { mockUsersService: mockService } = createMockServices();
-    mockUsersService = mockService;
+    mockUsersService = createUsersServiceMock();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -26,6 +27,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       ],
       controllers: [UsersController],
       providers: [
+        authGuardProvider,
         {
           provide: UsersServiceInterface,
           useValue: mockUsersService,
@@ -35,7 +37,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
-    await app.init();
+    await app.listen(0);
 
     authHelper = new AuthHelper(app);
   });
@@ -48,13 +50,19 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
     jest.clearAllMocks();
   });
 
-  describe('Public Access Tests', () => {
-    it('should delete user when valid ID provided (no auth required)', async () => {
+  describe('Authentication Tests', () => {
+    it('should return 401 when not authenticated', async () => {
+      const response = await authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
+      expectUnauthorizedResponse(response);
+      expect(mockUsersService.delete).not.toHaveBeenCalled();
+    });
+
+    it('should delete user when valid ID provided', async () => {
       // Arrange
       mockUsersService.delete.mockResolvedValue(undefined);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
+      const response = await signedRequest(authHelper, 'delete', `/users/${userId}`);
 
       // Assert
       expect(response.status).toBe(204);
@@ -81,7 +89,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       const invalidId = 'not-a-uuid';
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', `/users/${invalidId}`);
+      const response = await signedRequest(authHelper, 'delete', `/users/${invalidId}`);
 
       // Assert
       expect(response.status).toBe(400);
@@ -90,7 +98,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
 
     it('should validate required ID parameter', async () => {
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', '/users/');
+      const response = await signedRequest(authHelper, 'delete', '/users/');
 
       // Assert
       expect(response.status).toBe(404); // Route not found
@@ -98,7 +106,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
 
     it('should handle empty string as ID', async () => {
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', '/users/');
+      const response = await signedRequest(authHelper, 'delete', '/users/');
 
       // Assert
       expect(response.status).toBe(404); // Route not found
@@ -113,7 +121,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       mockUsersService.delete.mockRejectedValue(notFoundError);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
+      const response = await signedRequest(authHelper, 'delete', `/users/${userId}`);
 
       // Assert
       expect(response.status).toBe(404);
@@ -125,7 +133,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       mockUsersService.delete.mockRejectedValue(new Error('Database connection error'));
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
+      const response = await signedRequest(authHelper, 'delete', `/users/${userId}`);
 
       // Assert
       expect(response.status).toBe(404);
@@ -138,7 +146,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       mockUsersService.delete.mockRejectedValue(constraintError);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
+      const response = await signedRequest(authHelper, 'delete', `/users/${userId}`);
 
       // Assert
       expect(response.status).toBe(404);
@@ -151,7 +159,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       mockUsersService.delete.mockRejectedValue(permissionError);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
+      const response = await signedRequest(authHelper, 'delete', `/users/${userId}`);
 
       // Assert
       expect(response.status).toBe(404);
@@ -164,7 +172,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       mockUsersService.delete.mockResolvedValue(undefined);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
+      const response = await signedRequest(authHelper, 'delete', `/users/${userId}`);
 
       // Assert
       expect(response.status).toBe(204);
@@ -176,7 +184,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       mockUsersService.delete.mockResolvedValue(undefined);
 
       // Act
-      await authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
+      await signedRequest(authHelper, 'delete', `/users/${userId}`);
 
       // Assert
       expect(mockUsersService.delete).toHaveBeenCalledWith(userId);
@@ -191,7 +199,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       mockUsersService.delete.mockResolvedValue(undefined);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', `/users/${personUserId}`);
+      const response = await signedRequest(authHelper, 'delete', `/users/${personUserId}`);
 
       // Assert
       expect(response.status).toBe(204);
@@ -204,7 +212,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       mockUsersService.delete.mockResolvedValue(undefined);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', `/users/${companyUserId}`);
+      const response = await signedRequest(authHelper, 'delete', `/users/${companyUserId}`);
 
       // Assert
       expect(response.status).toBe(204);
@@ -225,7 +233,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
 
       // Act & Assert
       for (const uuid of validUUIDs) {
-        const response = await authHelper.unauthenticatedRequest('delete', `/users/${uuid}`);
+        const response = await signedRequest(authHelper, 'delete', `/users/${uuid}`);
         expect(response.status).toBe(204);
         expect(mockUsersService.delete).toHaveBeenCalledWith(uuid);
         jest.clearAllMocks();
@@ -244,7 +252,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
 
       // Act & Assert
       for (const invalidUuid of invalidUUIDs) {
-        const response = await authHelper.unauthenticatedRequest('delete', `/users/${invalidUuid}`);
+        const response = await signedRequest(authHelper, 'delete', `/users/${invalidUuid}`);
         expect(response.status).toBe(400);
         expect(mockUsersService.delete).not.toHaveBeenCalled();
       }
@@ -262,7 +270,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
 
       // Act
       const promises = differentUserIds.map((id) =>
-        authHelper.unauthenticatedRequest('delete', `/users/${id}`),
+        signedRequest(authHelper, 'delete', `/users/${id}`),
       );
       const responses = await Promise.all(promises);
 
@@ -287,8 +295,8 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       });
 
       // Act
-      const promise1 = authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
-      const promise2 = authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
+      const promise1 = signedRequest(authHelper, 'delete', `/users/${userId}`);
+      const promise2 = signedRequest(authHelper, 'delete', `/users/${userId}`);
       const [response1, response2] = await Promise.all([promise1, promise2]);
 
       // Assert
@@ -330,7 +338,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       mockUsersService.delete.mockResolvedValue(undefined);
 
       // Act
-      await authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
+      await signedRequest(authHelper, 'delete', `/users/${userId}`);
 
       // Assert
       expect(mockUsersService.delete).toHaveBeenCalledWith(userId);
@@ -342,7 +350,7 @@ describe('Users Controller - DELETE /users/:id (e2e)', () => {
       mockUsersService.delete.mockResolvedValue(undefined);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('delete', `/users/${userId}`);
+      const response = await signedRequest(authHelper, 'delete', `/users/${userId}`);
 
       // Assert
       expect(response.status).toBe(204);

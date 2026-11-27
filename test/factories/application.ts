@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { FactoryGirl } from 'factory-girl-ts';
-import { Application, ApplicationStatus } from 'src/domain/applications/application.model';
+import { Application } from 'src/domain/applications/application.model';
+import { ApplicationStatus } from 'src/domain/applications/interfaces/application.interface';
 
 export function defineApplicationFactory(factory: typeof FactoryGirl) {
   return factory.define(Application, () => ({

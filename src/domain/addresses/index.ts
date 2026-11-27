@@ -1,5 +1,7 @@
 // Address model
 export * from './address.model';
+// The model class wins over the same-named interface exported by './interfaces/address.interface'
+export { Address } from './address.model';
 
 // Address interfaces
 export * from './interfaces/address.interface';
@@ -18,4 +20,4 @@ export { AddressModule } from './address.module';
 export { AddressController } from './address.controller';
 
 // Address service
-export { AddressServiceImpl } from './address.service';
+export { AddressService } from './address.service';

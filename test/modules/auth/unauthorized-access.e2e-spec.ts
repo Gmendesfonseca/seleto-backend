@@ -1,3 +1,4 @@
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
@@ -26,9 +27,9 @@ import { ProcessTemplateController } from '../../../src/domain/templates/process
 import { UsersServiceInterface } from '../../../src/domain/users/interfaces/user.service.interface';
 import { ApplicationServiceInterface } from '../../../src/domain/applications/interfaces/application.service.interface';
 import { DashboardServiceInterface } from '../../../src/domain/dashboard/interfaces/dashboard.service.interface';
-import { CompanyService } from '../../../src/domain/companies/interfaces/company.service.interface';
+import { CompanyServiceInterface as CompanyService } from '../../../src/domain/companies/interfaces/company.service.interface';
 import { RecruitmentServiceInterface } from '../../../src/domain/recruitment/interfaces/recruitment.service.interface';
-import { ProcessTemplateService } from '../../../src/domain/templates/interfaces/process-template.service.interface';
+import { ProcessTemplateServiceInterface as ProcessTemplateService } from '../../../src/domain/templates/interfaces/process-template.service.interface';
 
 describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
   let app: INestApplication;
@@ -56,6 +57,7 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
         ProcessTemplateController,
       ],
       providers: [
+        authGuardProvider,
         { provide: UsersServiceInterface, useValue: mockServices.mockUsersService },
         {
           provide: ApplicationServiceInterface,
@@ -90,11 +92,6 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
         method: 'put' as const,
         path: `/users/${faker.string.uuid()}`,
         description: 'Update User (PUT)',
-      },
-      {
-        method: 'patch' as const,
-        path: `/users/${faker.string.uuid()}`,
-        description: 'Update User (PATCH)',
       },
     ];
 
@@ -164,15 +161,8 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
   });
 
   describe('Dashboard Controller - Unauthorized Access', () => {
-    const companyId = faker.string.uuid();
-
     const testRoutes = [
       { method: 'get' as const, path: '/dashboard/stats', description: 'General Stats' },
-      {
-        method: 'get' as const,
-        path: `/dashboard/company/${companyId}/stats`,
-        description: 'Company Stats',
-      },
       {
         method: 'get' as const,
         path: '/dashboard/recent-applications',
@@ -211,7 +201,6 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
 
   describe('Companies Controller - Unauthorized Access', () => {
     const companyId = faker.string.uuid();
-    const companyName = 'test-company';
 
     const testRoutes = [
       { method: 'get' as const, path: '/companies', description: 'List Companies' },
@@ -220,11 +209,6 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
         method: 'get' as const,
         path: `/companies/${companyId}/vacancies`,
         description: 'Get Company Vacancies',
-      },
-      {
-        method: 'get' as const,
-        path: `/companies/${companyId}/users`,
-        description: 'Get Company Users',
       },
       {
         method: 'get' as const,
@@ -243,11 +227,6 @@ describe('Unauthorized Access Tests (e2e) - All Protected Routes', () => {
         method: 'put' as const,
         path: `/companies/${companyId}/status`,
         description: 'Set Company Status',
-      },
-      {
-        method: 'get' as const,
-        path: `/companies/check/exists/${companyName}`,
-        description: 'Check Company Exists',
       },
     ];
 

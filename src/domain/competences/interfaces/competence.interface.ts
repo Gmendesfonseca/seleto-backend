@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 export interface Competence {
   id: string;
   name: string;
@@ -26,6 +27,4 @@ export type CompetenceLevel = (typeof CompetenceLevel)[keyof typeof CompetenceLe
 
 export interface CompetenceFilters {
   name?: string;
-  category?: CompetenceCategory;
-  level?: CompetenceLevel;
 }

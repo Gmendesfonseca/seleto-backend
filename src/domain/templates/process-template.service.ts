@@ -6,6 +6,11 @@ import {
 } from './interfaces/process-template.service.interface';
 import { ProcessTemplatesRepository } from './repositories/process-templates.repository.interface';
 import { StepRepository } from '../steps';
+import { VacancyTemplate } from './vacancy-template.model';
+
+// The repository persists VacancyTemplate rows, which the service exposes as ProcessTemplate.
+const toProcessTemplate = (row: VacancyTemplate | null) => row as unknown as ProcessTemplate;
+const toProcessTemplates = (rows: VacancyTemplate[]) => rows as unknown as ProcessTemplate[];
 
 @Injectable()
 export class ProcessTemplateService implements ProcessTemplateServiceInterface {
@@ -23,20 +28,20 @@ export class ProcessTemplateService implements ProcessTemplateServiceInterface {
     offset: number;
   }> {
     this.logger.debug('ProcessTemplateServiceImpl.findAll: Called', { filters });
-    const models = await this.repository.findAll(filters);
-    return models;
+    const { templates, ...page } = await this.repository.findAll(filters);
+    return { templates: toProcessTemplates(templates), ...page };
   }
 
   async findOne(id: string): Promise<ProcessTemplate> {
     this.logger.debug('ProcessTemplateServiceImpl.findOne: Called', { id });
-    return this.repository.findOne(id);
+    return toProcessTemplate(await this.repository.findOne(id));
   }
 
   async create(template: any): Promise<ProcessTemplate> {
     this.logger.debug('ProcessTemplateServiceImpl.create: Called', { template });
     const model = await this.repository.create(template);
     await Promise.all(
-      template.stages?.map((step) =>
+      template.stages?.map((step: any) =>
         this.stepRepository.create({
           name: step.name,
           description: step.description ?? undefined,
@@ -47,12 +52,12 @@ export class ProcessTemplateService implements ProcessTemplateServiceInterface {
         }),
       ) || [],
     );
-    return model;
+    return toProcessTemplate(model);
   }
 
   async update(id: string, template: any): Promise<ProcessTemplate> {
     this.logger.debug('ProcessTemplateServiceImpl.update: Called', { id, template });
-    return this.repository.update(id, template);
+    return toProcessTemplate(await this.repository.update(id, template));
   }
 
   async remove(id: string): Promise<void> {
@@ -62,12 +67,12 @@ export class ProcessTemplateService implements ProcessTemplateServiceInterface {
 
   async duplicate(id: string, name?: string): Promise<ProcessTemplate> {
     this.logger.debug('ProcessTemplateServiceImpl.duplicate: Called', { id, name });
-    return this.repository.duplicate(id, name);
+    return toProcessTemplate(await this.repository.duplicate(id, name));
   }
 
   async getDefaults(): Promise<ProcessTemplate[]> {
     this.logger.debug('ProcessTemplateServiceImpl.getDefaults: Called');
     const { templates } = await this.repository.findAll({ isDefault: true });
-    return templates;
+    return toProcessTemplates(templates);
   }
 }

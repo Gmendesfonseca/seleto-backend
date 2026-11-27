@@ -1,5 +1,13 @@
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  ValidationPipe,
+  NotFoundException,
+  ForbiddenException,
+  ServiceUnavailableException,
+  HttpException,
+} from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
 import { AuthHelper, createMockServices } from '../../helpers/auth-helper';
@@ -28,6 +36,7 @@ describe('Auth Controller - PATCH /auth/forgot-password (e2e)', () => {
       ],
       controllers: [AuthController],
       providers: [
+        authGuardProvider,
         {
           provide: AuthServiceInterface,
           useValue: mockAuthService,
@@ -37,7 +46,7 @@ describe('Auth Controller - PATCH /auth/forgot-password (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
-    await app.init();
+    await app.listen(0);
 
     authHelper = new AuthHelper(app);
   });
@@ -199,8 +208,7 @@ describe('Auth Controller - PATCH /auth/forgot-password (e2e)', () => {
   describe('Error Handling Tests', () => {
     it('should handle user not found gracefully', async () => {
       // Arrange
-      const notFoundError = new Error('User not found');
-      notFoundError.name = 'NotFoundException';
+      const notFoundError = new NotFoundException('User not found');
       mockAuthService.forgotPassword.mockRejectedValue(notFoundError);
 
       // Act
@@ -215,8 +223,7 @@ describe('Auth Controller - PATCH /auth/forgot-password (e2e)', () => {
 
     it('should handle inactive user gracefully', async () => {
       // Arrange
-      const forbiddenError = new Error('User account is inactive');
-      forbiddenError.name = 'ForbiddenException';
+      const forbiddenError = new ForbiddenException('User account is inactive');
       mockAuthService.forgotPassword.mockRejectedValue(forbiddenError);
 
       // Act
@@ -230,8 +237,7 @@ describe('Auth Controller - PATCH /auth/forgot-password (e2e)', () => {
 
     it('should handle email service errors', async () => {
       // Arrange
-      const serviceError = new Error('Email service unavailable');
-      serviceError.name = 'ServiceUnavailableException';
+      const serviceError = new ServiceUnavailableException('Email service unavailable');
       mockAuthService.forgotPassword.mockRejectedValue(serviceError);
 
       // Act
@@ -260,8 +266,7 @@ describe('Auth Controller - PATCH /auth/forgot-password (e2e)', () => {
   describe('Security Tests', () => {
     it('should not reveal if email exists or not', async () => {
       // Arrange
-      const notFoundError = new Error('User not found');
-      notFoundError.name = 'NotFoundException';
+      const notFoundError = new NotFoundException('User not found');
       mockAuthService.forgotPassword.mockRejectedValue(notFoundError);
 
       // Act
@@ -276,8 +281,7 @@ describe('Auth Controller - PATCH /auth/forgot-password (e2e)', () => {
 
     it('should handle rate limiting gracefully', async () => {
       // Arrange
-      const rateLimitError = new Error('Too many requests');
-      rateLimitError.name = 'TooManyRequestsException';
+      const rateLimitError = new HttpException('Too many requests', 429);
       mockAuthService.forgotPassword.mockRejectedValue(rateLimitError);
 
       // Act

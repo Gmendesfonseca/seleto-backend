@@ -18,8 +18,7 @@ export class AddressSequelizeRepository implements AddressRepository {
   async create(createAddressDto: CreateAddressDto): Promise<Address> {
     this.logger.debug('AddressSequelizeRepository.create: Called');
     return this.addressModel.create({
-      personId: createAddressDto.personId || null,
-      companyId: createAddressDto.companyId || null,
+      userId: createAddressDto.userId,
       street: createAddressDto.street,
       number: createAddressDto.number,
       complement: createAddressDto.complement || null,

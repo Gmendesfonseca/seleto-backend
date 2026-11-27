@@ -31,12 +31,12 @@ export class PhoneController {
 
   @Get()
   async index(
-    @Query('personId') personId?: string,
+    @Query('userId') userId?: string,
     @Query('type') type?: PhoneType,
     @Query('isPrimary') isPrimary?: boolean,
   ) {
     this.logger.debug('Index: Called');
-    return this.service.findAll({ personId, type, isPrimary });
+    return this.service.findAll({ userId, type, isPrimary });
   }
 
   @Get(':id')

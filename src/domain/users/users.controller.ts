@@ -24,6 +24,13 @@ import { QueryUserDto } from './dto/query-user.dto';
 import { UsersServiceInterface, UserFilters } from './interfaces/user.service.interface';
 import { Authorized } from 'src/shared/decorators/authorization.decorator';
 
+const withoutPassword = <T>(user: T): Omit<T, 'password'> => {
+  if (!user) return user;
+  const plain = typeof (user as any).toJSON === 'function' ? (user as any).toJSON() : user;
+  const { password: _password, ...rest } = plain;
+  return rest;
+};
+
 @Controller('/users')
 export class UsersController {
   private readonly logger = new Logger(UsersController.name);
@@ -46,7 +53,8 @@ export class UsersController {
         page: queryDto.page ? Number.parseInt(queryDto.page, 10) : 1,
         limit: queryDto.limit ? Number.parseInt(queryDto.limit, 10) : 10,
       };
-      return await this.service.findAll(filters);
+      const { users, total } = await this.service.findAll(filters);
+      return { users: users.map(withoutPassword), total };
     } catch (error) {
       this.logger.error(error.message);
       throw new BadRequestException('Failed to list users');
@@ -58,7 +66,7 @@ export class UsersController {
   async show(@Param('id', new ParseUUIDPipe()) id: string) {
     this.logger.debug('Show: Called');
     try {
-      return await this.service.findById(id);
+      return withoutPassword(await this.service.findById(id));
     } catch (error) {
       this.logger.error(error.message);
       throw error instanceof NotFoundException ? error : new NotFoundException('User not found');
@@ -118,7 +126,7 @@ export class UsersController {
   ) {
     this.logger.debug('Update: Called');
     try {
-      return await this.service.update(id, updateUserDto);
+      return withoutPassword(await this.service.update(id, updateUserDto));
     } catch (error) {
       this.logger.error(error.message);
       throw error instanceof NotFoundException
@@ -135,7 +143,7 @@ export class UsersController {
       await this.service.delete(id);
     } catch (error) {
       this.logger.error(error.message);
-      return new NotFoundException();
+      throw new NotFoundException();
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Competence, CompetenceCategory, CompetenceFilters } from './competence.interface';
+import { Competence, CompetenceFilters } from './competence.interface';
 import { CreateCompetenceDto, UpdateCompetenceDto } from '../dto/competence.dto';
 
 export abstract class CompetenceServiceInterface {
@@ -7,6 +7,5 @@ export abstract class CompetenceServiceInterface {
   abstract findOne(id: string): Promise<Competence | null>;
   abstract update(id: string, updateCompetenceDto: UpdateCompetenceDto): Promise<Competence>;
   abstract remove(id: string): Promise<void>;
-  abstract findByCategory(category: CompetenceCategory): Promise<Competence[]>;
   abstract searchByName(name: string): Promise<Competence[]>;
 }

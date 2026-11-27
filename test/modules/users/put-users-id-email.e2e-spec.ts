@@ -2,9 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
-import { AuthHelper, createMockServices } from '../../helpers/auth-helper';
+import { AuthHelper, expectUnauthorizedResponse } from '../../helpers/auth-helper';
 import { UsersController } from '../../../src/domain/users/users.controller';
 import { UsersServiceInterface } from '../../../src/domain/users/interfaces/user.service.interface';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
+import { createUsersServiceMock, signedRequest } from '../../helpers/e2e-users-mocks';
 
 describe('Users Controller - PUT /users/:id/email (e2e)', () => {
   let app: INestApplication;
@@ -18,8 +20,7 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
   };
 
   beforeAll(async () => {
-    const { mockUsersService: mockService } = createMockServices();
-    mockUsersService = mockService;
+    mockUsersService = createUsersServiceMock();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -30,6 +31,7 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       ],
       controllers: [UsersController],
       providers: [
+        authGuardProvider,
         {
           provide: UsersServiceInterface,
           useValue: mockUsersService,
@@ -52,15 +54,21 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
     jest.clearAllMocks();
   });
 
-  describe('Public Access Tests', () => {
-    it('should update email when valid data provided (no auth required)', async () => {
+  describe('Authentication Tests', () => {
+    it('should return 401 when not authenticated', async () => {
+      const response = await authHelper.unauthenticatedRequest('put', `/users/${userId}/email`);
+      expectUnauthorizedResponse(response);
+      expect(mockUsersService.changeEmail).not.toHaveBeenCalled();
+    });
+
+    it('should update email when valid data provided', async () => {
       // Arrange
       mockUsersService.changeEmail.mockResolvedValue(undefined);
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(validEmailUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+        validEmailUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(204);
@@ -95,9 +103,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       const invalidId = 'not-a-uuid';
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${invalidId}/email`)
-        .send(validEmailUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${invalidId}/email`).send(
+        validEmailUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(400);
@@ -112,9 +120,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       };
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(incompleteData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+        incompleteData,
+      );
 
       // Assert
       expect(response.status).toBe(400);
@@ -129,9 +137,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       };
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(incompleteData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+        incompleteData,
+      );
 
       // Assert
       expect(response.status).toBe(400);
@@ -146,26 +154,21 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       };
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(invalidEmailData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+        invalidEmailData,
+      );
 
       // Assert
       expect(response.status).toBe(400);
       expect(mockUsersService.changeEmail).not.toHaveBeenCalled();
     });
 
-    it('should validate secret format/length', async () => {
-      // Arrange
-      const invalidSecretData = {
-        email: validEmailUpdateData.email,
-        secret: '123', // Too short
-      };
-
+    it('should reject a non-string secret', async () => {
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(invalidSecretData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send({
+        email: validEmailUpdateData.email,
+        secret: 123,
+      });
 
       // Assert
       expect(response.status).toBe(400);
@@ -181,9 +184,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       mockUsersService.changeEmail.mockRejectedValue(notFoundError);
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(validEmailUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+        validEmailUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(404);
@@ -195,9 +198,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       mockUsersService.changeEmail.mockRejectedValue(new Error('Database error'));
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(validEmailUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+        validEmailUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(404);
@@ -210,9 +213,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       mockUsersService.changeEmail.mockRejectedValue(invalidSecretError);
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(validEmailUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+        validEmailUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(404);
@@ -225,9 +228,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       mockUsersService.changeEmail.mockRejectedValue(expiredSecretError);
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(validEmailUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+        validEmailUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(404);
@@ -249,9 +252,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       // Act & Assert
       for (const email of validEmails) {
         const data = { ...validEmailUpdateData, email };
-        const response = await authHelper
-          .unauthenticatedRequest('put', `/users/${userId}/email`)
-          .send(data);
+        const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+          data,
+        );
         expect(response.status).toBe(204);
         jest.clearAllMocks();
       }
@@ -270,9 +273,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       // Act & Assert
       for (const email of invalidEmails) {
         const data = { ...validEmailUpdateData, email };
-        const response = await authHelper
-          .unauthenticatedRequest('put', `/users/${userId}/email`)
-          .send(data);
+        const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+          data,
+        );
         expect(response.status).toBe(400);
       }
     });
@@ -284,9 +287,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       mockUsersService.changeEmail.mockResolvedValue(undefined);
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(validEmailUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+        validEmailUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(204);
@@ -298,9 +301,7 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       mockUsersService.changeEmail.mockResolvedValue(undefined);
 
       // Act
-      await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(validEmailUpdateData);
+      await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(validEmailUpdateData);
 
       // Assert
       expect(mockUsersService.changeEmail).toHaveBeenCalledWith({
@@ -325,9 +326,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       // Act & Assert
       for (const secret of validSecrets) {
         const data = { ...validEmailUpdateData, secret };
-        const response = await authHelper
-          .unauthenticatedRequest('put', `/users/${userId}/email`)
-          .send(data);
+        const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+          data,
+        );
         expect(response.status).toBe(204);
         jest.clearAllMocks();
       }
@@ -338,9 +339,9 @@ describe('Users Controller - PUT /users/:id/email (e2e)', () => {
       mockUsersService.changeEmail.mockRejectedValue(new Error('Internal error'));
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/email`)
-        .send(validEmailUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/email`).send(
+        validEmailUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(404);

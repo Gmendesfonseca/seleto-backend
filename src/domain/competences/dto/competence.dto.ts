@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { CompetenceCategory, CompetenceLevel } from '../interfaces/competence.interface';
 
 export class CreateCompetenceDto {
@@ -16,8 +17,6 @@ export class UpdateCompetenceDto {
 
 export class CompetenceQueryDto {
   name?: string;
-  category?: CompetenceCategory;
-  level?: CompetenceLevel;
 }
 
 export class CompetenceResponseDto {

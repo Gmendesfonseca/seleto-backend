@@ -6,7 +6,7 @@ export * from './interfaces/person.service.interface';
 export * from './dto/person.dto';
 
 // Person repositories
-export * from './repositories/person.repository.interface';
+export * from './interfaces/person.repository.interface';
 
 // Person module
 export { PersonModule } from './person.module';

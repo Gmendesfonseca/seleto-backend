@@ -51,36 +51,25 @@ export class AddressService implements AddressServiceInterface {
     await this.addressRepository.delete(id);
   }
 
-  async findByPerson(personId: string): Promise<Address[]> {
-    this.logger.debug('AddressService.findByPerson: Called');
-    return this.addressRepository.findByPerson(personId);
+  async findByUser(userId: string): Promise<Address[]> {
+    this.logger.debug('AddressService.findByUser: Called');
+    return this.addressRepository.findByUser(userId);
   }
 
-  async findByCompany(companyId: string): Promise<Address[]> {
-    this.logger.debug('AddressService.findByCompany: Called');
-    return this.addressRepository.findByCompany(companyId);
-  }
-
-  async setPrimary(id: string, ownerId: string, ownerType: 'person' | 'company'): Promise<Address> {
+  async setPrimary(id: string): Promise<Address> {
     this.logger.debug('AddressService.setPrimary: Called');
     const address = await this.addressRepository.findOne(id);
     if (!address) {
       throw new NotFoundException(`Address with id ${id} not found`);
     }
 
-    // First, unset all other addresses for this owner as primary
-    const allAddresses =
-      ownerType === 'person'
-        ? await this.addressRepository.findByPerson(ownerId)
-        : await this.addressRepository.findByCompany(ownerId);
-
-    for (const addr of allAddresses) {
+    const userAddresses = await this.addressRepository.findByUser(address.userId);
+    for (const addr of userAddresses) {
       if (addr.id !== id && addr.isPrimary) {
         await this.addressRepository.update(addr.id, { isPrimary: false });
       }
     }
 
-    // Set this address as primary
     return this.addressRepository.update(id, { isPrimary: true });
   }
 }

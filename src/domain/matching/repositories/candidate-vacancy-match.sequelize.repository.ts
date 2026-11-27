@@ -30,7 +30,7 @@ export class CandidateVacancyMatchSequelizeRepository implements CandidateVacanc
 
   async findAll(filters?: CandidateVacancyMatchFilters): Promise<CandidateVacancyMatch[]> {
     this.logger.debug('CandidateVacancyMatchSequelizeRepository.findAll: Called');
-    const where: WhereOptions<CandidateVacancyMatchModel> = {};
+    const where: WhereOptions<CandidateVacancyMatch> = {};
 
     if (filters?.personId) {
       where.personId = filters.personId;

@@ -1,6 +1,6 @@
+import { DateTime } from 'luxon';
 export class CreateAddressDto {
-  personId?: string;
-  companyId?: string;
+  userId: string;
   street: string;
   number: string;
   complement?: string;
@@ -24,8 +24,7 @@ export class UpdateAddressDto {
 
 export class AddressResponseDto {
   id: string;
-  personId?: string;
-  companyId?: string;
+  userId: string;
   street: string;
   number: string;
   complement?: string;

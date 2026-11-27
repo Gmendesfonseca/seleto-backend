@@ -1,5 +1,7 @@
 // Phone model
 export * from './phone.model';
+// The model class wins over the same-named interface exported by './interfaces/phone.interface'
+export { Phone } from './phone.model';
 
 // Phone interfaces
 export * from './interfaces/phone.interface';
@@ -18,4 +20,4 @@ export { PhoneModule } from './phone.module';
 export { PhoneController } from './phone.controller';
 
 // Phone service
-export { PhoneServiceImpl } from './phone.service';
+export { PhoneService } from './phone.service';

@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { PasswordResetToken } from '../models/password-reset-token.model';
 import { PasswordResetTokenRepository } from './password-reset-token.repository.interface';
 import { Op } from 'sequelize';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class PasswordResetTokenSequelizeRepository implements PasswordResetTokenRepository {
@@ -13,12 +14,12 @@ export class PasswordResetTokenSequelizeRepository implements PasswordResetToken
     private readonly passwordResetTokenModel: typeof PasswordResetToken,
   ) {}
 
-  async create(userId: string, token: string, expiresAt: Date): Promise<PasswordResetToken> {
+  async create(userId: string, token: string, expiresAt: DateTime): Promise<PasswordResetToken> {
     this.logger.debug('PasswordResetTokenSequelizeRepository.create: Called');
     return this.passwordResetTokenModel.create({
-      userId,
+      user_id: userId,
       token,
-      expiresAt,
+      expiresAt: expiresAt.toJSDate(),
       used: false,
     } as any);
   }
@@ -30,7 +31,7 @@ export class PasswordResetTokenSequelizeRepository implements PasswordResetToken
 
   async findByUserId(userId: string): Promise<PasswordResetToken[]> {
     this.logger.debug('PasswordResetTokenSequelizeRepository.findByUserId: Called');
-    return this.passwordResetTokenModel.findAll({ where: { userId } });
+    return this.passwordResetTokenModel.findAll({ where: { user_id: userId } });
   }
 
   async markAsUsed(id: string): Promise<void> {
@@ -48,7 +49,7 @@ export class PasswordResetTokenSequelizeRepository implements PasswordResetToken
 
   async deleteByUserId(userId: string): Promise<void> {
     this.logger.debug('PasswordResetTokenSequelizeRepository.deleteByUserId: Called');
-    await this.passwordResetTokenModel.destroy({ where: { userId } });
+    await this.passwordResetTokenModel.destroy({ where: { user_id: userId } });
   }
 
   async deleteExpired(): Promise<void> {

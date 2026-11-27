@@ -1,5 +1,13 @@
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  ValidationPipe,
+  UnauthorizedException,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
 import { AuthHelper, createMockServices } from '../../helpers/auth-helper';
@@ -34,6 +42,7 @@ describe('Auth Controller - POST /auth/refresh (e2e)', () => {
       ],
       controllers: [AuthController],
       providers: [
+        authGuardProvider,
         {
           provide: AuthServiceInterface,
           useValue: mockAuthService,
@@ -191,8 +200,7 @@ describe('Auth Controller - POST /auth/refresh (e2e)', () => {
   describe('Error Handling Tests', () => {
     it('should handle invalid refresh token error', async () => {
       // Arrange
-      const unauthorizedError = new Error('Invalid refresh token');
-      unauthorizedError.name = 'UnauthorizedException';
+      const unauthorizedError = new UnauthorizedException('Invalid refresh token');
       mockAuthService.refreshToken.mockRejectedValue(unauthorizedError);
 
       // Act
@@ -207,8 +215,7 @@ describe('Auth Controller - POST /auth/refresh (e2e)', () => {
 
     it('should handle expired refresh token error', async () => {
       // Arrange
-      const expiredError = new Error('Refresh token expired');
-      expiredError.name = 'UnauthorizedException';
+      const expiredError = new UnauthorizedException('Refresh token expired');
       mockAuthService.refreshToken.mockRejectedValue(expiredError);
 
       // Act
@@ -222,8 +229,7 @@ describe('Auth Controller - POST /auth/refresh (e2e)', () => {
 
     it('should handle revoked refresh token error', async () => {
       // Arrange
-      const revokedError = new Error('Refresh token revoked');
-      revokedError.name = 'ForbiddenException';
+      const revokedError = new ForbiddenException('Refresh token revoked');
       mockAuthService.refreshToken.mockRejectedValue(revokedError);
 
       // Act
@@ -237,8 +243,7 @@ describe('Auth Controller - POST /auth/refresh (e2e)', () => {
 
     it('should handle user not found error', async () => {
       // Arrange
-      const notFoundError = new Error('User not found');
-      notFoundError.name = 'NotFoundException';
+      const notFoundError = new NotFoundException('User not found');
       mockAuthService.refreshToken.mockRejectedValue(notFoundError);
 
       // Act
@@ -315,8 +320,7 @@ describe('Auth Controller - POST /auth/refresh (e2e)', () => {
 
       for (const refreshToken of malformedTokens) {
         // Arrange
-        const validationError = new Error('Invalid token format');
-        validationError.name = 'BadRequestException';
+        const validationError = new BadRequestException('Invalid token format');
         mockAuthService.refreshToken.mockRejectedValue(validationError);
 
         // Act
