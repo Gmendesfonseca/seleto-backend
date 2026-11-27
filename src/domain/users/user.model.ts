@@ -1,8 +1,8 @@
 import { Column, DataType, HasOne, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { UserInterface } from './interfaces';
 import { DateTime } from 'luxon';
-import { Phone } from '../phones';
-import { Address } from '../addresses';
+import { Phone } from '../phones/phone.model';
+import { Address } from '../addresses/address.model';
 
 @Table({ tableName: 'users', underscored: true, paranoid: true })
 export class User extends Model<User> implements UserInterface {
