@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsOptional, IsString, IsEnum, IsBoolean } from 'class-validator';
 
 export class QueryUserDto {
@@ -22,6 +23,7 @@ export class QueryUserDto {
   readonly companyId?: string;
 
   @IsOptional()
+  @Transform(({ value }) => (value === 'true' ? true : value === 'false' ? false : value))
   @IsBoolean()
   readonly isVerified?: boolean;
 

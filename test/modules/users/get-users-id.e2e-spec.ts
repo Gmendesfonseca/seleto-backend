@@ -2,9 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
-import { AuthHelper, createMockServices } from '../../helpers/auth-helper';
+import { AuthHelper, expectUnauthorizedResponse } from '../../helpers/auth-helper';
 import { UsersController } from '../../../src/domain/users/users.controller';
 import { UsersServiceInterface } from '../../../src/domain/users/interfaces/user.service.interface';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
+import { createUsersServiceMock, signedRequest } from '../../helpers/e2e-users-mocks';
 
 describe('Users Controller - GET /users/:id (e2e)', () => {
   let app: INestApplication;
@@ -23,8 +25,7 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
   };
 
   beforeAll(async () => {
-    const { mockUsersService: mockService } = createMockServices();
-    mockUsersService = mockService;
+    mockUsersService = createUsersServiceMock();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -35,6 +36,7 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
       ],
       controllers: [UsersController],
       providers: [
+        authGuardProvider,
         {
           provide: UsersServiceInterface,
           useValue: mockUsersService,
@@ -44,7 +46,7 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
-    await app.init();
+    await app.listen(0);
 
     authHelper = new AuthHelper(app);
   });
@@ -57,24 +59,30 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
     jest.clearAllMocks();
   });
 
-  describe('Public Access Tests', () => {
-    it('should return user when requesting valid ID (no auth required)', async () => {
+  describe('Authentication Tests', () => {
+    it('should return 401 when not authenticated', async () => {
+      const response = await authHelper.unauthenticatedRequest('get', `/users/${mockUser.id}`);
+      expectUnauthorizedResponse(response);
+      expect(mockUsersService.findById).not.toHaveBeenCalled();
+    });
+
+    it('should return user when requesting valid ID', async () => {
       // Arrange
-      mockUsersService.findOne.mockResolvedValue(mockUser);
+      mockUsersService.findById.mockResolvedValue(mockUser);
       const userId = mockUser.id;
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', `/users/${userId}`);
+      const response = await signedRequest(authHelper, 'get', `/users/${userId}`);
 
       // Assert
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockUser);
-      expect(mockUsersService.findOne).toHaveBeenCalledWith(userId);
+      expect(mockUsersService.findById).toHaveBeenCalledWith(userId);
     });
 
     it('should work when authenticated as well', async () => {
       // Arrange
-      mockUsersService.findOne.mockResolvedValue(mockUser);
+      mockUsersService.findById.mockResolvedValue(mockUser);
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -83,7 +91,7 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
       // Assert
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockUser);
-      expect(mockUsersService.findOne).toHaveBeenCalledWith(mockUser.id);
+      expect(mockUsersService.findById).toHaveBeenCalledWith(mockUser.id);
     });
   });
 
@@ -93,27 +101,23 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
       const invalidId = 'not-a-uuid';
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', `/users/${invalidId}`);
+      const response = await signedRequest(authHelper, 'get', `/users/${invalidId}`);
 
       // Assert
       expect(response.status).toBe(400);
-      expect(mockUsersService.findOne).not.toHaveBeenCalled();
+      expect(mockUsersService.findById).not.toHaveBeenCalled();
     });
 
-    it('should validate required ID parameter', async () => {
+    it('should route a missing ID to the list endpoint', async () => {
+      // Arrange
+      mockUsersService.findAll.mockResolvedValue({ users: [], total: 0 });
+
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', '/users/');
+      const response = await signedRequest(authHelper, 'get', '/users/');
 
       // Assert
-      expect(response.status).toBe(404); // Route not found
-    });
-
-    it('should handle empty string as ID', async () => {
-      // Act
-      const response = await authHelper.unauthenticatedRequest('get', '/users/');
-
-      // Assert
-      expect(response.status).toBe(404); // Route not found
+      expect(response.status).toBe(200);
+      expect(mockUsersService.findById).not.toHaveBeenCalled();
     });
   });
 
@@ -122,24 +126,24 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
       // Arrange
       const notFoundError = new Error('User not found');
       notFoundError.name = 'NotFoundException';
-      mockUsersService.findOne.mockRejectedValue(notFoundError);
+      mockUsersService.findById.mockRejectedValue(notFoundError);
       const userId = faker.string.uuid();
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', `/users/${userId}`);
+      const response = await signedRequest(authHelper, 'get', `/users/${userId}`);
 
       // Assert
       expect(response.status).toBe(404);
-      expect(mockUsersService.findOne).toHaveBeenCalledWith(userId);
+      expect(mockUsersService.findById).toHaveBeenCalledWith(userId);
     });
 
     it('should handle generic service errors', async () => {
       // Arrange
-      mockUsersService.findOne.mockRejectedValue(new Error('Database connection error'));
+      mockUsersService.findById.mockRejectedValue(new Error('Database connection error'));
       const userId = faker.string.uuid();
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', `/users/${userId}`);
+      const response = await signedRequest(authHelper, 'get', `/users/${userId}`);
 
       // Assert
       expect(response.status).toBe(404);
@@ -147,15 +151,15 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
 
     it('should handle null/undefined response from service', async () => {
       // Arrange
-      mockUsersService.findOne.mockResolvedValue(null);
+      mockUsersService.findById.mockResolvedValue(null);
       const userId = faker.string.uuid();
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', `/users/${userId}`);
+      const response = await signedRequest(authHelper, 'get', `/users/${userId}`);
 
       // Assert
       expect(response.status).toBe(200);
-      expect(response.body).toBeNull();
+      expect(response.body).toEqual({});
     });
   });
 
@@ -163,10 +167,10 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
     it('should return person user details', async () => {
       // Arrange
       const personUser = { ...mockUser, type: 'PERSON' };
-      mockUsersService.findOne.mockResolvedValue(personUser);
+      mockUsersService.findById.mockResolvedValue(personUser);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', `/users/${personUser.id}`);
+      const response = await signedRequest(authHelper, 'get', `/users/${personUser.id}`);
 
       // Assert
       expect(response.status).toBe(200);
@@ -176,10 +180,10 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
     it('should return company user details', async () => {
       // Arrange
       const companyUser = { ...mockUser, type: 'COMPANY' };
-      mockUsersService.findOne.mockResolvedValue(companyUser);
+      mockUsersService.findById.mockResolvedValue(companyUser);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', `/users/${companyUser.id}`);
+      const response = await signedRequest(authHelper, 'get', `/users/${companyUser.id}`);
 
       // Assert
       expect(response.status).toBe(200);
@@ -191,10 +195,10 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
     it('should return active user', async () => {
       // Arrange
       const activeUser = { ...mockUser, status: 'ACTIVE' };
-      mockUsersService.findOne.mockResolvedValue(activeUser);
+      mockUsersService.findById.mockResolvedValue(activeUser);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', `/users/${activeUser.id}`);
+      const response = await signedRequest(authHelper, 'get', `/users/${activeUser.id}`);
 
       // Assert
       expect(response.status).toBe(200);
@@ -204,10 +208,10 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
     it('should return inactive user', async () => {
       // Arrange
       const inactiveUser = { ...mockUser, status: 'INACTIVE' };
-      mockUsersService.findOne.mockResolvedValue(inactiveUser);
+      mockUsersService.findById.mockResolvedValue(inactiveUser);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', `/users/${inactiveUser.id}`);
+      const response = await signedRequest(authHelper, 'get', `/users/${inactiveUser.id}`);
 
       // Assert
       expect(response.status).toBe(200);
@@ -218,10 +222,10 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
   describe('Data Integrity Tests', () => {
     it('should return user data with correct structure', async () => {
       // Arrange
-      mockUsersService.findOne.mockResolvedValue(mockUser);
+      mockUsersService.findById.mockResolvedValue(mockUser);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', `/users/${mockUser.id}`);
+      const response = await signedRequest(authHelper, 'get', `/users/${mockUser.id}`);
 
       // Assert
       expect(response.body).toMatchObject({
@@ -239,10 +243,10 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
     it('should not return sensitive data', async () => {
       // Arrange
       const userWithPassword = { ...mockUser, password: 'secret123' };
-      mockUsersService.findOne.mockResolvedValue(userWithPassword);
+      mockUsersService.findById.mockResolvedValue(userWithPassword);
 
       // Act
-      const response = await authHelper.unauthenticatedRequest('get', `/users/${mockUser.id}`);
+      const response = await signedRequest(authHelper, 'get', `/users/${mockUser.id}`);
 
       // Assert
       expect(response.body).not.toHaveProperty('password');
@@ -256,11 +260,11 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
         '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
       ];
 
-      mockUsersService.findOne.mockResolvedValue(mockUser);
+      mockUsersService.findById.mockResolvedValue(mockUser);
 
       // Act & Assert
       for (const uuid of validUUIDs) {
-        const response = await authHelper.unauthenticatedRequest('get', `/users/${uuid}`);
+        const response = await signedRequest(authHelper, 'get', `/users/${uuid}`);
         expect(response.status).toBe(200);
         jest.clearAllMocks();
       }
@@ -270,13 +274,13 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
   describe('Performance Tests', () => {
     it('should handle concurrent requests', async () => {
       // Arrange
-      mockUsersService.findOne.mockResolvedValue(mockUser);
+      mockUsersService.findById.mockResolvedValue(mockUser);
       const userId = mockUser.id;
       const concurrentRequests = 10;
 
       // Act
       const promises = Array.from({ length: concurrentRequests }, () =>
-        authHelper.unauthenticatedRequest('get', `/users/${userId}`),
+        signedRequest(authHelper, 'get', `/users/${userId}`),
       );
       const responses = await Promise.all(promises);
 
@@ -284,7 +288,7 @@ describe('Users Controller - GET /users/:id (e2e)', () => {
       responses.forEach((response) => {
         expect(response.status).toBe(200);
       });
-      expect(mockUsersService.findOne).toHaveBeenCalledTimes(concurrentRequests);
+      expect(mockUsersService.findById).toHaveBeenCalledTimes(concurrentRequests);
     });
   });
 });

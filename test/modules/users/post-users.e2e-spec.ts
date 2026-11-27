@@ -2,13 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
-import {
-  AuthHelper,
-  expectUnauthorizedResponse,
-  createMockServices,
-} from '../../helpers/auth-helper';
+import { AuthHelper, expectUnauthorizedResponse } from '../../helpers/auth-helper';
 import { UsersController } from '../../../src/domain/users/users.controller';
 import { UsersServiceInterface } from '../../../src/domain/users/interfaces/user.service.interface';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
+import { createUsersServiceMock } from '../../helpers/e2e-users-mocks';
 
 describe('Users Controller - POST /users (e2e)', () => {
   let app: INestApplication;
@@ -16,17 +14,12 @@ describe('Users Controller - POST /users (e2e)', () => {
   let mockUsersService: any;
 
   const validActivationData = {
-    userId: faker.string.uuid(),
-    username: faker.internet.username(),
-    password: faker.internet.password({ length: 12 }),
-    confirmPassword: faker.internet.password({ length: 12 }),
+    id: faker.string.uuid(),
+    secret: faker.string.alphanumeric(32),
   };
 
   beforeAll(async () => {
-    validActivationData.confirmPassword = validActivationData.password;
-
-    const { mockUsersService: mockService } = createMockServices();
-    mockUsersService = mockService;
+    mockUsersService = createUsersServiceMock();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -37,6 +30,7 @@ describe('Users Controller - POST /users (e2e)', () => {
       ],
       controllers: [UsersController],
       providers: [
+        authGuardProvider,
         {
           provide: UsersServiceInterface,
           useValue: mockUsersService,
@@ -107,126 +101,83 @@ describe('Users Controller - POST /users (e2e)', () => {
     it('should validate required fields', async () => {
       // Arrange
       const testUser = authHelper.createTestUser();
-      const incompleteData = {
-        userId: faker.string.uuid(),
-        // Missing username, password, confirmPassword
-      };
 
       // Act
-      const { response } = await authHelper.authenticatedPost('/users', incompleteData, testUser);
+      const { response } = await authHelper.authenticatedPost(
+        '/users',
+        { id: faker.string.uuid() },
+        testUser,
+      );
 
       // Assert
       expect(response.status).toBe(400);
       expect(mockUsersService.activate).not.toHaveBeenCalled();
     });
 
-    it('should validate userId format', async () => {
+    it('should validate id format', async () => {
       // Arrange
       const testUser = authHelper.createTestUser();
-      const invalidData = {
-        ...validActivationData,
-        userId: 'invalid-uuid',
-      };
-
-      // Act
-      const { response } = await authHelper.authenticatedPost('/users', invalidData, testUser);
-
-      // Assert
-      expect(response.status).toBe(400);
-    });
-
-    it('should validate password requirements', async () => {
-      // Arrange
-      const testUser = authHelper.createTestUser();
-      const weakPasswordData = {
-        ...validActivationData,
-        password: '123',
-        confirmPassword: '123',
-      };
-
-      // Act
-      const { response } = await authHelper.authenticatedPost('/users', weakPasswordData, testUser);
-
-      // Assert
-      expect(response.status).toBe(400);
-    });
-
-    it('should validate password confirmation match', async () => {
-      // Arrange
-      const testUser = authHelper.createTestUser();
-      const mismatchData = {
-        ...validActivationData,
-        password: 'strongPassword123!',
-        confirmPassword: 'differentPassword456!',
-      };
-
-      // Act
-      const { response } = await authHelper.authenticatedPost('/users', mismatchData, testUser);
-
-      // Assert
-      expect(response.status).toBe(400);
-    });
-
-    it('should validate username requirements', async () => {
-      // Arrange
-      const testUser = authHelper.createTestUser();
-      const invalidUsernameData = {
-        ...validActivationData,
-        username: 'ab', // Too short
-      };
 
       // Act
       const { response } = await authHelper.authenticatedPost(
         '/users',
-        invalidUsernameData,
+        { ...validActivationData, id: 'invalid-uuid' },
         testUser,
       );
 
       // Assert
       expect(response.status).toBe(400);
+      expect(mockUsersService.activate).not.toHaveBeenCalled();
+    });
+
+    it('should reject a non-string secret', async () => {
+      // Arrange
+      const testUser = authHelper.createTestUser();
+
+      // Act
+      const { response } = await authHelper.authenticatedPost(
+        '/users',
+        { ...validActivationData, secret: 12345 },
+        testUser,
+      );
+
+      // Assert
+      expect(response.status).toBe(400);
+      expect(mockUsersService.activate).not.toHaveBeenCalled();
     });
   });
 
   describe('User Context Tests', () => {
-    it('should work with person user', async () => {
+    it.each([
+      ['person', () => authHelper.createPersonUser()],
+      ['company', () => authHelper.createCompanyUser()],
+    ])('should work with a %s user', async (_label, build) => {
       // Arrange
       mockUsersService.activate.mockResolvedValue(undefined);
-      const personUser = authHelper.createPersonUser();
 
       // Act
       const { response } = await authHelper.authenticatedPost(
         '/users',
         validActivationData,
-        personUser,
+        build(),
       );
 
       // Assert
       expect(response.status).toBe(201);
-      expect(mockUsersService.activate).toHaveBeenCalled();
-    });
-
-    it('should work with company user', async () => {
-      // Arrange
-      mockUsersService.activate.mockResolvedValue(undefined);
-      const companyUser = authHelper.createCompanyUser();
-
-      // Act
-      const { response } = await authHelper.authenticatedPost(
-        '/users',
-        validActivationData,
-        companyUser,
-      );
-
-      // Assert
-      expect(response.status).toBe(201);
-      expect(mockUsersService.activate).toHaveBeenCalled();
+      expect(mockUsersService.activate).toHaveBeenCalledWith(validActivationData);
     });
   });
 
   describe('Error Handling Tests', () => {
-    it('should handle service activation errors', async () => {
+    it.each([
+      ['a generic error', new Error('User already activated')],
+      [
+        'a not found error',
+        Object.assign(new Error('User not found'), { name: 'NotFoundException' }),
+      ],
+    ])('should map %s from the service to a 400', async (_label, error) => {
       // Arrange
-      mockUsersService.activate.mockRejectedValue(new Error('User already activated'));
+      mockUsersService.activate.mockRejectedValue(error);
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -239,42 +190,6 @@ describe('Users Controller - POST /users (e2e)', () => {
       // Assert
       expect(response.status).toBe(400);
       expect(response.body.message).toBe('Failed to activate user');
-    });
-
-    it('should handle user not found during activation', async () => {
-      // Arrange
-      const notFoundError = new Error('User not found');
-      notFoundError.name = 'NotFoundException';
-      mockUsersService.activate.mockRejectedValue(notFoundError);
-      const testUser = authHelper.createTestUser();
-
-      // Act
-      const { response } = await authHelper.authenticatedPost(
-        '/users',
-        validActivationData,
-        testUser,
-      );
-
-      // Assert
-      expect(response.status).toBe(400);
-    });
-
-    it('should handle duplicate username errors', async () => {
-      // Arrange
-      const duplicateError = new Error('Username already exists');
-      duplicateError.name = 'ConflictException';
-      mockUsersService.activate.mockRejectedValue(duplicateError);
-      const testUser = authHelper.createTestUser();
-
-      // Act
-      const { response } = await authHelper.authenticatedPost(
-        '/users',
-        validActivationData,
-        testUser,
-      );
-
-      // Assert
-      expect(response.status).toBe(400);
     });
   });
 
@@ -293,67 +208,7 @@ describe('Users Controller - POST /users (e2e)', () => {
 
       // Assert
       expect(response.status).toBe(201);
-      expect(response.body).toEqual({
-        message: 'User activated successfully',
-      });
-    });
-
-    it('should call service with correct parameters', async () => {
-      // Arrange
-      mockUsersService.activate.mockResolvedValue(undefined);
-      const testUser = authHelper.createTestUser();
-
-      // Act
-      await authHelper.authenticatedPost('/users', validActivationData, testUser);
-
-      // Assert
-      expect(mockUsersService.activate).toHaveBeenCalledWith({
-        userId: validActivationData.userId,
-        username: validActivationData.username,
-        password: validActivationData.password,
-        confirmPassword: validActivationData.confirmPassword,
-      });
-    });
-  });
-
-  describe('Data Integrity Tests', () => {
-    it('should handle various valid username formats', async () => {
-      // Arrange
-      mockUsersService.activate.mockResolvedValue(undefined);
-      const testUser = authHelper.createTestUser();
-      const usernameVariations = ['john_doe', 'johndoe123', 'john.doe', 'JohnDoe', 'john-doe'];
-
-      // Act & Assert
-      for (const username of usernameVariations) {
-        const data = { ...validActivationData, username };
-        const { response } = await authHelper.authenticatedPost('/users', data, testUser);
-        expect(response.status).toBe(201);
-        jest.clearAllMocks();
-      }
-    });
-
-    it('should handle various valid password formats', async () => {
-      // Arrange
-      mockUsersService.activate.mockResolvedValue(undefined);
-      const testUser = authHelper.createTestUser();
-      const strongPasswords = [
-        'StrongPass123!',
-        'MySecureP@ssw0rd',
-        'Complex!Pass123',
-        'Secure#Password456',
-      ];
-
-      // Act & Assert
-      for (const password of strongPasswords) {
-        const data = {
-          ...validActivationData,
-          password,
-          confirmPassword: password,
-        };
-        const { response } = await authHelper.authenticatedPost('/users', data, testUser);
-        expect(response.status).toBe(201);
-        jest.clearAllMocks();
-      }
+      expect(response.body).toEqual({ message: 'User activated successfully' });
     });
   });
 });

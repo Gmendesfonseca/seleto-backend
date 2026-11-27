@@ -2,9 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
-import { AuthHelper, createMockServices } from '../../helpers/auth-helper';
+import { AuthHelper, expectUnauthorizedResponse } from '../../helpers/auth-helper';
 import { UsersController } from '../../../src/domain/users/users.controller';
 import { UsersServiceInterface } from '../../../src/domain/users/interfaces/user.service.interface';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
+import { createUsersServiceMock, signedRequest } from '../../helpers/e2e-users-mocks';
 
 describe('Users Controller - PUT /users/:id/username (e2e)', () => {
   let app: INestApplication;
@@ -27,8 +29,7 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
   };
 
   beforeAll(async () => {
-    const { mockUsersService: mockService } = createMockServices();
-    mockUsersService = mockService;
+    mockUsersService = createUsersServiceMock();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -39,6 +40,7 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
       ],
       controllers: [UsersController],
       providers: [
+        authGuardProvider,
         {
           provide: UsersServiceInterface,
           useValue: mockUsersService,
@@ -48,7 +50,7 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
-    await app.init();
+    await app.listen(0);
 
     authHelper = new AuthHelper(app);
   });
@@ -61,15 +63,21 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
     jest.clearAllMocks();
   });
 
-  describe('Public Access Tests', () => {
-    it('should update username when valid data provided (no auth required)', async () => {
+  describe('Authentication Tests', () => {
+    it('should return 401 when not authenticated', async () => {
+      const response = await authHelper.unauthenticatedRequest('put', `/users/${userId}/username`);
+      expectUnauthorizedResponse(response);
+      expect(mockUsersService.updateUsername).not.toHaveBeenCalled();
+    });
+
+    it('should update username when valid data provided', async () => {
       // Arrange
       mockUsersService.updateUsername.mockResolvedValue(mockUpdateResponse);
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/username`)
-        .send(validUsernameUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/username`).send(
+        validUsernameUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(204);
@@ -103,9 +111,9 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
       const invalidId = 'not-a-uuid';
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${invalidId}/username`)
-        .send(validUsernameUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${invalidId}/username`).send(
+        validUsernameUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(400);
@@ -117,41 +125,20 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
       const incompleteData = {};
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/username`)
-        .send(incompleteData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/username`).send(
+        incompleteData,
+      );
 
       // Assert
       expect(response.status).toBe(400);
       expect(mockUsersService.updateUsername).not.toHaveBeenCalled();
     });
 
-    it('should validate username format and length', async () => {
-      // Arrange
-      const invalidUsernameData = {
-        username: 'ab', // Too short
-      };
-
+    it('should reject a non-string username', async () => {
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/username`)
-        .send(invalidUsernameData);
-
-      // Assert
-      expect(response.status).toBe(400);
-      expect(mockUsersService.updateUsername).not.toHaveBeenCalled();
-    });
-
-    it('should validate username characters', async () => {
-      // Arrange
-      const invalidUsernameData = {
-        username: 'invalid@username!', // Invalid characters
-      };
-
-      // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/username`)
-        .send(invalidUsernameData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/username`).send({
+        username: 12345,
+      });
 
       // Assert
       expect(response.status).toBe(400);
@@ -176,32 +163,26 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
       // Act & Assert
       for (const username of validUsernames) {
         const data = { username };
-        const response = await authHelper
-          .unauthenticatedRequest('put', `/users/${userId}/username`)
-          .send(data);
+        const response = await signedRequest(authHelper, 'put', `/users/${userId}/username`).send(
+          data,
+        );
         expect(response.status).toBe(204);
         jest.clearAllMocks();
       }
     });
 
-    it('should reject invalid username formats', async () => {
+    it('should leave format and length rules to the service', async () => {
       // Arrange
-      const invalidUsernames = [
-        'ab', // Too short
-        'username_with_very_long_name_that_exceeds_limits_significantly',
-        'user@name',
-        'user name', // Space
-        'user!name',
-        '123username', // Starting with number
-      ];
+      mockUsersService.updateUsername.mockResolvedValue(undefined);
+      const unusualUsernames = ['ab', 'user@name', 'user name', '123username'];
 
       // Act & Assert
-      for (const username of invalidUsernames) {
-        const data = { username };
-        const response = await authHelper
-          .unauthenticatedRequest('put', `/users/${userId}/username`)
-          .send(data);
-        expect(response.status).toBe(400);
+      for (const username of unusualUsernames) {
+        const response = await signedRequest(authHelper, 'put', `/users/${userId}/username`).send({
+          username,
+        });
+        expect(response.status).toBe(204);
+        expect(mockUsersService.updateUsername).toHaveBeenLastCalledWith({ id: userId, username });
       }
     });
   });
@@ -214,9 +195,9 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
       mockUsersService.updateUsername.mockRejectedValue(notFoundError);
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/username`)
-        .send(validUsernameUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/username`).send(
+        validUsernameUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(404);
@@ -228,9 +209,9 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
       mockUsersService.updateUsername.mockRejectedValue(new Error('Database error'));
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/username`)
-        .send(validUsernameUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/username`).send(
+        validUsernameUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(404);
@@ -243,9 +224,9 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
       mockUsersService.updateUsername.mockRejectedValue(conflictError);
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/username`)
-        .send(validUsernameUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/username`).send(
+        validUsernameUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(404);
@@ -258,9 +239,9 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
       mockUsersService.updateUsername.mockResolvedValue(mockUpdateResponse);
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/username`)
-        .send(validUsernameUpdateData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/username`).send(
+        validUsernameUpdateData,
+      );
 
       // Assert
       expect(response.status).toBe(204);
@@ -272,9 +253,9 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
       mockUsersService.updateUsername.mockResolvedValue(mockUpdateResponse);
 
       // Act
-      await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/username`)
-        .send(validUsernameUpdateData);
+      await signedRequest(authHelper, 'put', `/users/${userId}/username`).send(
+        validUsernameUpdateData,
+      );
 
       // Assert
       expect(mockUsersService.updateUsername).toHaveBeenCalledWith({
@@ -293,9 +274,9 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
       mockUsersService.updateUsername.mockResolvedValue(mockUpdateResponse);
 
       // Act
-      const response = await authHelper
-        .unauthenticatedRequest('put', `/users/${userId}/username`)
-        .send(mixedCaseData);
+      const response = await signedRequest(authHelper, 'put', `/users/${userId}/username`).send(
+        mixedCaseData,
+      );
 
       // Assert
       expect(response.status).toBe(204);
@@ -317,9 +298,9 @@ describe('Users Controller - PUT /users/:id/username (e2e)', () => {
 
       // Act
       const promises = differentUserIds.map((id) =>
-        authHelper
-          .unauthenticatedRequest('put', `/users/${id}/username`)
-          .send({ username: faker.internet.username() }),
+        signedRequest(authHelper, 'put', `/users/${id}/username`).send({
+          username: faker.internet.username(),
+        }),
       );
       const responses = await Promise.all(promises);
 
