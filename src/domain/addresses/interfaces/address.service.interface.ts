@@ -8,9 +8,5 @@ export abstract class AddressServiceInterface {
   abstract create(createAddressDto: CreateAddressDto): Promise<Address>;
   abstract update(id: string, updateAddressDto: UpdateAddressDto): Promise<Address>;
   abstract remove(id: string): Promise<void>;
-  abstract setPrimary(
-    id: string,
-    ownerId: string,
-    ownerType: 'person' | 'company',
-  ): Promise<Address>;
+  abstract setPrimary(id: string): Promise<Address>;
 }

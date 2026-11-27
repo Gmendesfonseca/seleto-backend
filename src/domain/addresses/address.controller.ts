@@ -23,22 +23,20 @@ export class AddressController {
 
   @Get()
   async index(
-    @Query('personId') personId?: string,
-    @Query('companyId') companyId?: string,
+    @Query('userId') userId?: string,
     @Query('city') city?: string,
     @Query('state') state?: string,
     @Query('country') country?: string,
     @Query('isPrimary') isPrimary?: boolean,
   ) {
     this.logger.debug('Index: Called', {
-      personId,
-      companyId,
+      userId,
       city,
       state,
       country,
       isPrimary,
     });
-    return this.service.findAll({ personId, companyId, city, state, country, isPrimary });
+    return this.service.findAll({ userId, city, state, country, isPrimary });
   }
 
   @Get(':id')
@@ -61,13 +59,9 @@ export class AddressController {
   }
 
   @Patch(':id/set-primary')
-  async setPrimary(
-    @Param('id') id: string,
-    @Body('ownerId') ownerId: string,
-    @Body('ownerType') ownerType: 'person' | 'company',
-  ) {
+  async setPrimary(@Param('id') id: string) {
     this.logger.debug('SetPrimary: Called');
-    return this.service.setPrimary(id, ownerId, ownerType);
+    return this.service.setPrimary(id);
   }
 
   @Delete(':id')
