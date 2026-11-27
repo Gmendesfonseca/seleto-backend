@@ -1,531 +1,184 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { CompanyServiceImpl } from './company.service';
+import { DateTime } from 'luxon';
+import { CompanyService } from './company.service';
 import { CompanyRepository } from './repositories/company.repository.interface';
-import { PaginationParams, SearchParams } from '../../shared/interfaces/entities';
 import { Company } from './interfaces/company.interface';
-import { CompanyResponse, CreateCompanyRequest, UpdateCompanyRequest } from './dto';
+import { CompanyOutputDto, CreateCompanyDto, UpdateCompanyDto } from './dto';
 
 describe('CompanyService', () => {
-  let service: CompanyServiceImpl;
+  let service: CompanyService;
   let repository: jest.Mocked<CompanyRepository>;
 
-  const mockCompany = {
+  const createdAt = new Date('2023-01-01T00:00:00.000Z');
+  const updatedAt = new Date('2023-02-01T00:00:00.000Z');
+
+  // Sequelize hands back native Dates at runtime even though the model types them as DateTime.
+  const mockCompany: Company = {
     id: '550e8400-e29b-41d4-a716-446655440000',
-    name: 'Test Company',
-    address: 'Test Address',
-    isActive: true,
-    createdAt: new Date('2023-01-01'),
-    updatedAt: new Date('2023-01-01'),
+    cnpj: '12345678000199',
+    user_id: '550e8400-e29b-41d4-a716-446655440001',
+    createdAt: createdAt as unknown as DateTime,
+    updatedAt: updatedAt as unknown as DateTime,
   };
 
-  const mockCompanyResponse: CompanyResponse = {
+  const mockCompanyOutput: CompanyOutputDto = {
     id: mockCompany.id,
-    name: mockCompany.name,
-    address: mockCompany.address,
-    isActive: mockCompany.isActive,
-    createdAt: mockCompany.createdAt.toISOString(),
-    updatedAt: mockCompany.updatedAt.toISOString(),
+    cnpj: mockCompany.cnpj,
+    createdAt: createdAt.toISOString(),
+    updatedAt: updatedAt.toISOString(),
   };
 
   beforeEach(async () => {
-    const mockRepository = {
-      create: jest.fn(),
-      findById: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      findAll: jest.fn(),
-      existsByName: jest.fn(),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CompanyServiceImpl,
+        CompanyService,
         {
           provide: CompanyRepository,
-          useValue: mockRepository,
+          useValue: {
+            create: jest.fn(),
+            findOne: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
+            findAll: jest.fn(),
+            count: jest.fn(),
+          },
         },
       ],
     }).compile();
 
-    service = module.get<CompanyServiceImpl>(CompanyServiceImpl);
+    service = module.get(CompanyService);
     repository = module.get(CompanyRepository);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-    expect(service).toBeInstanceOf(CompanyServiceImpl);
-  });
-
   describe('create', () => {
-    it('should successfully create a company', async () => {
-      // Arrange
-      const createRequest: CreateCompanyRequest = {
-        name: 'New Company',
-        address: 'New Address',
-      };
-
-      const expectedRepositoryInput = {
-        name: createRequest.name,
-        address: createRequest.address,
-        isActive: true,
-      };
-
+    it('maps userId to user_id for the repository and returns the output dto', async () => {
+      const request: CreateCompanyDto = { cnpj: mockCompany.cnpj, userId: mockCompany.user_id };
       repository.create.mockResolvedValue(mockCompany);
 
-      // Act
-      const result = await service.create(createRequest);
+      const result = await service.create(request);
 
-      // Assert
-      expect(repository.create).toHaveBeenCalledWith(expectedRepositoryInput);
-      expect(result).toEqual(mockCompanyResponse);
+      expect(repository.create).toHaveBeenCalledWith({
+        cnpj: mockCompany.cnpj,
+        user_id: mockCompany.user_id,
+      });
+      expect(result).toEqual(mockCompanyOutput);
     });
 
-    it('should create company with null address when not provided', async () => {
-      // Arrange
-      const createRequest: CreateCompanyRequest = {
-        name: 'New Company',
-      };
-
-      const expectedRepositoryInput = {
-        name: createRequest.name,
-        address: null,
-        isActive: true,
-      };
-
-      repository.create.mockResolvedValue(mockCompany);
-
-      // Act
-      const result = await service.create(createRequest);
-
-      // Assert
-      expect(repository.create).toHaveBeenCalledWith(expectedRepositoryInput);
-      expect(result).toEqual(mockCompanyResponse);
-    });
-
-    it('should handle repository errors', async () => {
-      // Arrange
-      const createRequest: CreateCompanyRequest = {
-        name: 'New Company',
-        address: 'New Address',
-      };
-
+    it('propagates repository errors', async () => {
       repository.create.mockRejectedValue(new Error('Database error'));
 
-      // Act & Assert
-      await expect(service.create(createRequest)).rejects.toThrow('Database error');
-      expect(repository.create).toHaveBeenCalledTimes(1);
+      await expect(service.create({ cnpj: '1', userId: 'u' })).rejects.toThrow('Database error');
     });
   });
 
   describe('findById', () => {
-    it('should successfully find company by id', async () => {
-      // Arrange
-      const companyId = mockCompany.id;
-      repository.findById.mockResolvedValue(mockCompany);
+    it('looks the company up by id and returns the output dto', async () => {
+      repository.findOne.mockResolvedValue(mockCompany);
 
-      // Act
-      const result = await service.findById(companyId);
-
-      // Assert
-      expect(repository.findById).toHaveBeenCalledWith(companyId);
-      expect(result).toEqual(mockCompanyResponse);
+      await expect(service.findById(mockCompany.id)).resolves.toEqual(mockCompanyOutput);
+      expect(repository.findOne).toHaveBeenCalledWith({ id: mockCompany.id });
     });
 
-    it('should throw NotFoundException when company not found', async () => {
-      // Arrange
-      const companyId = 'non-existent-id';
-      repository.findById.mockResolvedValue(null);
+    it('throws NotFoundException when the company does not exist', async () => {
+      repository.findOne.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.findById(companyId)).rejects.toThrow(
-        new NotFoundException(`Company with id ${companyId} not found`),
+      await expect(service.findById('missing')).rejects.toThrow(
+        new NotFoundException('Company with id missing not found'),
       );
-      expect(repository.findById).toHaveBeenCalledWith(companyId);
+    });
+  });
+
+  describe('findByUserId', () => {
+    it('looks the company up by user_id', async () => {
+      repository.findOne.mockResolvedValue(mockCompany);
+
+      await expect(service.findByUserId(mockCompany.user_id)).resolves.toEqual(mockCompanyOutput);
+      expect(repository.findOne).toHaveBeenCalledWith({ user_id: mockCompany.user_id });
     });
 
-    it('should handle repository errors', async () => {
-      // Arrange
-      const companyId = mockCompany.id;
-      repository.findById.mockRejectedValue(new Error('Database error'));
+    it('throws NotFoundException when the user has no company', async () => {
+      repository.findOne.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.findById(companyId)).rejects.toThrow('Database error');
-      expect(repository.findById).toHaveBeenCalledWith(companyId);
+      await expect(service.findByUserId('u-1')).rejects.toThrow(
+        new NotFoundException('Company with userId u-1 not found'),
+      );
     });
   });
 
   describe('update', () => {
-    it('should successfully update a company', async () => {
-      // Arrange
-      const companyId = mockCompany.id;
-      const updateRequest: UpdateCompanyRequest = {
-        name: 'Updated Company',
-        address: 'Updated Address',
-      };
+    it('updates the cnpj of an existing company', async () => {
+      const request: UpdateCompanyDto = { cnpj: '99999999000100' };
+      repository.findOne.mockResolvedValue(mockCompany);
+      repository.update.mockResolvedValue({ ...mockCompany, cnpj: '99999999000100' });
 
-      const updatedCompany: Company = {
-        ...mockCompany,
-        name: updateRequest.name!,
-        address: updateRequest.address!,
-        updatedAt: new Date('2023-01-02'),
-      };
+      const result = await service.update(mockCompany.id, request);
 
-      const expectedRepositoryInput = {
-        name: updateRequest.name,
-        address: updateRequest.address,
-      };
-
-      repository.update.mockResolvedValue(updatedCompany);
-
-      // Act
-      const result = await service.update(companyId, updateRequest);
-
-      // Assert
-      expect(repository.update).toHaveBeenCalledWith(companyId, expectedRepositoryInput);
-      expect(result).toEqual({
-        ...mockCompanyResponse,
-        name: updateRequest.name,
-        address: updateRequest.address,
-        updatedAt: updatedCompany.updatedAt.toISOString(),
-      });
+      expect(repository.update).toHaveBeenCalledWith(mockCompany.id, { cnpj: '99999999000100' });
+      expect(result).toEqual({ ...mockCompanyOutput, cnpj: '99999999000100' });
     });
 
-    it('should update company with null address when not provided', async () => {
-      // Arrange
-      const companyId = mockCompany.id;
-      const updateRequest: UpdateCompanyRequest = {
-        name: 'Updated Company',
-      };
+    it('throws NotFoundException and does not update when the company does not exist', async () => {
+      repository.findOne.mockResolvedValue(null);
 
-      const expectedRepositoryInput = {
-        name: updateRequest.name,
-        address: null,
-      };
-
-      repository.update.mockResolvedValue(mockCompany);
-
-      // Act
-      const result = await service.update(companyId, updateRequest);
-
-      // Assert
-      expect(repository.update).toHaveBeenCalledWith(companyId, expectedRepositoryInput);
-      expect(result).toEqual(mockCompanyResponse);
-    });
-
-    it('should handle repository errors', async () => {
-      // Arrange
-      const companyId = mockCompany.id;
-      const updateRequest: UpdateCompanyRequest = {
-        name: 'Updated Company',
-      };
-
-      repository.update.mockRejectedValue(new Error('Database error'));
-
-      // Act & Assert
-      await expect(service.update(companyId, updateRequest)).rejects.toThrow('Database error');
-      expect(repository.update).toHaveBeenCalledTimes(1);
+      await expect(service.update('missing', { cnpj: '1' })).rejects.toThrow(
+        new NotFoundException('Company with id missing not found'),
+      );
+      expect(repository.update).not.toHaveBeenCalled();
     });
   });
 
   describe('delete', () => {
-    it('should successfully delete a company', async () => {
-      // Arrange
-      const companyId = mockCompany.id;
-      repository.findById.mockResolvedValue(mockCompany);
-      repository.delete.mockResolvedValue(undefined);
+    it('deletes an existing company', async () => {
+      repository.findOne.mockResolvedValue(mockCompany);
 
-      // Act
-      await service.delete(companyId);
+      await service.delete(mockCompany.id);
 
-      // Assert
-      expect(repository.findById).toHaveBeenCalledWith(companyId);
-      expect(repository.delete).toHaveBeenCalledWith(companyId);
+      expect(repository.delete).toHaveBeenCalledWith(mockCompany.id);
     });
 
-    it('should throw NotFoundException when company not found', async () => {
-      // Arrange
-      const companyId = 'non-existent-id';
-      repository.findById.mockResolvedValue(null);
+    it('throws NotFoundException and does not delete when the company does not exist', async () => {
+      repository.findOne.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.delete(companyId)).rejects.toThrow(
-        new NotFoundException(`Company with id ${companyId} not found`),
-      );
-      expect(repository.findById).toHaveBeenCalledWith(companyId);
+      await expect(service.delete('missing')).rejects.toThrow(NotFoundException);
       expect(repository.delete).not.toHaveBeenCalled();
-    });
-
-    it('should handle repository errors', async () => {
-      // Arrange
-      const companyId = mockCompany.id;
-      repository.findById.mockResolvedValue(mockCompany);
-      repository.delete.mockRejectedValue(new Error('Database error'));
-
-      // Act & Assert
-      await expect(service.delete(companyId)).rejects.toThrow('Database error');
-      expect(repository.delete).toHaveBeenCalledWith(companyId);
     });
   });
 
   describe('findAll', () => {
-    it('should successfully find all companies with pagination', async () => {
-      // Arrange
-      const pagination: PaginationParams = { page: 1, perPage: 10 };
-      const search: SearchParams = { search: 'test' };
+    it('maps every company to the output dto and keeps the meta', async () => {
+      const meta = { total: 1, currentPage: 2, perPage: 5, lastPage: 1 };
+      repository.findAll.mockResolvedValue({ data: [mockCompany], meta });
 
-      const mockRepositoryResult = {
-        data: [mockCompany],
-        meta: {
-          currentPage: 1,
-          perPage: 10,
-          lastPage: 1,
-          total: 1,
-        },
-      };
+      const result = await service.findAll({ page: 2, perPage: 5 }, { search: '123' });
 
-      const expectedResult = {
-        data: [mockCompanyResponse],
-        meta: {
-          currentPage: 1,
-          perPage: 10,
-          lastPage: 1,
-          total: 1,
-        },
-      };
-
-      repository.findAll.mockResolvedValue(mockRepositoryResult);
-
-      // Act
-      const result = await service.findAll(pagination, search);
-
-      // Assert
-      expect(repository.findAll).toHaveBeenCalledWith(pagination, search);
-      expect(result).toEqual(expectedResult);
+      expect(repository.findAll).toHaveBeenCalledWith({ page: 2, perPage: 5 }, { search: '123' });
+      expect(result).toEqual({ data: [mockCompanyOutput], meta });
     });
 
-    it('should find all companies without search parameters', async () => {
-      // Arrange
-      const pagination: PaginationParams = { page: 1, perPage: 10 };
+    it('returns an empty page when nothing matches', async () => {
+      const meta = { total: 0, currentPage: 1, perPage: 10, lastPage: 0 };
+      repository.findAll.mockResolvedValue({ data: [], meta });
 
-      const mockRepositoryResult = {
-        data: [mockCompany],
-        meta: {
-          currentPage: 1,
-          perPage: 10,
-          lastPage: 1,
-          total: 1,
-        },
-      };
-
-      repository.findAll.mockResolvedValue(mockRepositoryResult);
-
-      // Act
-      const result = await service.findAll(pagination);
-
-      // Assert
-      expect(repository.findAll).toHaveBeenCalledWith(pagination, undefined);
-      expect(result.data).toHaveLength(1);
-      expect(result.data[0]).toEqual(mockCompanyResponse);
-    });
-
-    it('should handle empty results', async () => {
-      // Arrange
-      const pagination: PaginationParams = { page: 1, perPage: 10 };
-
-      const mockRepositoryResult = {
-        data: [],
-        meta: {
-          currentPage: 1,
-          perPage: 10,
-          lastPage: 0,
-          total: 0,
-        },
-      };
-
-      repository.findAll.mockResolvedValue(mockRepositoryResult);
-
-      // Act
-      const result = await service.findAll(pagination);
-
-      // Assert
-      expect(result.data).toHaveLength(0);
-      expect(result.meta.total).toBe(0);
-    });
-
-    it('should handle repository errors', async () => {
-      // Arrange
-      const pagination: PaginationParams = { page: 1, perPage: 10 };
-      repository.findAll.mockRejectedValue(new Error('Database error'));
-
-      // Act & Assert
-      await expect(service.findAll(pagination)).rejects.toThrow('Database error');
+      await expect(service.findAll({})).resolves.toEqual({ data: [], meta });
     });
   });
 
-  describe('existsByName', () => {
-    it('should return true when company exists', async () => {
-      // Arrange
-      const name = 'Existing Company';
-      repository.existsByName.mockResolvedValue(true);
-
-      // Act
-      const result = await service.existsByName(name);
-
-      // Assert
-      expect(repository.existsByName).toHaveBeenCalledWith(name);
-      expect(result).toBe(true);
+  describe('placeholders', () => {
+    it('setActiveStatus is no longer supported', async () => {
+      await expect(service.setActiveStatus(mockCompany.id, true)).rejects.toThrow(
+        'setActiveStatus is no longer supported',
+      );
     });
 
-    it('should return false when company does not exist', async () => {
-      // Arrange
-      const name = 'Non-existing Company';
-      repository.existsByName.mockResolvedValue(false);
-
-      // Act
-      const result = await service.existsByName(name);
-
-      // Assert
-      expect(repository.existsByName).toHaveBeenCalledWith(name);
-      expect(result).toBe(false);
-    });
-
-    it('should handle repository errors', async () => {
-      // Arrange
-      const name = 'Test Company';
-      repository.existsByName.mockRejectedValue(new Error('Database error'));
-
-      // Act & Assert
-      await expect(service.existsByName(name)).rejects.toThrow('Database error');
-    });
-  });
-
-  describe('getUsersCount', () => {
-    it('should return 0 as placeholder implementation', async () => {
-      // Act
-      const result = await service.getUsersCount(mockCompany.id);
-
-      // Assert
-      expect(result).toBe(0);
-    });
-  });
-
-  describe('setActiveStatus', () => {
-    it('should successfully set active status', async () => {
-      // Arrange
-      const companyId = mockCompany.id;
-      const isActive = false;
-      repository.update.mockResolvedValue({ ...mockCompany, isActive });
-
-      // Act
-      await service.setActiveStatus(companyId, isActive);
-
-      // Assert
-      expect(repository.update).toHaveBeenCalledWith(companyId, { isActive });
-    });
-
-    it('should handle repository errors', async () => {
-      // Arrange
-      const companyId = mockCompany.id;
-      repository.update.mockRejectedValue(new Error('Database error'));
-
-      // Act & Assert
-      await expect(service.setActiveStatus(companyId, true)).rejects.toThrow('Database error');
-    });
-  });
-
-  describe('getStatistics', () => {
-    it('should return default statistics', async () => {
-      // Act
-      const result = await service.getStatistics(mockCompany.id);
-
-      // Assert
-      expect(result).toEqual({ totalUsers: 0, totalVacancies: 0 });
-    });
-  });
-
-  describe('getUsers', () => {
-    it('should return empty array as placeholder implementation', async () => {
-      // Act
-      const result = await service.getUsers(mockCompany.id);
-
-      // Assert
-      expect(result).toEqual([]);
-    });
-
-    it('should return empty array with filters', async () => {
-      // Arrange
-      const filters = { type: 'PERSON', status: 'ACTIVE', page: 1, limit: 10 };
-
-      // Act
-      const result = await service.getUsers(mockCompany.id, filters);
-
-      // Assert
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('getVacancies', () => {
-    it('should return empty array as placeholder implementation', async () => {
-      // Act
-      const result = await service.getVacancies(mockCompany.id);
-
-      // Assert
-      expect(result).toEqual([]);
-    });
-
-    it('should return empty array with filters', async () => {
-      // Arrange
-      const filters = { status: 'OPEN', page: 1, limit: 10 };
-
-      // Act
-      const result = await service.getVacancies(mockCompany.id, filters);
-
-      // Assert
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('toResponse (private method behavior)', () => {
-    it('should correctly map company data to response format', async () => {
-      // Arrange
-      repository.create.mockResolvedValue(mockCompany);
-
-      const createRequest: CreateCompanyRequest = {
-        name: mockCompany.name,
-        address: mockCompany.address,
-      };
-
-      // Act
-      const result = await service.create(createRequest);
-
-      // Assert
-      expect(result).toEqual(mockCompanyResponse);
-      expect(result.isActive).toBe(true);
-      expect(typeof result.createdAt).toBe('string');
-      expect(typeof result.updatedAt).toBe('string');
-    });
-
-    it('should use nullish coalescing for isActive property', async () => {
-      // This test verifies the ?? operator works correctly in toResponse method
-      // by ensuring the method returns expected structure
-      // Arrange
-      repository.create.mockResolvedValue(mockCompany);
-
-      const createRequest: CreateCompanyRequest = {
-        name: mockCompany.name,
-        address: mockCompany.address,
-      };
-
-      // Act
-      const result = await service.create(createRequest);
-
-      // Assert
-      expect(result.isActive).toBe(mockCompany.isActive);
+    it('count, statistics, findUsers and findVacancies return empty defaults', async () => {
+      await expect(service.count(mockCompany.id)).resolves.toBe(0);
+      await expect(service.statistics(mockCompany.id)).resolves.toEqual({
+        totalUsers: 0,
+        totalVacancies: 0,
+      });
+      await expect(service.findUsers(mockCompany.id)).resolves.toEqual([]);
+      await expect(service.findVacancies(mockCompany.id)).resolves.toEqual([]);
     });
   });
 });
