@@ -2,13 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
-import {
-  AuthHelper,
-  expectUnauthorizedResponse,
-  createMockServices,
-} from '../../helpers/auth-helper';
+import { AuthHelper, expectUnauthorizedResponse } from '../../helpers/auth-helper';
 import { UsersController } from '../../../src/domain/users/users.controller';
 import { UsersServiceInterface } from '../../../src/domain/users/interfaces/user.service.interface';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
+import { createUsersServiceMock } from '../../helpers/e2e-users-mocks';
 
 describe('Users Controller - GET /users (e2e)', () => {
   let app: INestApplication;
@@ -16,7 +14,7 @@ describe('Users Controller - GET /users (e2e)', () => {
   let mockUsersService: any;
 
   const mockUsersListResponse = {
-    data: [
+    users: [
       {
         id: faker.string.uuid(),
         username: faker.internet.username(),
@@ -29,13 +27,10 @@ describe('Users Controller - GET /users (e2e)', () => {
       },
     ],
     total: 1,
-    page: 1,
-    limit: 10,
   };
 
   beforeAll(async () => {
-    const { mockUsersService: mockService } = createMockServices();
-    mockUsersService = mockService;
+    mockUsersService = createUsersServiceMock();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -46,6 +41,7 @@ describe('Users Controller - GET /users (e2e)', () => {
       ],
       controllers: [UsersController],
       providers: [
+        authGuardProvider,
         {
           provide: UsersServiceInterface,
           useValue: mockUsersService,
@@ -54,7 +50,7 @@ describe('Users Controller - GET /users (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
 
     authHelper = new AuthHelper(app);
@@ -204,7 +200,7 @@ describe('Users Controller - GET /users (e2e)', () => {
       // Assert
       expect(mockUsersService.findAll).toHaveBeenCalledWith(
         expect.objectContaining({
-          isVerified: 'true',
+          isVerified: true,
         }),
       );
     });
@@ -268,7 +264,7 @@ describe('Users Controller - GET /users (e2e)', () => {
 
     it('should handle empty results', async () => {
       // Arrange
-      const emptyResponse = { data: [], total: 0, page: 1, limit: 10 };
+      const emptyResponse = { users: [], total: 0 };
       mockUsersService.findAll.mockResolvedValue(emptyResponse);
       const testUser = authHelper.createTestUser();
 
@@ -278,6 +274,25 @@ describe('Users Controller - GET /users (e2e)', () => {
       // Assert
       expect(response.status).toBe(200);
       expect(response.body).toEqual(emptyResponse);
+    });
+  });
+
+  describe('Sensitive Data Tests', () => {
+    it('should strip password from listed users', async () => {
+      // Arrange
+      const [user] = mockUsersListResponse.users;
+      mockUsersService.findAll.mockResolvedValue({
+        users: [{ ...user, password: 'hashed-secret' }],
+        total: 1,
+      });
+      const testUser = authHelper.createTestUser();
+
+      // Act
+      const { response } = await authHelper.authenticatedGet('/users', testUser);
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(response.body.users[0]).not.toHaveProperty('password');
     });
   });
 

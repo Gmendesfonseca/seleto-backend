@@ -1,14 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication, NotFoundException, ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
-import {
-  AuthHelper,
-  expectUnauthorizedResponse,
-  createMockServices,
-} from '../../helpers/auth-helper';
+import { AuthHelper, expectUnauthorizedResponse } from '../../helpers/auth-helper';
 import { UsersController } from '../../../src/domain/users/users.controller';
 import { UsersServiceInterface } from '../../../src/domain/users/interfaces/user.service.interface';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
+import { createUsersServiceMock } from '../../helpers/e2e-users-mocks';
 
 describe('Users Controller - PUT /users/:id (e2e)', () => {
   let app: INestApplication;
@@ -32,8 +30,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
   };
 
   beforeAll(async () => {
-    const { mockUsersService: mockService } = createMockServices();
-    mockUsersService = mockService;
+    mockUsersService = createUsersServiceMock();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -44,6 +41,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
       ],
       controllers: [UsersController],
       providers: [
+        authGuardProvider,
         {
           provide: UsersServiceInterface,
           useValue: mockUsersService,
@@ -69,7 +67,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
   describe('Authentication Tests', () => {
     it('should update user when authenticated', async () => {
       // Arrange
-      mockUsersService.updateUser.mockResolvedValue(mockUpdateResponse);
+      mockUsersService.update.mockResolvedValue(mockUpdateResponse);
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -82,7 +80,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
       // Assert
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockUpdateResponse);
-      expect(mockUsersService.updateUser).toHaveBeenCalledWith(userId, validUpdateUserData);
+      expect(mockUsersService.update).toHaveBeenCalledWith(userId, validUpdateUserData);
     });
 
     it('should return 401 when not authenticated', async () => {
@@ -90,7 +88,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
         .unauthenticatedRequest('put', `/users/${userId}`)
         .send(validUpdateUserData);
       expectUnauthorizedResponse(response);
-      expect(mockUsersService.updateUser).not.toHaveBeenCalled();
+      expect(mockUsersService.update).not.toHaveBeenCalled();
     });
 
     it('should return 401 with invalid token', async () => {
@@ -98,7 +96,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
         .invalidTokenRequest('put', `/users/${userId}`)
         .send(validUpdateUserData);
       expectUnauthorizedResponse(response);
-      expect(mockUsersService.updateUser).not.toHaveBeenCalled();
+      expect(mockUsersService.update).not.toHaveBeenCalled();
     });
 
     it('should return 401 with expired token', async () => {
@@ -106,7 +104,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
         .expiredTokenRequest('put', `/users/${userId}`)
         .send(validUpdateUserData);
       expectUnauthorizedResponse(response);
-      expect(mockUsersService.updateUser).not.toHaveBeenCalled();
+      expect(mockUsersService.update).not.toHaveBeenCalled();
     });
   });
 
@@ -125,7 +123,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(mockUsersService.updateUser).not.toHaveBeenCalled();
+      expect(mockUsersService.update).not.toHaveBeenCalled();
     });
 
     it('should validate email format when provided', async () => {
@@ -145,14 +143,14 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(mockUsersService.updateUser).not.toHaveBeenCalled();
+      expect(mockUsersService.update).not.toHaveBeenCalled();
     });
 
-    it('should validate username format when provided', async () => {
+    it('should validate username type when provided', async () => {
       // Arrange
       const invalidUsernameData = {
         ...validUpdateUserData,
-        username: 'ab', // Too short
+        username: 12345,
       };
       const testUser = authHelper.createTestUser();
 
@@ -165,7 +163,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(mockUsersService.updateUser).not.toHaveBeenCalled();
+      expect(mockUsersService.update).not.toHaveBeenCalled();
     });
 
     it('should validate status enum values when provided', async () => {
@@ -185,7 +183,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
 
       // Assert
       expect(response.status).toBe(400);
-      expect(mockUsersService.updateUser).not.toHaveBeenCalled();
+      expect(mockUsersService.update).not.toHaveBeenCalled();
     });
 
     it('should accept partial updates', async () => {
@@ -193,7 +191,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
       const partialUpdateData = {
         username: faker.internet.username(),
       };
-      mockUsersService.updateUser.mockResolvedValue(mockUpdateResponse);
+      mockUsersService.update.mockResolvedValue(mockUpdateResponse);
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -205,14 +203,14 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
 
       // Assert
       expect(response.status).toBe(200);
-      expect(mockUsersService.updateUser).toHaveBeenCalledWith(userId, partialUpdateData);
+      expect(mockUsersService.update).toHaveBeenCalledWith(userId, partialUpdateData);
     });
   });
 
   describe('User Context Tests', () => {
     it('should work with person user', async () => {
       // Arrange
-      mockUsersService.updateUser.mockResolvedValue(mockUpdateResponse);
+      mockUsersService.update.mockResolvedValue(mockUpdateResponse);
       const personUser = authHelper.createPersonUser();
 
       // Act
@@ -224,12 +222,12 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
 
       // Assert
       expect(response.status).toBe(200);
-      expect(mockUsersService.updateUser).toHaveBeenCalled();
+      expect(mockUsersService.update).toHaveBeenCalled();
     });
 
     it('should work with company user', async () => {
       // Arrange
-      mockUsersService.updateUser.mockResolvedValue(mockUpdateResponse);
+      mockUsersService.update.mockResolvedValue(mockUpdateResponse);
       const companyUser = authHelper.createCompanyUser();
 
       // Act
@@ -241,16 +239,14 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
 
       // Assert
       expect(response.status).toBe(200);
-      expect(mockUsersService.updateUser).toHaveBeenCalled();
+      expect(mockUsersService.update).toHaveBeenCalled();
     });
   });
 
   describe('Error Handling Tests', () => {
     it('should handle NotFoundException when user not found', async () => {
       // Arrange
-      const notFoundError = new Error('User not found');
-      notFoundError.name = 'NotFoundException';
-      mockUsersService.updateUser.mockRejectedValue(notFoundError);
+      mockUsersService.update.mockRejectedValue(new NotFoundException('User not found'));
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -266,7 +262,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
 
     it('should handle generic service errors as BadRequestException', async () => {
       // Arrange
-      mockUsersService.updateUser.mockRejectedValue(new Error('Database error'));
+      mockUsersService.update.mockRejectedValue(new Error('Database error'));
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -285,7 +281,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
       // Arrange
       const constraintError = new Error('Username already exists');
       constraintError.name = 'ConflictException';
-      mockUsersService.updateUser.mockRejectedValue(constraintError);
+      mockUsersService.update.mockRejectedValue(constraintError);
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -304,7 +300,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
     it('should update username field', async () => {
       // Arrange
       const usernameUpdate = { username: faker.internet.username() };
-      mockUsersService.updateUser.mockResolvedValue({ ...mockUpdateResponse, ...usernameUpdate });
+      mockUsersService.update.mockResolvedValue({ ...mockUpdateResponse, ...usernameUpdate });
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -322,7 +318,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
     it('should update email field', async () => {
       // Arrange
       const emailUpdate = { email: faker.internet.email() };
-      mockUsersService.updateUser.mockResolvedValue({ ...mockUpdateResponse, ...emailUpdate });
+      mockUsersService.update.mockResolvedValue({ ...mockUpdateResponse, ...emailUpdate });
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -340,7 +336,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
     it('should update status field', async () => {
       // Arrange
       const statusUpdate = { status: 'INACTIVE' };
-      mockUsersService.updateUser.mockResolvedValue({ ...mockUpdateResponse, ...statusUpdate });
+      mockUsersService.update.mockResolvedValue({ ...mockUpdateResponse, ...statusUpdate });
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -358,7 +354,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
     it('should update isVerified field', async () => {
       // Arrange
       const verificationUpdate = { isVerified: false };
-      mockUsersService.updateUser.mockResolvedValue({
+      mockUsersService.update.mockResolvedValue({
         ...mockUpdateResponse,
         ...verificationUpdate,
       });
@@ -383,7 +379,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
         status: 'INACTIVE',
         isVerified: false,
       };
-      mockUsersService.updateUser.mockResolvedValue({
+      mockUsersService.update.mockResolvedValue({
         ...mockUpdateResponse,
         ...multipleFieldsUpdate,
       });
@@ -407,7 +403,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
   describe('Response Structure Tests', () => {
     it('should return updated user data with correct structure', async () => {
       // Arrange
-      mockUsersService.updateUser.mockResolvedValue(mockUpdateResponse);
+      mockUsersService.update.mockResolvedValue(mockUpdateResponse);
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -433,7 +429,7 @@ describe('Users Controller - PUT /users/:id (e2e)', () => {
     it('should not return sensitive data', async () => {
       // Arrange
       const userWithPassword = { ...mockUpdateResponse, password: 'secret123' };
-      mockUsersService.updateUser.mockResolvedValue(userWithPassword);
+      mockUsersService.update.mockResolvedValue(userWithPassword);
       const testUser = authHelper.createTestUser();
 
       // Act

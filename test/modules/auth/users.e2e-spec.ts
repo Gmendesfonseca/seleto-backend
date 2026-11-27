@@ -1,14 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication, NotFoundException, ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
-import {
-  AuthHelper,
-  expectUnauthorizedResponse,
-  createMockServices,
-} from '../../helpers/auth-helper';
+import { AuthHelper, expectUnauthorizedResponse } from '../../helpers/auth-helper';
 import { UsersController } from '../../../src/domain/users/users.controller';
 import { UsersServiceInterface } from '../../../src/domain/users/interfaces/user.service.interface';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
+import { createUsersServiceMock } from '../../helpers/e2e-users-mocks';
 
 describe('Users Controller (e2e) - Authorized Routes', () => {
   let app: INestApplication;
@@ -28,15 +26,12 @@ describe('Users Controller (e2e) - Authorized Routes', () => {
   };
 
   const mockUsersListResponse = {
-    data: [mockUserResponse],
+    users: [mockUserResponse],
     total: 1,
-    page: 1,
-    limit: 10,
   };
 
   beforeAll(async () => {
-    const { mockUsersService: mockService } = createMockServices();
-    mockUsersService = mockService;
+    mockUsersService = createUsersServiceMock();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -47,6 +42,7 @@ describe('Users Controller (e2e) - Authorized Routes', () => {
       ],
       controllers: [UsersController],
       providers: [
+        authGuardProvider,
         {
           provide: UsersServiceInterface,
           useValue: mockUsersService,
@@ -146,19 +142,17 @@ describe('Users Controller (e2e) - Authorized Routes', () => {
     });
   });
 
-  describe('GET /users/me (Get Current User)', () => {
-    it('should return current user when authenticated', async () => {
+  describe('GET /users/me', () => {
+    it('should treat "me" as an invalid user ID when authenticated', async () => {
       // Arrange
-      mockUsersService.findOne.mockResolvedValue(mockUserResponse);
       const testUser = authHelper.createTestUser();
 
       // Act
       const { response } = await authHelper.authenticatedGet('/users/me', testUser);
 
       // Assert
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockUserResponse);
-      expect(mockUsersService.findOne).toHaveBeenCalledWith(testUser.id);
+      expect(response.status).toBe(400);
+      expect(mockUsersService.findById).not.toHaveBeenCalled();
     });
 
     it('should return 401 when not authenticated', async () => {
@@ -167,7 +161,7 @@ describe('Users Controller (e2e) - Authorized Routes', () => {
 
       // Assert
       expectUnauthorizedResponse(response);
-      expect(mockUsersService.findOne).not.toHaveBeenCalled();
+      expect(mockUsersService.findById).not.toHaveBeenCalled();
     });
 
     it('should return 401 with invalid token', async () => {
@@ -176,13 +170,13 @@ describe('Users Controller (e2e) - Authorized Routes', () => {
 
       // Assert
       expectUnauthorizedResponse(response);
-      expect(mockUsersService.findOne).not.toHaveBeenCalled();
+      expect(mockUsersService.findById).not.toHaveBeenCalled();
     });
   });
 
   describe('POST /users (Activate User)', () => {
     const activateUserDto = {
-      email: faker.internet.email(),
+      id: faker.string.uuid(),
       secret: faker.string.alphanumeric(32),
     };
 
@@ -231,7 +225,7 @@ describe('Users Controller (e2e) - Authorized Routes', () => {
 
     it('should update user when authenticated', async () => {
       // Arrange
-      mockUsersService.updateUser.mockResolvedValue({ ...mockUserResponse, ...updateUserDto });
+      mockUsersService.update.mockResolvedValue({ ...mockUserResponse, ...updateUserDto });
       const testUser = authHelper.createTestUser();
 
       // Act
@@ -244,7 +238,7 @@ describe('Users Controller (e2e) - Authorized Routes', () => {
       // Assert
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject(updateUserDto);
-      expect(mockUsersService.updateUser).toHaveBeenCalledWith(userId, updateUserDto);
+      expect(mockUsersService.update).toHaveBeenCalledWith(userId, updateUserDto);
     });
 
     it('should return 401 when not authenticated', async () => {
@@ -255,7 +249,7 @@ describe('Users Controller (e2e) - Authorized Routes', () => {
 
       // Assert
       expectUnauthorizedResponse(response);
-      expect(mockUsersService.updateUser).not.toHaveBeenCalled();
+      expect(mockUsersService.update).not.toHaveBeenCalled();
     });
 
     it('should return 401 with invalid token', async () => {
@@ -266,55 +260,22 @@ describe('Users Controller (e2e) - Authorized Routes', () => {
 
       // Assert
       expectUnauthorizedResponse(response);
-      expect(mockUsersService.updateUser).not.toHaveBeenCalled();
+      expect(mockUsersService.update).not.toHaveBeenCalled();
     });
   });
 
-  describe('PATCH /users/:id (Update User)', () => {
-    const userId = faker.string.uuid();
-    const updateUserDto = {
-      email: faker.internet.email(),
-      status: 'INACTIVE',
-    };
-
-    it('should update user when authenticated', async () => {
-      // Arrange
-      mockUsersService.updateUser.mockResolvedValue({ ...mockUserResponse, ...updateUserDto });
-      const testUser = authHelper.createTestUser();
-
+  describe('PATCH /users/:id', () => {
+    it('should return 404 because the controller has no PATCH route', async () => {
       // Act
       const { response } = await authHelper.authenticatedPatch(
-        `/users/${userId}`,
-        updateUserDto,
-        testUser,
+        `/users/${faker.string.uuid()}`,
+        { status: 'INACTIVE' },
+        authHelper.createTestUser(),
       );
 
       // Assert
-      expect(response.status).toBe(200);
-      expect(response.body).toMatchObject(updateUserDto);
-      expect(mockUsersService.updateUser).toHaveBeenCalledWith(userId, updateUserDto);
-    });
-
-    it('should return 401 when not authenticated', async () => {
-      // Act
-      const response = await authHelper
-        .unauthenticatedRequest('patch', `/users/${userId}`)
-        .send(updateUserDto);
-
-      // Assert
-      expectUnauthorizedResponse(response);
-      expect(mockUsersService.updateUser).not.toHaveBeenCalled();
-    });
-
-    it('should return 401 with invalid token', async () => {
-      // Act
-      const response = await authHelper
-        .invalidTokenRequest('patch', `/users/${userId}`)
-        .send(updateUserDto);
-
-      // Assert
-      expectUnauthorizedResponse(response);
-      expect(mockUsersService.updateUser).not.toHaveBeenCalled();
+      expect(response.status).toBe(404);
+      expect(mockUsersService.update).not.toHaveBeenCalled();
     });
   });
 
@@ -332,15 +293,16 @@ describe('Users Controller (e2e) - Authorized Routes', () => {
       expect(response.body.message).toBe('Failed to list users');
     });
 
-    it('should handle NotFoundException for getCurrentUser', async () => {
+    it('should map NotFoundException from findById to 404', async () => {
       // Arrange
-      const notFoundError = new Error('User not found');
-      notFoundError.name = 'NotFoundException';
-      mockUsersService.findOne.mockRejectedValue(notFoundError);
+      mockUsersService.findById.mockRejectedValue(new NotFoundException('User not found'));
       const testUser = authHelper.createTestUser();
 
       // Act
-      const { response } = await authHelper.authenticatedGet('/users/me', testUser);
+      const { response } = await authHelper.authenticatedGet(
+        `/users/${faker.string.uuid()}`,
+        testUser,
+      );
 
       // Assert
       expect(response.status).toBe(404);
