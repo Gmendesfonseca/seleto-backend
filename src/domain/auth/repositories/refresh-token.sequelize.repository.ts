@@ -16,7 +16,7 @@ export class RefreshTokenSequelizeRepository implements RefreshTokenRepository {
   async create(userId: string, token: string, expiresAt: Date): Promise<RefreshToken> {
     this.logger.debug('RefreshTokenSequelizeRepository.create: Called');
     return this.refreshTokenModel.create({
-      userId,
+      user_id: userId,
       token,
       expiresAt,
     } as any);
@@ -29,7 +29,7 @@ export class RefreshTokenSequelizeRepository implements RefreshTokenRepository {
 
   async findByUserId(userId: string): Promise<RefreshToken[]> {
     this.logger.debug('RefreshTokenSequelizeRepository.findByUserId: Called');
-    return this.refreshTokenModel.findAll({ where: { userId } });
+    return this.refreshTokenModel.findAll({ where: { user_id: userId } });
   }
 
   async delete(id: string): Promise<void> {
@@ -39,7 +39,7 @@ export class RefreshTokenSequelizeRepository implements RefreshTokenRepository {
 
   async deleteByUserId(userId: string): Promise<void> {
     this.logger.debug('RefreshTokenSequelizeRepository.deleteByUserId: Called');
-    await this.refreshTokenModel.destroy({ where: { userId } });
+    await this.refreshTokenModel.destroy({ where: { user_id: userId } });
   }
 
   async deleteExpired(): Promise<void> {
