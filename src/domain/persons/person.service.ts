@@ -1,4 +1,10 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { PersonServiceInterface } from './interfaces/person.service.interface';
 import { PersonRepository } from './interfaces/person.repository.interface';
 import { PersonFilters } from './interfaces/person.interface';
@@ -73,7 +79,13 @@ export class PersonService implements PersonServiceInterface {
     if (!person) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
-    await this.competenceRepository.create(dto);
+    if (!(await this.competenceRepository.competenceExists(dto.competenceId))) {
+      throw new UnprocessableEntityException(`Unknown competence: ${dto.competenceId}`);
+    }
+    if (await this.competenceRepository.hasCompetence(id, dto.competenceId)) {
+      throw new ConflictException('The person already has this competence');
+    }
+    await this.competenceRepository.create(id, dto);
     return person;
   }
 

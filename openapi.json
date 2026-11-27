@@ -1076,7 +1076,16 @@
     "/api/v1/competences": {
       "get": {
         "operationId": "CompetenceController_index",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -1085,7 +1094,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "$ref": "#/components/schemas/CompetenceResponseDto"
                   }
                 }
               }
@@ -1099,13 +1108,23 @@
       "post": {
         "operationId": "CompetenceController_store",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompetenceDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/CompetenceResponseDto"
                 }
               }
             }
@@ -1119,14 +1138,23 @@
     "/api/v1/competences/{id}": {
       "get": {
         "operationId": "CompetenceController_show",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/CompetenceResponseDto"
                 }
               }
             }
@@ -1138,14 +1166,33 @@
       },
       "put": {
         "operationId": "CompetenceController_update",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompetenceDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/CompetenceResponseDto"
                 }
               }
             }
@@ -1157,7 +1204,16 @@
       },
       "delete": {
         "operationId": "CompetenceController_destroy",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "204": {
             "description": ""
@@ -3969,27 +4025,30 @@
       "CreatePersonCompetenceDto": {
         "type": "object",
         "properties": {
-          "personId": {
-            "type": "string"
+          "competenceId": {
+            "type": "string",
+            "format": "uuid"
           },
-          "competenceName": {
-            "type": "string"
+          "level": {
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced",
+              "expert"
+            ]
           },
-          "proficiencyLevel": {
-            "type": "number"
+          "yearsOfExperience": {
+            "type": "number",
+            "minimum": 0
           },
           "description": {
             "type": "string"
-          },
-          "yearsOfExperience": {
-            "type": "number"
           }
         },
         "required": [
-          "personId",
-          "competenceName",
-          "proficiencyLevel",
-          "yearsOfExperience"
+          "competenceId",
+          "level"
         ]
       },
       "CreatePersonExperienceDto": {
@@ -4090,6 +4149,66 @@
           "endDate",
           "isCompleted",
           "grade"
+        ]
+      },
+      "CompetenceResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateCompetenceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateCompetenceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
         ]
       },
       "CreatePhoneDto": {

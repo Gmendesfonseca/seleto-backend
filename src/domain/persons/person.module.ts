@@ -16,10 +16,17 @@ import { PersonCompetenceSequelizeRepository } from './repositories/person-compe
 import { PersonFormation } from './person-formation.model';
 import { PersonCompetence } from './person-competence.model';
 import { PersonExperience } from './person-experience.model';
+import { Competence } from '../competences/competence.model';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Person, PersonCompetence, PersonExperience, PersonFormation]),
+    SequelizeModule.forFeature([
+      Person,
+      PersonCompetence,
+      PersonExperience,
+      PersonFormation,
+      Competence,
+    ]),
     MatchingModule,
   ],
   controllers: [PersonController],
