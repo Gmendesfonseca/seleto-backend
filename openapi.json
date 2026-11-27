@@ -2309,6 +2309,80 @@
         ]
       }
     },
+    "/api/v1/vacancies/{vacancyId}/competence-requirements": {
+      "get": {
+        "operationId": "VacancyCompetenceRequirementController_index",
+        "parameters": [
+          {
+            "name": "vacancyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CompetenceRequirementResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "VacancyCompetenceRequirement"
+        ]
+      },
+      "put": {
+        "operationId": "VacancyCompetenceRequirementController_replace",
+        "parameters": [
+          {
+            "name": "vacancyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceCompetenceRequirementsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CompetenceRequirementResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "VacancyCompetenceRequirement"
+        ]
+      }
+    },
     "/api/v1/applications": {
       "get": {
         "operationId": "ApplicationController_index",
@@ -4286,6 +4360,87 @@
       "VacancyStep": {
         "type": "object",
         "properties": {}
+      },
+      "CompetenceRequirementResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "competenceId": {
+            "type": "string"
+          },
+          "competenceName": {
+            "type": "string"
+          },
+          "priority": {
+            "enum": [
+              "required",
+              "preferred",
+              "nice_to_have"
+            ],
+            "type": "string"
+          },
+          "minimumYearsExperience": {
+            "type": "number",
+            "nullable": true
+          },
+          "weight": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "competenceId",
+          "competenceName",
+          "priority",
+          "minimumYearsExperience",
+          "weight"
+        ]
+      },
+      "CompetenceRequirementItemDto": {
+        "type": "object",
+        "properties": {
+          "competenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "required",
+              "preferred",
+              "nice_to_have"
+            ]
+          },
+          "minimumYearsExperience": {
+            "type": "number",
+            "minimum": 0
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "competenceId",
+          "priority"
+        ]
+      },
+      "ReplaceCompetenceRequirementsDto": {
+        "type": "object",
+        "properties": {
+          "requirements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompetenceRequirementItemDto"
+            }
+          }
+        },
+        "required": [
+          "requirements"
+        ]
       },
       "CreateApplicationDto": {
         "type": "object",
