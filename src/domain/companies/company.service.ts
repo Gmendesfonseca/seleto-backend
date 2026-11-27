@@ -45,6 +45,10 @@ export class CompanyService implements CompanyServiceInterface {
 
   async update(id: string, data: UpdateCompanyDto): Promise<CompanyOutputDto> {
     this.logger.debug('CompanyService.update: Called');
+    const existing = await this.repository.findOne({ id });
+    if (!existing) {
+      throw new NotFoundException(`Company with id ${id} not found`);
+    }
     const company = await this.repository.update(id, {
       cnpj: data.cnpj,
     });
