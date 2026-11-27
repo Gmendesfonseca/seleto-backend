@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { LogLevel, ConsoleLogger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
+import { toLogLevels } from './infrastructure/config/log-levels';
 import { applyGlobalPrefix, DEFAULT_API_PREFIX } from './infrastructure/config/global-prefix';
 import { createOpenApiDocument } from './infrastructure/config/swagger';
 import { SwaggerModule } from '@nestjs/swagger';
@@ -11,7 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
-  const logLevels = configService.get<LogLevel[]>('LOG_LEVEL');
+  const logLevels = toLogLevels(configService.get<string | LogLevel[]>('LOG_LEVEL'));
   const corsOriginsString = configService.get<string>('CORS_ORIGINS') ?? '*';
 
   const corsOrigins =
