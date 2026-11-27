@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -20,14 +21,15 @@ export class Competence extends Model<Competence> {
   name: string;
 
   @Column({ type: DataType.TEXT, allowNull: true })
-  description: string;
+  description: string | null;
 
+  // Null for the global catalog; set only on legacy company-owned rows.
   @ForeignKey(() => Company)
-  @Column({ type: DataType.UUID, allowNull: false })
-  company_id: string;
+  @Column({ type: DataType.UUID, allowNull: true })
+  company_id: string | null;
 
   @BelongsTo(() => Company)
-  company: Company;
+  company: Relation<Company>;
 
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt: DateTime;

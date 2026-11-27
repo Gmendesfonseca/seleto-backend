@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import { Column, DataType, HasOne, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { UserInterface } from './interfaces';
 import { DateTime } from 'luxon';
@@ -37,10 +38,10 @@ export class User extends Model<User> implements UserInterface {
   type: string;
 
   @HasOne(() => Phone, { foreignKey: 'user_id' })
-  phone: Phone;
+  phone: Relation<Phone>;
 
   @HasOne(() => Address, { foreignKey: 'user_id' })
-  address: Address;
+  address: Relation<Address>;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   isVerified: boolean;

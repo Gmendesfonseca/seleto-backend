@@ -17,11 +17,15 @@
     "noImplicitAny": true,
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@nestjs/swagger/plugin": ["node_modules/@nestjs/swagger/dist/plugin"]
+    }
   },
   "include": [
     "src/**/*",
     "test/**/*",
+    "scripts/**/*",
     "migrations/**/*",
     "eslint.config.js",
     ".config/*",

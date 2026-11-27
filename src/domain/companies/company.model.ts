@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -33,5 +34,5 @@ export class Company extends Model<Company> {
   deletedAt: DateTime | null;
 
   @BelongsTo(() => User)
-  user: User;
+  user: Relation<User>;
 }

@@ -20,6 +20,17 @@ import { VacancyStepRepository } from './interfaces/vacancy-step.repository.inte
 import { VacancyStepSequelizeRepository } from './repositories/vacancy-step.sequelize.repository';
 import { VacancyStep } from './vacancy-step.model';
 import { MatchingModule } from '../matching/matching.module';
+import { Competence } from '../competences/competence.model';
+import { VacancyCompetenceRequirement } from '../competences/vacancy-competence-requirement.model';
+import { VacancyCompetenceRequirementController } from './vacancy-competence-requirement.controller';
+import { VacancyCompetenceRequirementService } from './vacancy-competence-requirement.service';
+import { VacancyCompetenceRequirementRepository } from './interfaces/vacancy-competence-requirement.repository.interface';
+import { VacancyCompetenceRequirementServiceInterface } from './interfaces/vacancy-competence-requirement.service.interface';
+import { VacancyApplicationController } from './vacancy-application.controller';
+import { VacancyApplicationService } from './vacancy-application.service';
+import { VacancyApplicationServiceInterface } from './interfaces/vacancy-application.service.interface';
+import { ApplicationModule } from '../applications/application.module';
+import { VacancyCompetenceRequirementSequelizeRepository } from './repositories/vacancy-competence-requirement.sequelize.repository';
 
 @Module({
   imports: [
@@ -29,10 +40,17 @@ import { MatchingModule } from '../matching/matching.module';
       VacancyBenefit,
       VacancyRequirement,
       VacancyResponsibility,
+      VacancyCompetenceRequirement,
+      Competence,
     ]),
     MatchingModule,
+    ApplicationModule,
   ],
-  controllers: [VacancyController],
+  controllers: [
+    VacancyController,
+    VacancyCompetenceRequirementController,
+    VacancyApplicationController,
+  ],
   providers: [
     {
       provide: VacancyRepository,
@@ -57,6 +75,18 @@ import { MatchingModule } from '../matching/matching.module';
     {
       provide: VacancyStepRepository,
       useClass: VacancyStepSequelizeRepository,
+    },
+    {
+      provide: VacancyCompetenceRequirementRepository,
+      useClass: VacancyCompetenceRequirementSequelizeRepository,
+    },
+    {
+      provide: VacancyCompetenceRequirementServiceInterface,
+      useClass: VacancyCompetenceRequirementService,
+    },
+    {
+      provide: VacancyApplicationServiceInterface,
+      useClass: VacancyApplicationService,
     },
   ],
   exports: [

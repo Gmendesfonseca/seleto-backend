@@ -19,8 +19,4 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   ],
   exports: ['REDIS'],
 })
-export class RedisModule {
-  constructor() {
-    process.loadEnvFile();
-  }
-}
+export class RedisModule {}

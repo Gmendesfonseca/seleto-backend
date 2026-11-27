@@ -3,12 +3,16 @@ import { AppModule } from './app.module';
 import { LogLevel, ConsoleLogger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
+import { toLogLevels } from './infrastructure/config/log-levels';
+import { applyGlobalPrefix, DEFAULT_API_PREFIX } from './infrastructure/config/global-prefix';
+import { createOpenApiDocument } from './infrastructure/config/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
-  const logLevels = configService.get<LogLevel[]>('LOG_LEVEL');
+  const logLevels = toLogLevels(configService.get<string | LogLevel[]>('LOG_LEVEL'));
   const corsOriginsString = configService.get<string>('CORS_ORIGINS') ?? '*';
 
   const corsOrigins =
@@ -16,10 +20,7 @@ async function bootstrap() {
 
   app.useLogger(new ConsoleLogger('Seleto Backend', { logLevels }));
 
-  const apiPrefix = configService.get<string>('API_PREFIX') ?? 'api/v1';
-  app.setGlobalPrefix(apiPrefix, {
-    exclude: ['/health', '/health/*path'],
-  });
+  applyGlobalPrefix(app, configService.get<string>('API_PREFIX') ?? DEFAULT_API_PREFIX);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -28,6 +29,8 @@ async function bootstrap() {
       enableDebugMessages: true,
     }),
   );
+
+  SwaggerModule.setup('docs', app, await createOpenApiDocument(app));
 
   app.use(helmet());
   interface CorsOptions {

@@ -11,6 +11,8 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  ForbiddenException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { PersonServiceInterface } from './interfaces/person.service.interface';
 import { PersonQueryDto, CreatePersonDto, UpdatePersonDto } from './dto/person.dto';
@@ -61,13 +63,17 @@ export class PersonController {
   }
 
   @Post(':id/competences')
+  @HttpCode(HttpStatus.CREATED)
   async addCompetence(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreatePersonCompetenceDto,
     @Req() req: Request,
   ) {
     this.logger.debug('AddCompetence: Called');
-    return this.service.addCompetence(id, { ...dto, personId: req.auth?.profileId ?? '' });
+    if (req.auth?.profileId !== id) {
+      throw new ForbiddenException('A person can only change their own competences');
+    }
+    return this.service.addCompetence(id, dto);
   }
 
   @Delete(':id/competences/:competenceId')

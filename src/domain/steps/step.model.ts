@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -50,10 +51,10 @@ export class Step extends Model<Step> {
   company_id: string;
 
   @BelongsTo(() => Company)
-  company: Company;
+  company: Relation<Company>;
 
   @BelongsTo(() => VacancyTemplate)
-  template: VacancyTemplate;
+  template: Relation<VacancyTemplate>;
 
   @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   createdAt: DateTime;

@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -35,7 +36,7 @@ export class PersonCompetence extends Model<PersonCompetence> {
   competence_id: string;
 
   @BelongsTo(() => Competence)
-  competence: Competence;
+  competence: Relation<Competence>;
 
   @Column({
     type: DataType.ENUM(...Object.values(ProficiencyLevel)),
@@ -58,8 +59,8 @@ export class PersonCompetence extends Model<PersonCompetence> {
   source_formation_id: string; // References person_formations.id
 
   @Column({ type: DataType.DATE, allowNull: false })
-  created_at: Date;
+  createdAt: Date;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  updated_at: Date;
+  updatedAt: Date;
 }

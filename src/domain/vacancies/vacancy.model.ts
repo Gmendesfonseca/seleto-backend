@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -127,7 +128,7 @@ export class Vacancy extends Model<Vacancy> {
   company_id: string;
 
   @BelongsTo(() => Company)
-  company: Company;
+  company: Relation<Company>;
 
   @HasMany(() => VacancyStep)
   steps: VacancyStep[];

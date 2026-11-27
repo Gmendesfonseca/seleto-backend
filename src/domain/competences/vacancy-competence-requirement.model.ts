@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -35,7 +36,7 @@ export class VacancyCompetenceRequirement extends Model<VacancyCompetenceRequire
   competence_id: string;
 
   @BelongsTo(() => Competence)
-  competence: Competence;
+  competence: Relation<Competence>;
 
   @Column({
     type: DataType.ENUM(...Object.values(RequirementPriority)),

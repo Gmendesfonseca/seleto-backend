@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -29,7 +30,7 @@ export class Role extends Model<Role> {
   company_id: string;
 
   @BelongsTo(() => Company)
-  company: Company;
+  company: Relation<Company>;
 
   @Column({ type: DataType.DATE, allowNull: false })
   created_at: Date;

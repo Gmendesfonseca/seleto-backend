@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -29,7 +30,7 @@ export class VacancyStep extends Model<VacancyStep> {
   stepId: string;
 
   @BelongsTo(() => Step)
-  step: Step;
+  step: Relation<Step>;
 
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
   order: number;

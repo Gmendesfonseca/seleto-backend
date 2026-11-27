@@ -9,6 +9,7 @@ export interface TestUser {
   email: string;
   type: 'PERSON' | 'COMPANY';
   companyId?: string;
+  profileId?: string;
   status: 'ACTIVE' | 'INACTIVE';
 }
 
@@ -51,6 +52,7 @@ export class AuthHelper {
       email: user.email,
       type: user.type,
       companyId: user.companyId,
+      profileId: user.profileId,
       status: user.status,
       sub: user.id,
     };
@@ -152,6 +154,7 @@ export class AuthHelper {
   createPersonUser(): TestUser {
     return this.createTestUser({
       type: 'PERSON',
+      profileId: faker.string.uuid(),
     });
   }
 

@@ -1,30 +1,29 @@
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { DateTime } from 'luxon';
-import { CompetenceCategory, CompetenceLevel } from '../interfaces/competence.interface';
 
 export class CreateCompetenceDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
   name: string;
-  category: CompetenceCategory;
+
+  @IsOptional()
+  @IsString()
   description?: string;
-  level?: CompetenceLevel;
 }
 
-export class UpdateCompetenceDto {
-  name?: string;
-  category?: CompetenceCategory;
-  description?: string;
-  level?: CompetenceLevel;
-}
+export class UpdateCompetenceDto extends CreateCompetenceDto {}
 
 export class CompetenceQueryDto {
+  @IsOptional()
+  @IsString()
   name?: string;
 }
 
 export class CompetenceResponseDto {
   id: string;
   name: string;
-  category: CompetenceCategory;
-  description?: string;
-  level?: CompetenceLevel;
+  description: string | null;
   createdAt: DateTime;
   updatedAt: DateTime;
 }

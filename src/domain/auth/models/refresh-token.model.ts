@@ -1,3 +1,4 @@
+import { Relation } from '../../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -21,7 +22,7 @@ export class RefreshToken extends Model<RefreshToken> {
   user_id: string;
 
   @BelongsTo(() => User)
-  user: User;
+  user: Relation<User>;
 
   @Column({ type: DataType.STRING(500), allowNull: false, unique: true })
   token: string;

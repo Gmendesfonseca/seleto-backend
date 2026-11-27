@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -28,7 +29,7 @@ export class CandidateVacancyMatch extends Model<CandidateVacancyMatch> {
   vacancyId: string;
 
   @BelongsTo(() => Vacancy)
-  vacancy: Vacancy;
+  vacancy: Relation<Vacancy>;
 
   // Match score (0-100)
   @Column({ type: DataType.DECIMAL(5, 2), allowNull: false, field: 'match_score' })

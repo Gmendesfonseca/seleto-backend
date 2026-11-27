@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PersonService } from './person.service';
 import { PersonRepository } from './interfaces/person.repository.interface';
 import { PersonExperienceRepository } from './interfaces/person-experience.repository.interface';
@@ -12,6 +12,7 @@ import { CreatePersonCompetenceDto } from './dto/person-competence.dto';
 import { CreatePersonExperienceDto } from './dto/person-experience.dto';
 import { CreatePersonFormationDto } from './dto/person-formation.dto';
 import { DegreeType } from './person-formation.model';
+import { ProficiencyLevel } from './person-competence.model';
 import { DateTime } from 'luxon';
 
 jest.mock('../matching/matching.service', () => ({ MatchingService: class MatchingService {} }));
@@ -60,7 +61,12 @@ describe('PersonService', () => {
         },
         {
           provide: PersonCompetenceRepository,
-          useValue: { create: jest.fn(), delete: jest.fn() },
+          useValue: {
+            create: jest.fn(),
+            delete: jest.fn(),
+            competenceExists: jest.fn(),
+            hasCompetence: jest.fn(),
+          },
         },
         { provide: MatchingService, useValue: matchingService },
       ],
@@ -174,17 +180,37 @@ describe('PersonService', () => {
 
   describe('competences', () => {
     const dto: CreatePersonCompetenceDto = {
-      personId,
-      competenceName: 'TypeScript',
-      proficiencyLevel: 4,
+      competenceId: '550e8400-e29b-41d4-a716-446655440002',
+      level: ProficiencyLevel.ADVANCED,
       yearsOfExperience: 3,
     };
 
-    it('addCompetence persists the competence and returns the person', async () => {
+    it('addCompetence persists the competence for the person and returns the person', async () => {
       repository.findOne.mockResolvedValue(mockPerson);
+      competenceRepository.competenceExists.mockResolvedValue(true);
+      competenceRepository.hasCompetence.mockResolvedValue(false);
 
       await expect(service.addCompetence(personId, dto)).resolves.toBe(mockPerson);
-      expect(competenceRepository.create).toHaveBeenCalledWith(dto);
+      expect(competenceRepository.create).toHaveBeenCalledWith(personId, dto);
+    });
+
+    it('addCompetence rejects a competence missing from the catalog with 422', async () => {
+      repository.findOne.mockResolvedValue(mockPerson);
+      competenceRepository.competenceExists.mockResolvedValue(false);
+
+      await expect(service.addCompetence(personId, dto)).rejects.toThrow(
+        UnprocessableEntityException,
+      );
+      expect(competenceRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('addCompetence rejects a competence the person already has with 409', async () => {
+      repository.findOne.mockResolvedValue(mockPerson);
+      competenceRepository.competenceExists.mockResolvedValue(true);
+      competenceRepository.hasCompetence.mockResolvedValue(true);
+
+      await expect(service.addCompetence(personId, dto)).rejects.toThrow(ConflictException);
+      expect(competenceRepository.create).not.toHaveBeenCalled();
     });
 
     it('addCompetence throws NotFoundException without creating when the person is missing', async () => {
