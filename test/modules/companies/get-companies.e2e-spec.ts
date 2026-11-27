@@ -7,6 +7,7 @@ import {
   expectUnauthorizedResponse,
   createMockServices,
 } from '../../helpers/auth-helper';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { CompanyController } from '../../../src/domain/companies/company.controller';
 import { CompanyServiceInterface as CompanyService } from '../../../src/domain/companies/interfaces/company.service.interface';
 
@@ -63,6 +64,7 @@ describe('Companies Controller - GET /companies (e2e)', () => {
       ],
       controllers: [CompanyController],
       providers: [
+        authGuardProvider,
         {
           provide: CompanyService,
           useValue: mockCompanyService,

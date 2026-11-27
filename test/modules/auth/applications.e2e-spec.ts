@@ -7,6 +7,7 @@ import {
   expectUnauthorizedResponse,
   createMockServices,
 } from '../../helpers/auth-helper';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import {
   ApplicationController,
   ApplicantController,
@@ -49,6 +50,7 @@ describe('Applications Controller (e2e) - Authorized Routes', () => {
       ],
       controllers: [ApplicationController, ApplicantController],
       providers: [
+        authGuardProvider,
         {
           provide: ApplicationServiceInterface,
           useValue: mockApplicationService,

@@ -7,6 +7,7 @@ import {
   expectUnauthorizedResponse,
   createMockServices,
 } from '../../helpers/auth-helper';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { DashboardController } from '../../../src/domain/dashboard/dashboard.controller';
 import { DashboardServiceInterface } from '../../../src/domain/dashboard/interfaces/dashboard.service.interface';
 
@@ -74,6 +75,7 @@ describe('Dashboard Controller (e2e) - Authorized Routes', () => {
       ],
       controllers: [DashboardController],
       providers: [
+        authGuardProvider,
         {
           provide: DashboardServiceInterface,
           useValue: mockDashboardService,

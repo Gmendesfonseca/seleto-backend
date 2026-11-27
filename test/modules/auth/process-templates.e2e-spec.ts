@@ -7,6 +7,7 @@ import {
   expectUnauthorizedResponse,
   createMockServices,
 } from '../../helpers/auth-helper';
+import { authGuardProvider } from '../../helpers/auth-guard.provider';
 import { ProcessTemplateController } from '../../../src/domain/templates/process-template.controller';
 import { ProcessTemplateServiceInterface as ProcessTemplateService } from '../../../src/domain/templates/interfaces/process-template.service.interface';
 
@@ -67,6 +68,7 @@ describe('Process Templates Controller (e2e) - Authorized Routes', () => {
       ],
       controllers: [ProcessTemplateController],
       providers: [
+        authGuardProvider,
         {
           provide: ProcessTemplateService,
           useValue: mockProcessTemplateService,
