@@ -29,6 +29,11 @@ export class VacancyStepSequelizeRepository implements VacancyStepRepository {
     return this.model.findAll({ where });
   }
 
+  async findByVacancyId(vacancyId: string): Promise<VacancyStep[]> {
+    this.logger.debug('FindByVacancyId: Called');
+    return this.model.findAll({ where: { vacancyId }, order: [['order', 'ASC']] });
+  }
+
   async findOne(id: string): Promise<VacancyStep | null> {
     this.logger.debug('FindOne: Called');
     return this.model.findByPk(id);

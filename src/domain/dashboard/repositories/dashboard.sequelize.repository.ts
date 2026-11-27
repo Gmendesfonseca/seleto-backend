@@ -38,15 +38,15 @@ export class DashboardSequelizeRepository implements DashboardRepository {
     }
 
     if (filters?.dateFrom || filters?.dateTo) {
-      where.created_at = {};
+      where.createdAt = {};
       if (filters.dateFrom) {
-        where.created_at = {
+        where.createdAt = {
           [Op.gte]: new Date(filters.dateFrom),
         };
       }
       if (filters.dateTo) {
-        where.created_at = {
-          ...(where.created_at as object),
+        where.createdAt = {
+          ...(where.createdAt as object),
           [Op.lte]: new Date(filters.dateTo),
         };
       }
@@ -124,7 +124,7 @@ export class DashboardSequelizeRepository implements DashboardRepository {
     return this.applicationModel.findAll({
       where,
       limit,
-      order: [['created_at', 'DESC']],
+      order: [['createdAt', 'DESC']],
       include: [
         {
           model: this.personModel,
@@ -168,7 +168,7 @@ export class DashboardSequelizeRepository implements DashboardRepository {
     return this.vacancyModel.findAll({
       where,
       limit,
-      order: [['created_at', 'DESC']],
+      order: [['createdAt', 'DESC']],
       include: [
         {
           model: this.companyModel,
@@ -257,7 +257,7 @@ export class DashboardSequelizeRepository implements DashboardRepository {
       const year = date.getFullYear();
 
       const where: WhereOptions<Application> = {
-        created_at: {
+        createdAt: {
           [Op.gte]: new Date(year, date.getMonth(), 1),
           [Op.lt]: new Date(year, date.getMonth() + 1, 1),
         },
