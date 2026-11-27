@@ -1,545 +1,313 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { PersonService } from './person.service';
-import { PersonRepository } from './repositories/person.repository.interface';
-import { Person, PersonFilters, Address } from './interfaces/person.interface';
-import {
-  CreatePersonDto,
-  UpdatePersonDto,
-  AddCompetenceDto,
-  AddWorkExperienceDto,
-  AddEducationDto,
-} from './dto/person.dto';
+import { PersonRepository } from './interfaces/person.repository.interface';
+import { PersonExperienceRepository } from './interfaces/person-experience.repository.interface';
+import { PersonFormationRepository } from './interfaces/person-formation.repository.interface';
+import { PersonCompetenceRepository } from './interfaces/person-competence.repository.interface';
+import { MatchingService } from '../matching/matching.service';
+import { Person } from './person.model';
+import { CreatePersonDto, UpdatePersonDto } from './dto/person.dto';
+import { CreatePersonCompetenceDto } from './dto/person-competence.dto';
+import { CreatePersonExperienceDto } from './dto/person-experience.dto';
+import { CreatePersonFormationDto } from './dto/person-formation.dto';
+import { DegreeType } from './person-formation.model';
+import { DateTime } from 'luxon';
+
+jest.mock('../matching/matching.service', () => ({ MatchingService: class MatchingService {} }));
 
 describe('PersonService', () => {
   let service: PersonService;
   let repository: jest.Mocked<PersonRepository>;
+  let experienceRepository: jest.Mocked<PersonExperienceRepository>;
+  let formationRepository: jest.Mocked<PersonFormationRepository>;
+  let competenceRepository: jest.Mocked<PersonCompetenceRepository>;
+  let matchingService: { findMatchesForPerson: jest.Mock };
 
-  const mockAddress: Address = {
-    street: '123 Main St',
-    city: 'New York',
-    state: 'NY',
-    zipCode: '10001',
-    country: 'USA',
-  };
+  const personId = '550e8400-e29b-41d4-a716-446655440000';
+  const userId = '550e8400-e29b-41d4-a716-446655440001';
 
-  const mockPerson: Person = {
-    id: '550e8400-e29b-41d4-a716-446655440000',
-    userId: '550e8400-e29b-41d4-a716-446655440001',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1234567890',
-    dateOfBirth: new Date('1990-01-01'),
-    address: mockAddress,
-    bio: 'Software Developer',
-    profilePicture: 'https://example.com/avatar.jpg',
-    createdAt: new Date('2023-01-01'),
-    updatedAt: new Date('2023-01-01'),
-  };
+  const mockPerson = {
+    id: personId,
+    cpf: '12345678901',
+    user_id: userId,
+  } as Person;
 
   beforeEach(async () => {
-    const mockRepository = {
-      create: jest.fn(),
-      findAll: jest.fn(),
-      findOne: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      findByUser: jest.fn(),
-    };
+    matchingService = { findMatchesForPerson: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PersonService,
         {
           provide: PersonRepository,
-          useValue: mockRepository,
+          useValue: {
+            create: jest.fn(),
+            findAll: jest.fn(),
+            findOne: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
+            countByFilters: jest.fn(),
+          },
         },
+        {
+          provide: PersonExperienceRepository,
+          useValue: { create: jest.fn(), delete: jest.fn() },
+        },
+        {
+          provide: PersonFormationRepository,
+          useValue: { create: jest.fn(), delete: jest.fn() },
+        },
+        {
+          provide: PersonCompetenceRepository,
+          useValue: { create: jest.fn(), delete: jest.fn() },
+        },
+        { provide: MatchingService, useValue: matchingService },
       ],
     }).compile();
 
-    service = module.get<PersonService>(PersonService);
+    service = module.get(PersonService);
     repository = module.get(PersonRepository);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-    expect(service).toBeInstanceOf(PersonService);
+    experienceRepository = module.get(PersonExperienceRepository);
+    formationRepository = module.get(PersonFormationRepository);
+    competenceRepository = module.get(PersonCompetenceRepository);
   });
 
   describe('create', () => {
-    it('should successfully create a person', async () => {
-      // Arrange
-      const createPersonDto: CreatePersonDto = {
-        userId: mockPerson.userId,
-        firstName: mockPerson.firstName,
-        lastName: mockPerson.lastName,
-        email: mockPerson.email,
-      };
-
+    it('forwards the dto to the repository and returns the created person', async () => {
+      const dto: CreatePersonDto = { cpf: mockPerson.cpf, userId };
       repository.create.mockResolvedValue(mockPerson);
 
-      // Act
-      const result = await service.create(createPersonDto);
-
-      // Assert
-      expect(repository.create).toHaveBeenCalledWith(createPersonDto);
-      expect(result).toEqual(mockPerson);
+      await expect(service.create(dto)).resolves.toBe(mockPerson);
+      expect(repository.create).toHaveBeenCalledWith(dto);
     });
 
-    it('should handle repository errors', async () => {
-      // Arrange
-      const createPersonDto: CreatePersonDto = {
-        userId: mockPerson.userId,
-        firstName: mockPerson.firstName,
-        lastName: mockPerson.lastName,
-        email: mockPerson.email,
-      };
+    it('propagates repository errors', async () => {
+      repository.create.mockRejectedValue(new Error('db down'));
 
-      repository.create.mockRejectedValue(new Error('Database error'));
-
-      // Act & Assert
-      await expect(service.create(createPersonDto)).rejects.toThrow('Database error');
-      expect(repository.create).toHaveBeenCalledWith(createPersonDto);
+      await expect(service.create({ cpf: '1', userId })).rejects.toThrow('db down');
     });
   });
 
   describe('findAll', () => {
-    it('should return all persons without filters', async () => {
-      // Arrange
-      const persons = [mockPerson];
-      repository.findAll.mockResolvedValue(persons);
+    it('passes the filters through and returns the list', async () => {
+      repository.findAll.mockResolvedValue([mockPerson]);
 
-      // Act
-      const result = await service.findAll();
-
-      // Assert
-      expect(repository.findAll).toHaveBeenCalledWith(undefined);
-      expect(result).toEqual(persons);
+      await expect(service.findAll({ cpf: '123' })).resolves.toEqual([mockPerson]);
+      expect(repository.findAll).toHaveBeenCalledWith({ cpf: '123' });
     });
 
-    it('should return filtered persons', async () => {
-      // Arrange
-      const filters: PersonFilters = { firstName: 'John', location: 'New York' };
-      const persons = [mockPerson];
-      repository.findAll.mockResolvedValue(persons);
-
-      // Act
-      const result = await service.findAll(filters);
-
-      // Assert
-      expect(repository.findAll).toHaveBeenCalledWith(filters);
-      expect(result).toEqual(persons);
-    });
-
-    it('should handle empty results', async () => {
-      // Arrange
+    it('returns an empty list when nothing matches', async () => {
       repository.findAll.mockResolvedValue([]);
 
-      // Act
-      const result = await service.findAll();
-
-      // Assert
-      expect(result).toEqual([]);
-    });
-
-    it('should handle repository errors', async () => {
-      // Arrange
-      repository.findAll.mockRejectedValue(new Error('Database error'));
-
-      // Act & Assert
-      await expect(service.findAll()).rejects.toThrow('Database error');
+      await expect(service.findAll()).resolves.toEqual([]);
     });
   });
 
   describe('findOne', () => {
-    it('should return person when found', async () => {
-      // Arrange
-      const personId = mockPerson.id;
+    it('looks the person up by id', async () => {
       repository.findOne.mockResolvedValue(mockPerson);
 
-      // Act
-      const result = await service.findOne(personId);
-
-      // Assert
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
-      expect(result).toEqual(mockPerson);
+      await expect(service.findOne(personId)).resolves.toBe(mockPerson);
+      expect(repository.findOne).toHaveBeenCalledWith({ id: personId });
     });
 
-    it('should return null when person not found', async () => {
-      // Arrange
-      const personId = 'non-existent-id';
+    it('returns null when the person does not exist', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      // Act
-      const result = await service.findOne(personId);
+      await expect(service.findOne('missing')).resolves.toBeNull();
+    });
+  });
 
-      // Assert
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
-      expect(result).toBeNull();
+  describe('findByUserId', () => {
+    it('looks the person up by user_id', async () => {
+      repository.findOne.mockResolvedValue(mockPerson);
+
+      await expect(service.findByUserId(userId)).resolves.toBe(mockPerson);
+      expect(repository.findOne).toHaveBeenCalledWith({ user_id: userId });
     });
 
-    it('should handle repository errors', async () => {
-      // Arrange
-      const personId = mockPerson.id;
-      repository.findOne.mockRejectedValue(new Error('Database error'));
+    it('throws NotFoundException when no person belongs to the user', async () => {
+      repository.findOne.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.findOne(personId)).rejects.toThrow('Database error');
+      await expect(service.findByUserId(userId)).rejects.toThrow(
+        `Person with userId ${userId} not found`,
+      );
     });
   });
 
   describe('update', () => {
-    it('should successfully update a person', async () => {
-      // Arrange
-      const personId = mockPerson.id;
-      const updatePersonDto: UpdatePersonDto = {
-        firstName: 'Jane',
-        lastName: 'Smith',
-        phone: '+0987654321',
-      };
-
-      const updatedPerson = {
-        ...mockPerson,
-        ...updatePersonDto,
-        updatedAt: new Date('2023-01-02'),
-      };
-
+    it('updates an existing person with the dto', async () => {
+      const dto: UpdatePersonDto = { bio: 'New bio' };
+      const updated = { ...mockPerson } as Person;
       repository.findOne.mockResolvedValue(mockPerson);
-      repository.update.mockResolvedValue(updatedPerson);
+      repository.update.mockResolvedValue(updated);
 
-      // Act
-      const result = await service.update(personId, updatePersonDto);
-
-      // Assert
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
-      expect(repository.update).toHaveBeenCalledWith(personId, updatePersonDto);
-      expect(result).toEqual(updatedPerson);
+      await expect(service.update(personId, dto)).resolves.toBe(updated);
+      expect(repository.update).toHaveBeenCalledWith(personId, dto);
     });
 
-    it('should throw NotFoundException when person not found', async () => {
-      // Arrange
-      const personId = 'non-existent-id';
-      const updatePersonDto: UpdatePersonDto = {
-        firstName: 'Jane',
-      };
-
+    it('throws NotFoundException and skips the update when the person is missing', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.update(personId, updatePersonDto)).rejects.toThrow(
-        new NotFoundException(`Person with id ${personId} not found`),
-      );
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
+      await expect(service.update('missing', { bio: 'x' })).rejects.toThrow(NotFoundException);
       expect(repository.update).not.toHaveBeenCalled();
-    });
-
-    it('should handle repository errors', async () => {
-      // Arrange
-      const personId = mockPerson.id;
-      const updatePersonDto: UpdatePersonDto = {
-        firstName: 'Jane',
-      };
-
-      repository.findOne.mockResolvedValue(mockPerson);
-      repository.update.mockRejectedValue(new Error('Database error'));
-
-      // Act & Assert
-      await expect(service.update(personId, updatePersonDto)).rejects.toThrow('Database error');
     });
   });
 
   describe('remove', () => {
-    it('should successfully remove a person', async () => {
-      // Arrange
-      const personId = mockPerson.id;
+    it('deletes an existing person', async () => {
       repository.findOne.mockResolvedValue(mockPerson);
-      repository.delete.mockResolvedValue(undefined);
 
-      // Act
       await service.remove(personId);
 
-      // Assert
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
       expect(repository.delete).toHaveBeenCalledWith(personId);
     });
 
-    it('should throw NotFoundException when person not found', async () => {
-      // Arrange
-      const personId = 'non-existent-id';
+    it('throws NotFoundException and skips the delete when the person is missing', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.remove(personId)).rejects.toThrow(
-        new NotFoundException(`Person with id ${personId} not found`),
-      );
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
+      await expect(service.remove('missing')).rejects.toThrow(NotFoundException);
       expect(repository.delete).not.toHaveBeenCalled();
     });
-
-    it('should handle repository errors', async () => {
-      // Arrange
-      const personId = mockPerson.id;
-      repository.findOne.mockResolvedValue(mockPerson);
-      repository.delete.mockRejectedValue(new Error('Database error'));
-
-      // Act & Assert
-      await expect(service.remove(personId)).rejects.toThrow('Database error');
-    });
   });
 
-  describe('findByUser', () => {
-    it('should return person when found by user ID', async () => {
-      // Arrange
-      const userId = mockPerson.userId;
-      repository.findByUser.mockResolvedValue(mockPerson);
+  describe('competences', () => {
+    const dto: CreatePersonCompetenceDto = {
+      personId,
+      competenceName: 'TypeScript',
+      proficiencyLevel: 4,
+      yearsOfExperience: 3,
+    };
 
-      // Act
-      const result = await service.findByUser(userId);
-
-      // Assert
-      expect(repository.findByUser).toHaveBeenCalledWith(userId);
-      expect(result).toEqual(mockPerson);
-    });
-
-    it('should return null when person not found by user ID', async () => {
-      // Arrange
-      const userId = 'non-existent-user-id';
-      repository.findByUser.mockResolvedValue(null);
-
-      // Act
-      const result = await service.findByUser(userId);
-
-      // Assert
-      expect(repository.findByUser).toHaveBeenCalledWith(userId);
-      expect(result).toBeNull();
-    });
-
-    it('should handle repository errors', async () => {
-      // Arrange
-      const userId = mockPerson.userId;
-      repository.findByUser.mockRejectedValue(new Error('Database error'));
-
-      // Act & Assert
-      await expect(service.findByUser(userId)).rejects.toThrow('Database error');
-    });
-  });
-
-  describe('addCompetence', () => {
-    it('should return person (placeholder implementation)', async () => {
-      // Arrange
-      const personId = mockPerson.id;
-      const addCompetenceDto: AddCompetenceDto = {
-        competenceId: '550e8400-e29b-41d4-a716-446655440002',
-        level: 'Advanced',
-      };
-
+    it('addCompetence persists the competence and returns the person', async () => {
       repository.findOne.mockResolvedValue(mockPerson);
 
-      // Act
-      const result = await service.addCompetence(personId, addCompetenceDto);
-
-      // Assert
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
-      expect(result).toEqual(mockPerson);
+      await expect(service.addCompetence(personId, dto)).resolves.toBe(mockPerson);
+      expect(competenceRepository.create).toHaveBeenCalledWith(dto);
     });
 
-    it('should throw NotFoundException when person not found', async () => {
-      // Arrange
-      const personId = 'non-existent-id';
-      const addCompetenceDto: AddCompetenceDto = {
-        competenceId: '550e8400-e29b-41d4-a716-446655440002',
-        level: 'Advanced',
-      };
-
+    it('addCompetence throws NotFoundException without creating when the person is missing', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.addCompetence(personId, addCompetenceDto)).rejects.toThrow(
-        new NotFoundException(`Person with id ${personId} not found`),
+      await expect(service.addCompetence('missing', dto)).rejects.toThrow(NotFoundException);
+      expect(competenceRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('removeCompetence deletes the competence and returns the person', async () => {
+      repository.findOne.mockResolvedValue(mockPerson);
+
+      await expect(service.removeCompetence(personId, 'comp-1')).resolves.toBe(mockPerson);
+      expect(competenceRepository.delete).toHaveBeenCalledWith('comp-1');
+    });
+
+    it('removeCompetence throws NotFoundException without deleting when the person is missing', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await expect(service.removeCompetence('missing', 'comp-1')).rejects.toThrow(
+        NotFoundException,
       );
+      expect(competenceRepository.delete).not.toHaveBeenCalled();
     });
   });
 
-  describe('removeCompetence', () => {
-    it('should return person (placeholder implementation)', async () => {
-      // Arrange
-      const personId = mockPerson.id;
-      const competenceId = '550e8400-e29b-41d4-a716-446655440002';
+  describe('work experiences', () => {
+    const dto: CreatePersonExperienceDto = {
+      personId,
+      company: 'Acme',
+      position: 'Engineer',
+      startDate: DateTime.fromISO('2020-01-01'),
+      endDate: null,
+      isCurrent: true,
+    };
 
+    it('addWorkExperience persists the experience and returns the person', async () => {
       repository.findOne.mockResolvedValue(mockPerson);
 
-      // Act
-      const result = await service.removeCompetence(personId, competenceId);
-
-      // Assert
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
-      expect(result).toEqual(mockPerson);
+      await expect(service.addWorkExperience(personId, dto)).resolves.toBe(mockPerson);
+      expect(experienceRepository.create).toHaveBeenCalledWith(dto);
     });
 
-    it('should throw NotFoundException when person not found', async () => {
-      // Arrange
-      const personId = 'non-existent-id';
-      const competenceId = '550e8400-e29b-41d4-a716-446655440002';
-
+    it('addWorkExperience throws NotFoundException without creating when the person is missing', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.removeCompetence(personId, competenceId)).rejects.toThrow(
-        new NotFoundException(`Person with id ${personId} not found`),
+      await expect(service.addWorkExperience('missing', dto)).rejects.toThrow(NotFoundException);
+      expect(experienceRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('removeWorkExperience deletes the experience and returns the person', async () => {
+      repository.findOne.mockResolvedValue(mockPerson);
+
+      await expect(service.removeWorkExperience(personId, 'exp-1')).resolves.toBe(mockPerson);
+      expect(experienceRepository.delete).toHaveBeenCalledWith('exp-1');
+    });
+
+    it('removeWorkExperience throws NotFoundException without deleting when the person is missing', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await expect(service.removeWorkExperience('missing', 'exp-1')).rejects.toThrow(
+        NotFoundException,
       );
+      expect(experienceRepository.delete).not.toHaveBeenCalled();
     });
   });
 
-  describe('addWorkExperience', () => {
-    it('should return person (placeholder implementation)', async () => {
-      // Arrange
-      const personId = mockPerson.id;
-      const addWorkExperienceDto: AddWorkExperienceDto = {
-        company: 'Tech Corp',
-        position: 'Software Developer',
-        startDate: new Date('2020-01-01'),
-        endDate: new Date('2023-01-01'),
-        description: 'Developed web applications',
-        isCurrent: false,
-      };
+  describe('education', () => {
+    const dto: CreatePersonFormationDto = {
+      personId,
+      institution: 'MIT',
+      degree: Object.values(DegreeType)[0],
+      fieldOfStudy: 'Computer Science',
+      startDate: new Date('2010-01-01'),
+      endDate: new Date('2014-01-01'),
+      isCompleted: true,
+      grade: null,
+    };
 
+    it('addEducation persists the formation and returns the person', async () => {
       repository.findOne.mockResolvedValue(mockPerson);
 
-      // Act
-      const result = await service.addWorkExperience(personId, addWorkExperienceDto);
-
-      // Assert
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
-      expect(result).toEqual(mockPerson);
+      await expect(service.addEducation(personId, dto)).resolves.toBe(mockPerson);
+      expect(formationRepository.create).toHaveBeenCalledWith(dto);
     });
 
-    it('should throw NotFoundException when person not found', async () => {
-      // Arrange
-      const personId = 'non-existent-id';
-      const addWorkExperienceDto: AddWorkExperienceDto = {
-        company: 'Tech Corp',
-        position: 'Software Developer',
-        startDate: new Date('2020-01-01'),
-        endDate: new Date('2023-01-01'),
-        description: 'Developed web applications',
-        isCurrent: false,
-      };
-
+    it('addEducation throws NotFoundException without creating when the person is missing', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.addWorkExperience(personId, addWorkExperienceDto)).rejects.toThrow(
-        new NotFoundException(`Person with id ${personId} not found`),
-      );
+      await expect(service.addEducation('missing', dto)).rejects.toThrow(NotFoundException);
+      expect(formationRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('removeEducation deletes the formation and returns the person', async () => {
+      repository.findOne.mockResolvedValue(mockPerson);
+
+      await expect(service.removeEducation(personId, 'edu-1')).resolves.toBe(mockPerson);
+      expect(formationRepository.delete).toHaveBeenCalledWith('edu-1');
+    });
+
+    it('removeEducation throws NotFoundException without deleting when the person is missing', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await expect(service.removeEducation('missing', 'edu-1')).rejects.toThrow(NotFoundException);
+      expect(formationRepository.delete).not.toHaveBeenCalled();
     });
   });
 
-  describe('removeWorkExperience', () => {
-    it('should return person (placeholder implementation)', async () => {
-      // Arrange
-      const personId = mockPerson.id;
-      const experienceId = '550e8400-e29b-41d4-a716-446655440003';
-
+  describe('findMatchingVacancies', () => {
+    it('delegates to the matching service with score and limit', async () => {
+      const matches = [{ vacancyId: 'v1' }] as never;
       repository.findOne.mockResolvedValue(mockPerson);
+      matchingService.findMatchesForPerson.mockResolvedValue(matches);
 
-      // Act
-      const result = await service.removeWorkExperience(personId, experienceId);
-
-      // Assert
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
-      expect(result).toEqual(mockPerson);
+      await expect(service.findMatchingVacancies(personId, 70, 5)).resolves.toBe(matches);
+      expect(matchingService.findMatchesForPerson).toHaveBeenCalledWith(personId, 70, 5);
     });
 
-    it('should throw NotFoundException when person not found', async () => {
-      // Arrange
-      const personId = 'non-existent-id';
-      const experienceId = '550e8400-e29b-41d4-a716-446655440003';
-
+    it('throws NotFoundException without matching when the person is missing', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.removeWorkExperience(personId, experienceId)).rejects.toThrow(
-        new NotFoundException(`Person with id ${personId} not found`),
-      );
-    });
-  });
-
-  describe('addEducation', () => {
-    it('should return person (placeholder implementation)', async () => {
-      // Arrange
-      const personId = mockPerson.id;
-      const addEducationDto: AddEducationDto = {
-        institution: 'University of Technology',
-        degree: 'Bachelor of Computer Science',
-        fieldOfStudy: 'Computer Science',
-        startDate: new Date('2016-09-01'),
-        endDate: new Date('2020-06-01'),
-        isCurrent: false,
-      };
-
-      repository.findOne.mockResolvedValue(mockPerson);
-
-      // Act
-      const result = await service.addEducation(personId, addEducationDto);
-
-      // Assert
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
-      expect(result).toEqual(mockPerson);
-    });
-
-    it('should throw NotFoundException when person not found', async () => {
-      // Arrange
-      const personId = 'non-existent-id';
-      const addEducationDto: AddEducationDto = {
-        institution: 'University of Technology',
-        degree: 'Bachelor of Computer Science',
-        fieldOfStudy: 'Computer Science',
-        startDate: new Date('2016-09-01'),
-        endDate: new Date('2020-06-01'),
-        isCurrent: false,
-      };
-
-      repository.findOne.mockResolvedValue(null);
-
-      // Act & Assert
-      await expect(service.addEducation(personId, addEducationDto)).rejects.toThrow(
-        new NotFoundException(`Person with id ${personId} not found`),
-      );
-    });
-  });
-
-  describe('removeEducation', () => {
-    it('should return person (placeholder implementation)', async () => {
-      // Arrange
-      const personId = mockPerson.id;
-      const educationId = '550e8400-e29b-41d4-a716-446655440004';
-
-      repository.findOne.mockResolvedValue(mockPerson);
-
-      // Act
-      const result = await service.removeEducation(personId, educationId);
-
-      // Assert
-      expect(repository.findOne).toHaveBeenCalledWith(personId);
-      expect(result).toEqual(mockPerson);
-    });
-
-    it('should throw NotFoundException when person not found', async () => {
-      // Arrange
-      const personId = 'non-existent-id';
-      const educationId = '550e8400-e29b-41d4-a716-446655440004';
-
-      repository.findOne.mockResolvedValue(null);
-
-      // Act & Assert
-      await expect(service.removeEducation(personId, educationId)).rejects.toThrow(
-        new NotFoundException(`Person with id ${personId} not found`),
-      );
+      await expect(service.findMatchingVacancies('missing')).rejects.toThrow(NotFoundException);
+      expect(matchingService.findMatchesForPerson).not.toHaveBeenCalled();
     });
   });
 });
