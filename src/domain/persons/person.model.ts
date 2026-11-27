@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -38,7 +39,7 @@ export class Person extends Model<Person> {
   deletedAt: DateTime | null;
 
   @BelongsTo(() => User)
-  user: User;
+  user: Relation<User>;
 
   @HasMany(() => CandidateVacancyMatch, { foreignKey: 'person_id' })
   vacancy_matches: CandidateVacancyMatch[];

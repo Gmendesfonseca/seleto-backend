@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -34,7 +35,7 @@ export class Secret extends Model<Secret> {
   userId: string;
 
   @BelongsTo(() => User)
-  user: User;
+  user: Relation<User>;
 
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt: DateTime;

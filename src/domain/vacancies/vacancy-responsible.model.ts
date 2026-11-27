@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import {
   BelongsTo,
   Column,
@@ -29,7 +30,7 @@ export class VacancyResponsible extends Model<VacancyResponsible> {
   userId: string;
 
   @BelongsTo(() => User)
-  user: User;
+  user: Relation<User>;
 
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt: DateTime;

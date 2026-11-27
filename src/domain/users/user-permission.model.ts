@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import { DateTime } from 'luxon';
 import {
   BelongsTo,
@@ -22,14 +23,14 @@ export class UserPermission extends Model<UserPermission> {
   userId: string;
 
   @BelongsTo(() => User)
-  user: User;
+  user: Relation<User>;
 
   @ForeignKey(() => Permission)
   @Column({ type: DataType.UUID, allowNull: false })
   permissionId: string;
 
   @BelongsTo(() => Permission)
-  permission: Permission;
+  permission: Relation<Permission>;
 
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt: DateTime;

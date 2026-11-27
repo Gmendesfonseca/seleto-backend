@@ -1,3 +1,4 @@
+import { Relation } from '../../shared/types/relation';
 import { DateTime } from 'luxon';
 import {
   BelongsTo,
@@ -22,14 +23,14 @@ export class StepCompetence extends Model<StepCompetence> {
   stepId: string;
 
   @BelongsTo(() => Step)
-  step: Step;
+  step: Relation<Step>;
 
   @ForeignKey(() => Competence)
   @Column({ type: DataType.UUID, allowNull: false })
   competenceId: string;
 
   @BelongsTo(() => Competence)
-  competence: Competence;
+  competence: Relation<Competence>;
 
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt: DateTime;
