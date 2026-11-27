@@ -153,10 +153,10 @@ export class Vacancy extends Model<Vacancy> {
   @HasMany(() => VacancyCompetenceRequirement, { foreignKey: 'vacancy_id' })
   competence_requirements: VacancyCompetenceRequirement[];
 
-  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DateTime.now() })
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   created_at: DateTime;
 
-  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DateTime.now() })
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   updated_at: DateTime;
 
   @Column({ type: DataType.DATE, allowNull: true })
