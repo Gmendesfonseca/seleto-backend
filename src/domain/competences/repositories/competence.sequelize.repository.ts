@@ -1,15 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { Op, WhereOptions, fn, col, where as whereFn } from 'sequelize';
 import { Competence as CompetenceModel } from '../competence.model';
 import { CompetenceRepository } from './competence.repository.interface';
 import { CreateCompetenceDto, UpdateCompetenceDto } from '../dto/competence.dto';
 import { Competence, CompetenceFilters } from '../interfaces/competence.interface';
-import { Op, WhereOptions } from 'sequelize';
-import { Company } from 'src/domain/companies/company.model';
 
-// The persistence model does not declare category/level, so rows are exposed through the domain interface.
-const toCompetence = (row: CompetenceModel) => row as unknown as Competence;
-const toCompetences = (rows: CompetenceModel[]) => rows as unknown as Competence[];
+const toCompetence = (row: CompetenceModel): Competence => ({
+  id: row.id,
+  name: row.name,
+  description: row.description ?? null,
+  createdAt: row.createdAt,
+  updatedAt: row.updatedAt,
+});
+
+const nameFilter = (filters?: CompetenceFilters): WhereOptions =>
+  filters?.name ? { name: { [Op.iLike]: `%${filters.name}%` } } : {};
 
 @Injectable()
 export class CompetenceSequelizeRepository implements CompetenceRepository {
@@ -22,53 +28,44 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
 
   async create(dto: CreateCompetenceDto): Promise<Competence> {
     this.logger.debug('CompetenceSequelizeRepository.create: Called');
-    return toCompetence(await this.model.create(dto as never));
+    const row = await this.model.create({
+      name: dto.name,
+      description: dto.description ?? null,
+      company_id: null,
+    } as CompetenceModel);
+    return toCompetence(row);
   }
 
   async findAll(filters?: CompetenceFilters): Promise<Competence[]> {
     this.logger.debug('CompetenceSequelizeRepository.findAll: Called');
-    const where: WhereOptions = {};
-
-    if (filters?.name) {
-      where.name = { [Op.iLike]: `%${filters.name}%` };
-    }
-
-    return toCompetences(
-      await this.model.findAll({
-        where,
-        include: [
-          {
-            model: Company,
-            attributes: ['id', 'name'],
-          },
-        ],
-      }),
-    );
+    const rows = await this.model.findAll({ where: nameFilter(filters), order: [['name', 'ASC']] });
+    return rows.map(toCompetence);
   }
 
   async findOne(id: string): Promise<Competence | null> {
     this.logger.debug('CompetenceSequelizeRepository.findOne: Called');
-    const competence = await this.model.findOne({
-      where: { id },
-      include: [
-        {
-          model: Company,
-          attributes: ['id', 'name'],
-        },
-      ],
-    });
-    return competence && toCompetence(competence);
+    const row = await this.model.findByPk(id);
+    return row && toCompetence(row);
   }
 
-  async update(id: string, updateCompetenceDto: UpdateCompetenceDto): Promise<Competence> {
+  async findByName(name: string): Promise<Competence | null> {
+    this.logger.debug('CompetenceSequelizeRepository.findByName: Called');
+    const row = await this.model.findOne({
+      where: {
+        [Op.and]: [whereFn(fn('lower', col('name')), name.toLowerCase()), { company_id: null }],
+      },
+    });
+    return row && toCompetence(row);
+  }
+
+  async update(id: string, dto: UpdateCompetenceDto): Promise<Competence> {
     this.logger.debug('CompetenceSequelizeRepository.update: Called');
-    const competence = await this.model.findByPk(id);
-    if (!competence) {
+    const row = await this.model.findByPk(id);
+    if (!row) {
       throw new Error('Competence not found');
     }
-
-    await competence.update(updateCompetenceDto as any);
-    return toCompetence(competence);
+    await row.update({ name: dto.name, description: dto.description ?? null });
+    return toCompetence(row);
   }
 
   async delete(id: string): Promise<void> {
@@ -78,23 +75,12 @@ export class CompetenceSequelizeRepository implements CompetenceRepository {
 
   async searchByName(name: string): Promise<Competence[]> {
     this.logger.debug('CompetenceSequelizeRepository.searchByName: Called');
-    return toCompetences(
-      await this.model.findAll({
-        where: {
-          name: { [Op.iLike]: `%${name}%` },
-        },
-      }),
-    );
+    const rows = await this.model.findAll({ where: nameFilter({ name }) });
+    return rows.map(toCompetence);
   }
 
   async countByFilters(filters?: CompetenceFilters): Promise<number> {
     this.logger.debug('CompetenceSequelizeRepository.countByFilters: Called');
-    const where: WhereOptions = {};
-
-    if (filters?.name) {
-      where.name = { [Op.iLike]: `%${filters.name}%` };
-    }
-
-    return this.model.count({ where });
+    return this.model.count({ where: nameFilter(filters) });
   }
 }
